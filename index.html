@@ -2631,7 +2631,7 @@ function partnerOnline(){
 function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 async function supaConnect(){
   const cfg = window.SYSLIK_SUPABASE; if (!cfg || !cfg.url || !cfg.key) return null;
-  if (!window.supabase || !window.supabase.createClient) await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js");
+  if (!window.supabase || !window.supabase.createClient) await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js");
   const sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:false}});
   const cache = {}, subs = {}, loaded = {};
   const mapOf = c => cache[c] || (cache[c] = new Map());

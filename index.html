@@ -814,8 +814,11 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 36;
+const APP_VERSION = 37;
 const CHANGELOG = {
+  37: ["Sekání trávy: syslík je vidět z boku a jde se sekačkou ve směru sekání 🌱",
+       "Nová zahrádka: plot, živý plot, jabloň, záhonky s tulipány, budka pro ptáčky a pruhovaný trávník",
+       "Ze zahrádky zmizely dveře do Sklípku a ze Sklípku činnost U krbu"],
   36: ["Malovaný pruh na hrnečku lemuje hrdlo a kopíruje jeho oblouk, stejně jako puntíky, proužky a srdíčka pod ním ☕"],
   35: ["Na zahrádce: syslík může sekat trávu 🌱, oba si můžou dát na zahradním nábytku Tafíčko ☕ a syslice může navlékat korálky na dece 📿"],
   34: ["Hru už nejde přiblížit ani oddálit prsty nebo dvojitým klepnutím, obrazovka zůstává pořád stejně velká"],
@@ -1223,7 +1226,7 @@ function hairParts(L, view){
     front:Array.from({length:11}, (_, i) => { const a = Math.PI * (1.08 + i * .084); return `<circle cx="${(100 + 60*Math.cos(a)).toFixed(1)}" cy="${(70 + 54*Math.sin(a)).toFixed(1)}" r="11" fill="${hc}" stroke="${hd}" stroke-width="1"/>`; }).join("")};
   return {back:"", front:""};
 }
-const VIEW_OF = {carP:"side", trail:"side", prun:"side", pbike:"side", drive:"side", mx5:"side", evoque:"side", jetY:"side", jetG:"side", jetP:"side", bike:"side", run:"side", shop:"side", window:"side", fish:"back", garden:"side", relax:"back", gsunset:"back", jetski:"side", waiter:"side", chalet:"side", audience:"back", stroll:"side"};
+const VIEW_OF = {mow:"side", carP:"side", trail:"side", prun:"side", pbike:"side", drive:"side", mx5:"side", evoque:"side", jetY:"side", jetG:"side", jetP:"side", bike:"side", run:"side", shop:"side", window:"side", fish:"back", garden:"side", relax:"back", gsunset:"back", jetski:"side", waiter:"side", chalet:"side", audience:"back", stroll:"side"};
 const FACE_LEFT = new Set(["window"]);
 function syslikInner(lookIn, pose, key, wear, act){
   if (act && VIEW_OF[act]) return syslikAlt(VIEW_OF[act], lookIn, pose, key, wear, act);
@@ -1657,6 +1660,11 @@ function altArtSide(act, c){
       front:`<path d="M126 122 Q150 120 168 128" stroke="${c.fur}" stroke-width="13" fill="none" stroke-linecap="round"/>${c.paw(170,130,-50)}
         <g class="crank"><circle cx="98" cy="206" r="40" fill="none"/><path d="M98 188 V224" stroke="#2B2A33" stroke-width="5" stroke-linecap="round"/>${pedal(188, c.dk)}${pedal(224, shade(c.dk,.85))}<circle cx="98" cy="206" r="4" fill="#C9CFD8"/></g>${speed}`};
   }
+  if (act === "mow") return {hide:"both", front:`<path d="M124 128 Q146 136 162 146" stroke="${c.fur}" stroke-width="13" fill="none" stroke-linecap="round"/>${c.paw(164,148,-60)}
+      <path d="M150 140 L176 140" stroke="#2B2A33" stroke-width="6" stroke-linecap="round"/><path d="M168 142 L200 202" stroke="#5C6577" stroke-width="5" stroke-linecap="round"/>
+      <path d="M184 196 L232 196 Q238 196 238 204 L238 218 L180 218 Z" fill="#E8546B"/><rect x="190" y="186" width="30" height="12" rx="5" fill="#C23A50"/><rect x="176" y="214" width="66" height="7" rx="3" fill="#2B2A33"/>
+      <circle cx="190" cy="226" r="9" fill="#2B2A33"/><circle cx="228" cy="226" r="9" fill="#2B2A33"/><circle cx="190" cy="226" r="3" fill="#C9CFD8"/><circle cx="228" cy="226" r="3" fill="#C9CFD8"/>
+      <g class="speed">${[[168,230],[160,226],[152,232],[174,236]].map(([x, y]) => `<path d="M${x} ${y} l-6 -4" stroke="#5E9E5A" stroke-width="2.4" stroke-linecap="round"/>`).join("")}</g>`};
   if (act === "window") return {front:""};
   if (act === "garden") return {hide:"R", front:`<g class="can"><rect x="134" y="140" width="36" height="28" rx="8" fill="#7CC6C2"/><path d="M168 150 L194 128" stroke="#5FA9A5" stroke-width="5.5" stroke-linecap="round"/><ellipse cx="196" cy="126" rx="5" ry="3.5" fill="#5FA9A5"/><path d="M140 140 Q152 120 164 140" stroke="#5FA9A5" stroke-width="4" fill="none"/>${c.paw(142,150)}</g>
     <circle class="drip" cx="196" cy="132" r="2.6" fill="#8FD0F0"/><circle class="drip" style="animation-delay:.33s" cx="199" cy="134" r="2.1" fill="#8FD0F0"/><circle class="drip" style="animation-delay:.66s" cx="193" cy="135" r="2.3" fill="#8FD0F0"/>
@@ -1712,15 +1720,26 @@ function gardenSet(x, y, sc){
   return `<g transform="translate(${x} ${y}) scale(${sc})">${chair(-58, false)}${chair(58, true)}<ellipse cx="0" cy="-30" rx="38" ry="8" fill="#FFFFFF" stroke="#E3D3BC" stroke-width="2"/><rect x="-3" y="-30" width="6" height="34" fill="#8B5A3C"/><rect x="-16" y="2" width="32" height="4" rx="2" fill="#8B5A3C"/>
     <rect x="-14" y="-44" width="11" height="12" rx="3" fill="#E8846A"/><path d="M-3 -40 q5 0 5 4 q0 4 -5 4" stroke="#E8846A" stroke-width="2" fill="none"/><ellipse cx="12" cy="-34" rx="10" ry="3" fill="#F7E3B5"/><circle cx="9" cy="-36" r="3" fill="#D9A066"/><circle cx="15" cy="-36" r="3" fill="#C49A6C"/></g>`;
 }
-function gardenHTML(act, hab){
+function gardenHTML(act){
   const cut = act === "mow";
-  const svg = `<svg class="gfurn" viewBox="0 0 400 350" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    ${cut ? `<path d="M0 300 L170 288 L170 350 L0 350 Z" fill="#7FB86A" opacity=".55"/>${Array.from({length:14}, (_, i) => `<path d="M${200 + i*14} 300 l3 -12 l3 12" stroke="#4E8A3E" stroke-width="2" fill="none"/>`).join("")}` : ""}
-    ${act === "tafi" ? "" : gardenSet(act === "deka" ? 320 : 330, 268, act === "deka" ? .9 : .8)}
-    ${act === "garden" || cut ? `<path d="M30 300 L30 250 M44 300 L44 262" stroke="#5E9E5A" stroke-width="3"/><circle cx="30" cy="246" r="7" fill="#F48FA6"/><circle cx="44" cy="258" r="6" fill="#F2D16B"/>` : ""}
-    ${act === "tafi" ? `<g transform="translate(330 282)"><ellipse cx="0" cy="-30" rx="34" ry="7" fill="#FFFFFF" stroke="#E3D3BC" stroke-width="2"/><rect x="-3" y="-30" width="6" height="32" fill="#8B5A3C"/><rect x="-14" y="0" width="28" height="4" rx="2" fill="#8B5A3C"/><ellipse cx="-6" cy="-33" rx="9" ry="3" fill="#F7E3B5"/><circle cx="-8" cy="-35" r="3" fill="#D9A066"/><circle cx="-2" cy="-35" r="3" fill="#C49A6C"/><path d="M8 -46 q-3 -5 0 -10 M14 -46 q-3 -5 0 -10" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".8"/><rect x="5" y="-44" width="12" height="12" rx="3" fill="#9ED9C8"/></g>` : ""}
-  </svg>`;
-  return `<div class="place pl-garden">${habitatHTML(hab || "meadow", true)}${svg}</div>`;
+  const pickets = Array.from({length:21}, (_, i) => `<path d="M${i*20} 214 V160 l7 -9 l7 9 V214 Z" fill="#FFF8EE" stroke="#E3D3BC" stroke-width="1.2"/>`).join("");
+  const stripes = Array.from({length:9}, (_, i) => `<path d="M${-60 + i*60} 350 L${i*52} 214 L${26 + i*52} 214 L${-30 + i*60} 350 Z" fill="#FFFFFF" opacity=".07"/>`).join("");
+  const tulip = (x, y, c) => `<path d="M${x} ${y} V${y - 22}" stroke="#4E8A3E" stroke-width="2.4"/><ellipse cx="${x - 4}" cy="${y - 10}" rx="4" ry="2" fill="#5FAF6B" transform="rotate(-30 ${x - 4} ${y - 10})"/><path d="M${x - 5} ${y - 22} Q${x - 6} ${y - 32} ${x - 2} ${y - 30} L${x} ${y - 26} L${x + 2} ${y - 30} Q${x + 6} ${y - 32} ${x + 5} ${y - 22} Q${x} ${y - 18} ${x - 5} ${y - 22} Z" fill="${c}"/>`;
+  const tulips = [[18,"#E8546B"],[32,"#F2D16B"],[46,"#F48FA6"],[60,"#B79CE8"],[74,"#E8546B"],[300,"#F2D16B"],[314,"#F48FA6"],[328,"#E8546B"],[342,"#B79CE8"],[356,"#F2D16B"],[370,"#F48FA6"]].map(([x, c]) => tulip(x, 222, c)).join("");
+  const tall = cut ? Array.from({length:40}, (_, i) => { const x = 210 + (i * 23) % 200, y = 250 + (i * 37) % 100; return `<path d="M${x} ${y} l2 -10 l2 10 M${x + 5} ${y} l1 -8 l2 8" stroke="#3E7F48" stroke-width="1.8" fill="none"/>`; }).join("") : "";
+  const inner = `<defs><linearGradient id="gdSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9FD3F5"/><stop offset="1" stop-color="#E4F4FD"/></linearGradient>
+      <linearGradient id="gdLawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CCB74"/><stop offset="1" stop-color="#5FAF5A"/></linearGradient></defs>
+    <rect width="400" height="350" fill="url(#gdSky)"/><circle cx="340" cy="54" r="24" fill="#FFE38A"/><circle cx="340" cy="54" r="34" fill="#FFE38A" opacity=".25"/>
+    <g fill="#FFFFFF" opacity=".9"><ellipse cx="90" cy="54" rx="30" ry="11"/><ellipse cx="112" cy="46" rx="20" ry="12"/><ellipse cx="232" cy="74" rx="24" ry="8"/></g>
+    <path d="M0 170 Q60 132 130 156 Q200 124 270 150 Q340 128 400 152 V214 H0 Z" fill="#5E9E5A"/><path d="M0 182 Q70 156 140 172 Q210 150 280 170 Q350 152 400 168 V214 H0 Z" fill="#4E8A4E"/>
+    <g transform="translate(64 0)"><rect x="-7" y="128" width="14" height="88" rx="4" fill="#8B5A3C"/><circle cx="0" cy="110" r="38" fill="#5FAF6B"/><circle cx="-24" cy="124" r="24" fill="#4E9A5B"/><circle cx="24" cy="122" r="26" fill="#4E9A5B"/>${[[-14,104],[12,96],[22,124],[-26,128],[2,128]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#E8546B"/>`).join("")}</g>
+    ${pickets}<rect x="0" y="176" width="400" height="6" fill="#F2E6D4"/><rect x="0" y="200" width="400" height="6" fill="#F2E6D4"/>
+    <g transform="translate(374 132)"><rect x="-2" y="20" width="4" height="62" fill="#8B5A3C"/><path d="M-16 4 L0 -10 L16 4 Z" fill="#E07A5F"/><rect x="-12" y="4" width="24" height="20" rx="2" fill="#F7E3B5"/><circle cx="0" cy="13" r="4" fill="#5C3D24"/></g>
+    <rect x="0" y="212" width="400" height="138" fill="url(#gdLawn)"/>${stripes}
+    <path d="M0 214 H92 Q98 226 92 232 H0 Z M290 214 H400 V232 H284 Q278 224 290 214 Z" fill="#8B5A3C"/>${tulips}
+    ${cut ? `<path d="M160 214 L400 214 L400 350 L130 350 Z" fill="#4E9A4A" opacity=".55"/>${tall}` : ""}
+    ${act === "tafi" ? `<g transform="translate(330 282)"><ellipse cx="0" cy="-30" rx="34" ry="7" fill="#FFFFFF" stroke="#E3D3BC" stroke-width="2"/><rect x="-3" y="-30" width="6" height="32" fill="#8B5A3C"/><rect x="-14" y="0" width="28" height="4" rx="2" fill="#8B5A3C"/><ellipse cx="-6" cy="-33" rx="9" ry="3" fill="#F7E3B5"/><circle cx="-8" cy="-35" r="3" fill="#D9A066"/><circle cx="-2" cy="-35" r="3" fill="#C49A6C"/><rect x="5" y="-44" width="12" height="12" rx="3" fill="#9ED9C8"/></g>` : act === "deka" || act === "garden" ? gardenSet(330, 274, .85) : ""}`;
+  return svgPlace("pl-garden", inner);
 }
 function habitatHTML(h, door){
   const deco = (DECOS[h] || []).map(([e,x,y,s]) => `<span class="deco" style="left:${x}%;top:${y}%;font-size:${s}px">${e}</span>`).join("");
@@ -1987,7 +2006,7 @@ const PLACES = {
     acts:{nest:{n:"Pohoda v obýváku", e:"🏠", v:["si hoví v obýváku","si hoví v obýváku"]},
           prun:{n:"Běh po Praze", e:"🏃", g:"male", v:["běhá po náplavce","běhá po náplavce"]}, pbike:{n:"Kolo po Praze a okolí", e:"🚴", g:"male", v:["jezdí na kole po Praze","jezdí na kole po Praze"]},
           pswim:{n:"Plavání v Podolí", e:"🏊", g:"male", v:["plave v Podolí","plave v Podolí"]}, bed:{n:"Válet se v posteli", e:"🛏️", v:["se válí v naší velké posteli","se válí v naší velké posteli"]},
-          fireplace:{n:"U krbu", e:"🔥", v:["se hřeje u krbu","se hřeje u krbu"]},
+
           cook:{n:"Vařit", e:"🍲", v:["vaří","vaří"]}, sofa:{n:"Zasyslit se na gauči", e:"🛋️", v:["se zasyslil na gauči","se zasyslila na gauči"]},
           cou:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká na Čou","kouká na Čou"]}, cupik:{n:"Dát si čupík", e:"🌽", v:["si dává čupík","si dává čupík"]},
           garden:{n:"Ven na zahrádku", e:"🌼", v:["je venku na zahrádce","je venku na zahrádce"]}, mow:{n:"Sekat trávu", e:"🌱", g:"male", v:["seká trávu na zahrádce","seká trávu na zahrádce"]},
@@ -1999,7 +2018,7 @@ const ACT_LOOK = {
   watch:{pose:"clap", costume:[{type:"frak", color:"#15151B"},{type:"bowtie", color:"#111116"}]},
   swim:{pose:"swim", costume:[{type:"swimcap", color:"#E8546B"},{type:"goggles", color:"#2F3A56"}]},
   fish:{pose:"fish", costume:[{type:"bucket", color:"#8E9B6A"}]}, relax:{pose:"relax", costume:[{type:"sunglasses", color:"#2F3A56"}]},
-  garden:{pose:"garden"}, mow:{pose:"work"}, tafi:{pose:"mug"}, deka:{pose:"tv"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
+  garden:{pose:"garden"}, mow:{pose:"walk"}, tafi:{pose:"mug"}, deka:{pose:"tv"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
   atpl:{pose:"study", costume:[{type:"pilot", color:"#FFFFFF"},{type:"pilotcap", color:"#16264A"}]},
   cphswim:{pose:"swim", costume:[{type:"swimcap", color:"#3B6FB6"},{type:"goggles", color:"#F2D16B"}]},
   run:{pose:"run", costume:[{type:"runner", color:"#7CC6C2"},{type:"headband", color:"#E8546B"}]},
@@ -2547,7 +2566,7 @@ function placeHTML(place, act, hab, extra){
   if (place === "jungle") return jungleHTML(act);
   if (place === "garda") return gardaHTML(act);
   if (place === "home" && ["prun","pbike","pswim"].includes(act)) return pragueHTML(act);
-  if (place === "home" && GARDEN_ACTS.has(act)) return gardenHTML(act, hab);
+  if (place === "home" && GARDEN_ACTS.has(act)) return gardenHTML(act);
   if (place === "home" && act !== "garden") return apartmentHTML(act || "nest");
   return habitatHTML(hab || "meadow", true);
 }

@@ -694,6 +694,7 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 .status-box{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
 .status-box input{padding:10px 14px;font-size:15px}
 .status-box small{font-size:11px}
+.status-box.thought{border-top:0;padding-top:0;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .photo-btn{position:absolute;right:12px;top:52px;z-index:4;width:42px;height:42px;border-radius:50%;background:color-mix(in srgb,var(--card) 85%,transparent);backdrop-filter:blur(6px);box-shadow:var(--shadow-sm);font-size:20px;border:1px solid var(--line)}
 .flash{position:absolute;inset:0;z-index:9;background:#fff;animation:flash .6s ease-out forwards;pointer-events:none}
 @keyframes flash{from{opacity:.95}to{opacity:0}}
@@ -809,8 +810,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 31;
+const APP_VERSION = 32;
 const CHANGELOG = {
+  32: ["Nové okno 💭 Na co myslím: napiš, na co tvůj syslík právě myslí. Druhý syslík to uvidí v panelu Jak se má… a přijde mu oznámení"],
   31: ["Na kole má syslík obuté botky, které má vybrané v Šatníku 👟"],
   30: ["Syslíkovo kolo má větší kola 🚴"],
   29: ["Nové oblečení Přes to: kabát 🧥, sako a prošívaná vesta. Dají se kombinovat s tričkem, svetrem, mikinou i novým cyklistickým dresem",
@@ -2889,6 +2891,7 @@ function incomingText(e){
     case "craft": return p.to === e.author ? null : p.date ? `${n} ti na rande ${g("přinesl","přinesla")} ${p.kind === "mug" ? "hrneček ☕" : "kytici 💐"} Je v tvé skrýši v Doupěti 💞` : p.theatre ? `${n} ti ${g("přinesl","přinesla")} kytici do divadla! Brava! 💐` : p.kind === "mug" ? `${n} ti ${g("vyrobil","vyrobila")} hrneček ☕ Je v tvé skrýši v Doupěti` : `${n} ti ${g("uvázal","uvázala")} kytici 💐 Je v tvé skrýši v Doupěti`;
     case "sportResult": return SPORT[p.act] ? `${n} ${SPORT[p.act].v[p.gender === "female" ? 1 : 0]} ${fmtDist(p.dist, SPORT[p.act].u)} ${SPORT[p.act].e}` : null;
     case "todoAdd": return p.text ? `${n} ${g("přidal","přidala")} do Požídit: „${p.text}“ 📝` : null;
+    case "thought": return p.text ? `${n} myslí na: „${p.text}“ 💭` : null;
     case "status": return p.text ? `Stav Tlapíku od ${n}: „${p.text}“ 🐾` : null;
     case "photo": { const pl = PLACES[p.place] || PLACES.home; return p.mode === "selfie" ? `${n} ${g("udělal","udělala")} společné selfie 📸` : p.mode === "of" ? `${n} tě ${g("vyfotil","vyfotila")} ${pl.loc} 📸` : `${n} ${g("poslal","poslala")} selfie ${pl.loc} 📸`; }
     case "dateAnswer": return DATES[p.kind] ? (p.yes ? `${n} ${g("přijal","přijala")} pozvání: ${DATES[p.kind].n}! 💞` : `${n} teď nemůže, zkusíte to jindy 🌷`) : null;
@@ -3264,12 +3267,16 @@ function partnerPanel(){
       <div style="min-width:0;flex:1"><div class="row" style="gap:6px;align-items:center"><b style="font-family:var(--font-display);font-size:18px">Jak se má ${esc(o.name)}</b><i class="dot ${on ? "on" : ""}" title="${on ? "Online" : "Offline"}"></i></div>
         <div class="small">${doing}</div></div></div>
     <div class="minibars">${bars.map(([e, l, v, c]) => `<div style="--c:var(${c})">${e} ${l} <b>${Math.round(v)} %</b><span class="bar"><i style="width:${Math.round(v)}%"></i></span></div>`).join("")}</div>
+    <div class="small">💭 <b>Myslí na:</b> ${o.thought ? `„${esc(o.thought)}“ <span class="muted">· ${fmtShort(o.thoughtAt)}</span>` : `<span class="muted">zatím nic</span>`}</div>
     <div class="small">🐾 <b>Stav Tlapíku:</b> ${o.status ? `„${esc(o.status)}“ <span class="muted">· ${fmtShort(o.statusAt)}</span>` : `<span class="muted">zatím nic</span>`}</div>
   </section>`;
 }
 function homeBelow(p, m){
   const sl = [["⚡️","Energie","energy","--m-energy"],["😊","Nálada","mood","--m-mood"]];
   return `<section class="card sliders" aria-label="Jak se ${esc(p.name)} má">
+    <div class="status-box thought"><span class="sl-t">💭 Na co ${esc(p.name)} myslí</span>
+      <div class="row" style="gap:8px"><input type="text" id="tl-thought" maxlength="80" placeholder="Na co právě myslíš…" value="${esc(p.thought || "")}" autocomplete="off"><button class="round send" data-act="saveThought" aria-label="Uložit myšlenku">✓</button></div>
+      ${p.thoughtAt ? `<small class="muted">Naposledy ${fmtShort(p.thoughtAt)}</small>` : ""}</div>
     ${sl.map(([e, l, k, c]) => { const v = Math.round(m[k]); return `<label class="sl" style="--c:var(${c});--v:${v}%"><span class="e">${e}</span><span class="sl-t">${l}</span><b id="slv-${k}">${slText(k, v)}</b><input type="range" min="0" max="100" step="1" value="${v}" data-k="${k}" id="sl-${k}" aria-label="${l}"></label>`; }).join("")}
     <div class="status-box"><span class="sl-t">🐾 Stav Tlapíku</span>
       <div class="row" style="gap:8px"><input type="text" id="tl-status" maxlength="80" placeholder="Napiš, jak se Tlapík má…" value="${esc(p.status || "")}" autocomplete="off"><button class="round send" data-act="saveStatus" aria-label="Uložit stav">✓</button></div>
@@ -3423,7 +3430,8 @@ function parkView(){
   const bars = [["⚡️",om.energy < 20 ? "Mjšina 🥺" : "Energie",om.energy,"--m-energy"],["😊","Nálada",om.mood,"--m-mood"]];
   return `${scene}${inCard}${outCard}
     <section class="card stack" style="gap:8px"><span class="label">Jak se má ${esc(o.name)}</span><div class="minibars">${bars.map(([e, l, v, c]) => `<div style="--c:var(${c})">${e} ${l}<span class="bar"><i style="width:${Math.round(v)}%"></i></span></div>`).join("")}</div>
-      <div class="small">🐾 <b>Stav Tlapíku:</b> ${o.status ? `„${esc(o.status)}“ <span class="muted">· ${fmtShort(o.statusAt)}</span>` : `<span class="muted">zatím nic</span>`}</div></section>
+      <div class="small">💭 <b>Myslí na:</b> ${o.thought ? `„${esc(o.thought)}“ <span class="muted">· ${fmtShort(o.thoughtAt)}</span>` : `<span class="muted">zatím nic</span>`}</div>
+    <div class="small">🐾 <b>Stav Tlapíku:</b> ${o.status ? `„${esc(o.status)}“ <span class="muted">· ${fmtShort(o.statusAt)}</span>` : `<span class="muted">zatím nic</span>`}</div></section>
     <span class="label">Kam ${g("ho","ji")} pozveš na rande?</span>
     <div class="dates">${Object.entries(DATES).map(([k, D]) => `<button class="card datec" data-act="dateOpen" data-v="${k}"><span class="e">${D.e}</span><b>${esc(D.n)}</b><small>${esc(D.sub)}</small></button>`).join("")}</div>
     <span class="label">Rychlé reakce 💬</span>
@@ -3591,6 +3599,13 @@ function saveStatus(){
   updateMe(pp => { pp.status = t; pp.statusAt = now(); }, true);
   if (t) send("status", {text:t});
   el.blur(); toast("Stav Tlapíku uložen 🐾"); render();
+}
+function saveThought(){
+  const el = document.getElementById("tl-thought"), p = me(); if (!el || !p) return;
+  const t = el.value.trim().slice(0, 80); if (t === (p.thought || "")) { el.blur(); return; }
+  updateMe(pp => { pp.thought = t; pp.thoughtAt = now(); }, true);
+  if (t) send("thought", {text:t});
+  el.blur(); toast("Myšlenka uložena 💭"); render();
 }
 /* ---- Společné fotky ---- */
 function photoContext(){
@@ -4082,6 +4097,7 @@ document.addEventListener("change", ev => {
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape" && S.sheet) closeSheet();
   if (ev.key === "Enter" && ev.target.id === "todo-text") { ev.preventDefault(); todoAdd(); }
+  if (ev.key === "Enter" && ev.target.id === "tl-thought") { ev.preventDefault(); saveThought(); }
   if (ev.key === "Enter" && ev.target.id === "tl-status") { ev.preventDefault(); saveStatus(); }
   if (ev.key === "Enter" && ev.target.id === "ob-name" && S.ob && S.ob.name.trim()) handle("obNext");
   if (ev.key === "Enter" && !ev.shiftKey && ev.target.id === "chat-input" && window.matchMedia && matchMedia("(pointer: fine)").matches) { ev.preventDefault(); handle("sendChat"); }
@@ -4211,6 +4227,7 @@ function handle(a, v, el){
     }
     case "dtCar": S.sheet.car = v || null; renderSheet(); break;
     case "saveStatus": saveStatus(); break;
+    case "saveThought": saveThought(); break;
     case "photo": openSheet("photo", {mode:null}); break;
     case "takePhoto": takePhoto(v); break;
     case "dateEnd": { const ds = dateState().current; if (!ds) break; send("dateEnd", {id:ds.id, kind:ds.kind}); dsCache.k = null; toast("Rande skončilo. Bylo to krásné 💞"); render(); break; }

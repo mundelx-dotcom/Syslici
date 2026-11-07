@@ -818,8 +818,11 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 40;
+const APP_VERSION = 41;
 const CHANGELOG = {
+  41: ["Nová kytara: vypadá jako opravdová akustická, s pražci, ladicími kolíčky, kobylkou a ozdobou kolem otvoru 🎸",
+       "Vlásky pro syslici jsou teď tři a jsou hezčí: Ofinka (mikádo s ofinkou), Culík (bohatý, zvlněný, s gumičkou) a Drdůlek (s gumičkou a pramínky)",
+       "V nastavení syslíka už se nevybírá povaha ani nejoblíbenější pamlsek"],
   40: ["Hezčí vlásky pro syslici: pramínky, lesk a jemnější tvary u všech účesů 💇‍♀️",
        "Syslice po koupání nezadává metry. Syslík může místo metrů zvolit Jen jsem smočil tlapík 💧",
        "Nové plavání: kratší tlapky jako při mávání a syslík je opravdu ve vodě s vlnkami 🏊",
@@ -976,7 +979,7 @@ const CAT = {
   tail: {plain:"Obyčejný", tip:"Světlá špička", rings:"Proužkovaný"},
   trait: {foodie:["Mlsoun","🍓"], sleepy:["Spáč","😴"], explorer:["Dobrodruh","🧭"], cuddly:["Mazel","🤗"], playful:["Hravé kvítko","⚽️"], dreamy:["Snílek","☁️"]},
   ears: {round:"Kulatá", pointy:"Špičatá", tiny:"Malinká", heart:"Srdíčková", fluffy:"Se štětičkou", floppy:"Klopená", big:"Velká"},
-  hair: {none:"Bez vlásků", bangs:"Ofinka", ponytail:"Culík", pigtails:"Copánky", bun:"Drdůlek", long:"Dlouhé vlnky", curls:"Kudrlinky"},
+  hair: {none:"Bez vlásků", bangs:"Ofinka", ponytail:"Culík", bun:"Drdůlek"},
   hairc: {brown:["Čokoládové","#6B4430"], blond:["Blond","#E8C26A"], ginger:["Zrzavé","#C9632F"], black:["Černé","#2E2422"], pink:["Růžové","#F49AC0"], lilac:["Fialkové","#B79CE8"]},
   pattern: {none:"Žádný", dots:"Tečky", stripes:"Proužky"},
   accessory: {none:["Nic","✨"], scarf:["Šátek","🧣"], cap:["Čepička","🧢"], bow:["Mašle","🎀"], glasses:["Brýle","👓"]},
@@ -1204,7 +1207,7 @@ function patchSVG(it, x, y, sc = 1){
 
 /* Holčičí vlásky: back = za hlavou, front = přes temeno. view: front | side | back */
 function hairParts(L, view){
-  const h = L.hair; if (!h || h === "none" || !CAT.hair[h]) return {back:"", front:""};
+  const h = ({long:"ponytail", pigtails:"ponytail", curls:"bangs"})[L.hair] || L.hair; if (!h || h === "none" || !CAT.hair[h]) return {back:"", front:""};
   const hc = (CAT.hairc[L.hairc] || CAT.hairc.brown)[1], hd = shade(hc, .78), bow = "#F48FA6";
   const braid = (pts) => pts.map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="10" ry="9" fill="${hc}" stroke="${hd}" stroke-width="1.4"/>`).join("");
   if (view === "side") {
@@ -1225,21 +1228,28 @@ function hairParts(L, view){
       : h === "bun" ? `<circle cx="100" cy="6" r="20" fill="${hc}"/>` : "";
     return {back:"", front:extra + cap};
   }
-  const sheen = (d) => `<path d="${d}" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  const strands = `<path d="M74 22 Q62 34 58 52 M100 14 Q96 26 99 38 M128 21 Q140 32 143 50" stroke="${hd}" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".7"/>`;
-  const cap = `<path d="M42 62 Q40 12 100 12 Q160 12 158 62 Q150 46 134 42 Q118 50 104 38 Q92 48 74 43 Q56 46 42 62 Z" fill="${hc}"/>${strands}${sheen("M66 26 Q88 15 114 18")}`;
-  const lock = (side) => side < 0 ? `<path d="M44 58 Q32 92 37 132 Q43 116 45 98 Q46 80 49 62 Z" fill="${hc}"/><path d="M44 72 Q38 96 42 118" stroke="${hd}" stroke-width="1.6" fill="none" opacity=".7"/>`
-    : `<path d="M156 58 Q168 92 163 132 Q157 116 155 98 Q154 80 151 62 Z" fill="${hc}"/><path d="M156 72 Q162 96 158 118" stroke="${hd}" stroke-width="1.6" fill="none" opacity=".7"/>`;
-  if (h === "bangs") return {back:"", front:`<path d="M42 66 Q40 12 100 12 Q160 12 158 66 Q152 54 144 54 Q138 46 128 52 Q120 42 110 50 Q100 40 90 50 Q80 42 72 52 Q62 46 56 54 Q48 54 42 66 Z" fill="${hc}"/><path d="M72 52 Q76 40 84 34 M100 46 Q100 32 102 22 M128 52 Q126 40 120 32" stroke="${hd}" stroke-width="1.8" fill="none" opacity=".7"/>${sheen("M64 28 Q88 16 116 19")}`};
-  if (h === "long") return {back:`<path d="M34 62 Q32 6 100 8 Q168 6 166 62 Q176 100 170 140 Q174 160 160 168 Q150 160 146 168 Q134 162 132 150 L68 150 Q66 162 54 168 Q50 160 40 168 Q26 160 30 140 Q24 100 34 62 Z" fill="${hc}"/><path d="M40 96 Q34 124 44 156 M160 96 Q166 124 156 156 M52 110 Q48 134 56 152 M148 110 Q152 134 144 152" stroke="${hd}" stroke-width="1.8" fill="none" opacity=".6"/>`,
-    front:cap + lock(-1) + lock(1)};
-  if (h === "ponytail") return {back:`<path d="M146 34 Q198 40 190 100 Q186 128 176 144 Q170 152 166 140 Q178 112 172 84 Q166 62 150 54 Z" fill="${hc}"/><path d="M166 62 Q182 88 176 124 M158 58 Q170 80 168 110" stroke="${hd}" stroke-width="1.8" fill="none" opacity=".6"/>${sheen("M164 48 Q184 60 184 84")}`,
-    front:cap + `<circle cx="150" cy="40" r="7.5" fill="${bow}"/><circle cx="148" cy="38" r="2.4" fill="#FFFFFF" opacity=".6"/>`};
-  if (h === "pigtails") return {back:braid([[42,76],[36,94],[32,112],[30,130],[30,148]]) + braid([[158,76],[164,94],[168,112],[170,130],[170,148]]) + [[36,94],[32,130],[164,94],[168,130]].map(([x, y]) => `<path d="M${x - 5} ${y - 3} q5 -4 10 0" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2" fill="none"/>`).join(""),
-    front:`<path d="M42 62 Q40 12 100 12 Q160 12 158 62 Q150 46 134 42 Q118 46 100 40 Q82 46 66 42 Q50 46 42 62 Z" fill="${hc}"/><path d="M100 13 V40" stroke="${hd}" stroke-width="2.4"/>${sheen("M64 28 Q80 18 94 18")}${sheen("M108 18 Q124 18 138 28")}<g fill="${bow}"><path d="M44 66 l-10 -6 v12 Z M44 66 l10 -6 v12 Z"/><path d="M156 66 l-10 -6 v12 Z M156 66 l10 -6 v12 Z"/></g><circle cx="44" cy="66" r="3" fill="${shade(bow, .8)}"/><circle cx="156" cy="66" r="3" fill="${shade(bow, .8)}"/>`};
-  if (h === "bun") return {back:"", front:`<circle cx="100" cy="0" r="21" fill="${hc}"/><path d="M86 -2 Q94 -16 108 -10 Q118 -4 110 6 Q100 12 92 4" stroke="${hd}" stroke-width="2" fill="none"/>${sheen("M88 -12 Q96 -18 106 -16")}` + cap + `<ellipse cx="100" cy="18" rx="14" ry="4" fill="${bow}"/>`};
-  if (h === "curls") return {back:[[38,80],[34,104],[38,128],[162,80],[166,104],[162,128]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="13" fill="${hc}" stroke="${hd}" stroke-width="1"/>`).join(""),
-    front:Array.from({length:11}, (_, i) => { const a = Math.PI * (1.08 + i * .084), x = 100 + 60*Math.cos(a), y = 70 + 54*Math.sin(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11.5" fill="${hc}" stroke="${hd}" stroke-width="1"/><path d="M${(x - 4).toFixed(1)} ${(y - 3).toFixed(1)} q4 -4 8 0" stroke="#FFFFFF" stroke-opacity=".4" stroke-width="2" fill="none" stroke-linecap="round"/>`; }).join("")};
+  const sheen = (d, w = 4) => `<path d="${d}" stroke="#FFFFFF" stroke-opacity=".38" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;
+  const hl = shade(hc, 1.18), sh2 = shade(hc, .62);
+  const scrunch = (x, y, r) => `<g>${Array.from({length:8}, (_, i) => { const a = i * Math.PI / 4; return `<circle cx="${(x + r * Math.cos(a)).toFixed(1)}" cy="${(y + r * .75 * Math.sin(a)).toFixed(1)}" r="${(r * .48).toFixed(1)}" fill="${bow}"/>`; }).join("")}<ellipse cx="${x}" cy="${y}" rx="${r * .7}" ry="${r * .5}" fill="${shade(bow, .82)}"/><circle cx="${x - r * .4}" cy="${y - r * .4}" r="${r * .22}" fill="#FFFFFF" opacity=".5"/></g>`;
+  if (h === "bangs") return {
+    back:`<path d="M38 60 Q34 10 100 9 Q166 10 162 60 Q170 94 166 118 Q160 130 146 126 L54 126 Q40 130 34 118 Q30 94 38 60 Z" fill="${hc}"/><path d="M40 92 Q38 110 44 122 M160 92 Q162 110 156 122" stroke="${sh2}" stroke-width="2" fill="none" opacity=".5"/>`,
+    front:`<path d="M40 70 Q36 12 100 11 Q164 12 160 70 Q156 66 152 70 Q150 58 144 56 Q140 62 134 56 Q128 62 122 55 Q116 62 110 55 Q104 62 98 55 Q92 62 86 55 Q80 62 74 56 Q68 62 62 56 Q56 58 52 68 Q46 64 40 70 Z" fill="${hc}"/>
+      <path d="M44 66 Q36 92 42 118 Q48 108 50 92 Z M156 66 Q164 92 158 118 Q152 108 150 92 Z" fill="${hc}"/>
+      <path d="M62 56 Q66 36 76 24 M86 55 Q88 36 92 18 M110 55 Q110 36 108 18 M134 56 Q132 36 124 24" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".55"/>
+      ${sheen("M60 30 Q84 16 112 17")}${sheen("M126 22 Q138 26 146 34", 3)}`};
+  if (h === "ponytail") return {
+    back:`<path d="M140 28 Q188 18 200 58 Q208 98 190 132 Q180 152 164 156 Q160 150 166 142 Q182 116 180 88 Q176 58 150 46 Z" fill="${hc}"/>
+      <path d="M152 40 Q186 46 192 84 Q194 112 180 136" stroke="${sh2}" stroke-width="2.2" fill="none" opacity=".5"/><path d="M160 54 Q178 70 178 98" stroke="${sh2}" stroke-width="1.8" fill="none" opacity=".45"/>
+      ${sheen("M168 34 Q192 46 196 74")}`,
+    front:`<path d="M42 64 Q38 13 100 11 Q154 11 160 52 Q150 40 128 40 Q100 40 82 50 Q60 54 42 64 Z" fill="${hc}"/>
+      <path d="M58 48 Q92 26 142 32 M70 30 Q104 16 140 26 M84 50 Q114 36 146 38" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".5"/>
+      ${sheen("M62 28 Q92 14 124 17")}${scrunch(148, 34, 8)}`};
+  if (h === "bun") return {back:"",
+    front:`<path d="M42 64 Q38 13 100 11 Q162 13 158 64 Q150 46 130 42 Q100 38 70 42 Q50 46 42 64 Z" fill="${hc}"/>
+      <path d="M52 52 Q70 26 96 16 M148 52 Q130 26 104 16 M70 46 Q84 26 98 18 M130 46 Q116 26 102 18" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".5"/>
+      <circle cx="100" cy="5" r="18" fill="${hc}"/><path d="M87 2 Q92 -9 104 -8 Q115 -5 112 5 Q109 13 99 12 Q92 10 94 4 Q97 -1 104 2" stroke="${sh2}" stroke-width="2" fill="none" opacity=".6"/>
+      ${sheen("M89 -5 Q96 -11 106 -10")}${sheen("M64 30 Q80 20 92 19", 3)}${scrunch(100, 21, 8)}
+      <path d="M50 60 Q44 74 48 88" stroke="${hc}" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M150 60 Q156 74 152 88" stroke="${hc}" stroke-width="4" fill="none" stroke-linecap="round"/>`};
   return {back:"", front:""};
 }
 const VIEW_OF = {mow:"side", carP:"side", trail:"side", prun:"side", pbike:"side", drive:"side", mx5:"side", evoque:"side", jetY:"side", jetG:"side", jetP:"side", bike:"side", run:"side", shop:"side", window:"side", fish:"back", garden:"side", relax:"back", gsunset:"back", jetski:"side", waiter:"side", chalet:"side", audience:"back", stroll:"side"};
@@ -1732,9 +1742,18 @@ function clothSwatch(it, key){
 const GARDEN_ACTS = new Set(["garden","mow","tafi","deka"]);
 /* kytara: tělo, otvor, kobylka, krk a hlava se šroubky */
 function guitarSVG(x, y, sc, rot){
-  return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})"><rect x="-3.5" y="-92" width="7" height="62" rx="2" fill="#5C3D24"/>${[-84,-72,-60,-48].map(yy => `<path d="M-3.5 ${yy} h7" stroke="#C9CFD8" stroke-width="1"/>`).join("")}<path d="M-6 -104 L6 -104 L5 -90 L-5 -90 Z" fill="#3E2A1A"/>${[-101,-96].map(yy => `<circle cx="-7.5" cy="${yy}" r="1.8" fill="#C9CFD8"/><circle cx="7.5" cy="${yy}" r="1.8" fill="#C9CFD8"/>`).join("")}
-    <path d="M0 -34 C-20 -34 -22 -18 -14 -10 C-26 -2 -24 22 0 22 C24 22 26 -2 14 -10 C22 -18 20 -34 0 -34 Z" fill="#E0A458" stroke="#A86B34" stroke-width="2"/><circle cx="0" cy="-12" r="6" fill="#3E2A1A"/><circle cx="0" cy="-12" r="8" fill="none" stroke="#A86B34" stroke-width="1.4"/><rect x="-7" y="6" width="14" height="3.5" rx="1.5" fill="#3E2A1A"/>
-    ${[-1.6,-.5,.5,1.6].map(dx => `<path d="M${dx} -92 V7" stroke="#F2EEE6" stroke-width=".5"/>`).join("")}</g>`;
+  const body = "M0 -40 C-18 -40 -21 -28 -16 -18 C-13 -12 -13 -10 -17 -4 C-28 7 -26 28 0 28 C26 28 28 7 17 -4 C13 -10 13 -12 16 -18 C21 -28 18 -40 0 -40 Z";
+  return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})">
+    <path d="M-4.5 -108 L4.5 -108 L4 -40 L-4 -40 Z" fill="#4A2E1C"/><path d="M-3 -106 V-42" stroke="#6B4430" stroke-width="1.2"/>
+    ${[-100,-93,-86,-79,-72,-65,-58,-51].map(yy => `<path d="M-4.2 ${yy} h8.4" stroke="#D9DEE5" stroke-width=".9"/>`).join("")}${[-89.5,-75.5,-61.5].map(yy => `<circle cx="0" cy="${yy}" r="1.1" fill="#F3E2C4"/>`).join("")}
+    <path d="M-7 -126 Q-8 -118 -5 -108 L5 -108 Q8 -118 7 -126 Q0 -130 -7 -126 Z" fill="#3E2A1A"/>${[-123,-118,-113].map(yy => `<rect x="-11" y="${yy - 1.5}" width="5" height="3" rx="1.2" fill="#C9CFD8"/><rect x="6" y="${yy - 1.5}" width="5" height="3" rx="1.2" fill="#C9CFD8"/>`).join("")}
+    <path d="${body}" fill="#C97A3A"/><path d="M0 -36 C-14 -36 -17 -26 -12 -18 C-9 -12 -10 -9 -13 -4 C-22 6 -20 24 0 24 C20 24 22 6 13 -4 C10 -9 9 -12 12 -18 C17 -26 14 -36 0 -36 Z" fill="#E7A65E"/>
+    <path d="${body}" fill="none" stroke="#F3E2C4" stroke-width="1.6"/><path d="${body}" fill="none" stroke="#7A4A22" stroke-width="1" transform="scale(1.04)"/>
+    <path d="M6 -6 Q16 -4 16 6 Q10 12 4 4 Z" fill="#5C3D24" opacity=".85"/>
+    <circle cx="0" cy="-12" r="9.5" fill="none" stroke="#7A4A22" stroke-width="1.2"/><circle cx="0" cy="-12" r="8" fill="none" stroke="#F3E2C4" stroke-width="1"/><circle cx="0" cy="-12" r="6.4" fill="#2B1B10"/>
+    <rect x="-9" y="10" width="18" height="4.5" rx="2" fill="#3E2A1A"/>${[-5,-3,-1,1,3,5].map(dx => `<circle cx="${dx}" cy="12.2" r=".7" fill="#F3E2C4"/>`).join("")}
+    ${[-2.5,-1.5,-.5,.5,1.5,2.5].map((dx, i) => `<path d="M${dx} -110 L${dx * 1.9} 11" stroke="#F2EEE6" stroke-width="${(.35 + i * .07).toFixed(2)}"/>`).join("")}
+    <path d="M-14 -30 Q-8 -36 0 -37" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`;
 }
 const LUCIE = ["Medvídek","Amerika","Černí andělé","Šrouby do hlavy","Chci zas v tobě spát","Lucie","Panic","Sluníčko"];
 const SYSLI_WORDS = ["Syslííímeee","Tlapík","Mjšina","čupík","Tafíčko","Sklípek","Čou","Dobý","Taaak Dobý","Nežíkej","Čupr","Bouí","Ty Sysle","Ty Mizejo","Čau sysle","Tak zase pšíště","syslíček","pšenička","norička","Syslííííímeee"];
@@ -1917,7 +1936,7 @@ function actArt(act, c){
       `<g class="can"><rect x="132" y="134" width="38" height="30" rx="9" fill="#7CC6C2"/><path d="M168 146 L192 126" stroke="#5FA9A5" stroke-width="5.5" stroke-linecap="round"/><ellipse cx="194" cy="124" rx="5" ry="3.5" fill="#5FA9A5"/><path d="M138 134 Q151 112 164 134" stroke="#5FA9A5" stroke-width="4" fill="none"/>${paw(140,150)}</g>
        <circle class="drip" cx="194" cy="130" r="2.6" fill="#8FD0F0"/><circle class="drip" style="animation-delay:.33s" cx="197" cy="132" r="2.1" fill="#8FD0F0"/><circle class="drip" style="animation-delay:.66s" cx="191" cy="133" r="2.3" fill="#8FD0F0"/>
        <path d="M190 230 L190 202 M176 230 L176 210" stroke="#5E9E5A" stroke-width="3"/><circle cx="190" cy="198" r="7.5" fill="#F48FA6"/><circle cx="190" cy="198" r="3" fill="#FFE08A"/><circle cx="176" cy="206" r="6" fill="#B79CE8"/><circle cx="176" cy="206" r="2.4" fill="#FFE08A"/>`};
-    case "guitar": return {hide:"both", front:`${guitarSVG(96, 178, 1.05, 52)}${paw(144, 132, -40)}<g class="strum">${paw(84, 172, 30)}</g>${star(30, 80, 6, "#F2D16B", 0)}<text class="twinkle" x="160" y="70" font-size="20" fill="#B79CE8">♪</text><text class="twinkle" style="animation-delay:.6s" x="22" y="120" font-size="18" fill="#F48FA6">♫</text>`};
+    case "guitar": return {hide:"both", front:`${guitarSVG(98, 176, .95, 52)}${paw(144, 132, -40)}<g class="strum">${paw(84, 172, 30)}</g>${star(30, 80, 6, "#F2D16B", 0)}<text class="twinkle" x="160" y="70" font-size="20" fill="#B79CE8">♪</text><text class="twinkle" style="animation-delay:.6s" x="22" y="120" font-size="18" fill="#F48FA6">♫</text>`};
     case "tafi": return {hide:"both",
       back:`<rect x="40" y="70" width="10" height="150" rx="4" fill="#8B5A3C"/><rect x="150" y="70" width="10" height="150" rx="4" fill="#8B5A3C"/>${[84,108,132,156].map(y => `<rect x="40" y="${y}" width="120" height="12" rx="4" fill="#B07A50"/>`).join("")}<rect x="30" y="196" width="140" height="14" rx="5" fill="#C49A6C"/><rect x="38" y="208" width="8" height="30" fill="#8B5A3C"/><rect x="154" y="208" width="8" height="30" fill="#8B5A3C"/>`,
       front:`<rect x="85" y="132" width="30" height="31" rx="7" fill="#9ED9C8"/><path d="M115 140 q11 0 11 8 q0 8 -11 8" stroke="#9ED9C8" stroke-width="4.5" fill="none"/><ellipse cx="100" cy="134" rx="13" ry="3.4" fill="#8A5A3C"/><path d="M88 150 q6 -6 12 0 q6 -6 12 0" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".8"/>${paw(83,150,20)}${paw(117,150,-20)}${steam(94,128,0)}${steam(106,126,.8)}`};
@@ -4062,8 +4081,6 @@ function settingsSheet(s){
       <input type="text" id="set-name" maxlength="24" value="${esc(s.name)}" autocomplete="off">
       <div class="seg" role="group" aria-label="Rod"><button data-act="setGender" data-v="male" aria-pressed="${s.gender === "male"}">Syslík</button><button data-act="setGender" data-v="female" aria-pressed="${s.gender === "female"}">Syslice</button></div>
       ${lookEditor(s.look, "set", wearingOf(p))}
-      <div class="stack" style="gap:8px"><span class="label">Povaha</span><div class="chips">${Object.entries(CAT.trait).map(([k, a]) => `<button class="chip" data-act="setTrait" data-v="${k}" aria-pressed="${s.trait === k}">${a[1]} ${a[0]}</button>`).join("")}</div></div>
-      <div class="stack" style="gap:8px"><span class="label">Nejoblíbenější pamlsek</span><div class="chips">${Object.entries(CAT.food).map(([k, a]) => `<button class="chip" data-act="setFav" data-v="${k}" aria-pressed="${s.fav === k}">${a[1]} ${a[0]}</button>`).join("")}</div></div>
       <button class="btn" data-act="saveLook" ${s.name.trim() ? "" : "disabled"}>Uložit změny</button>
     </div>
     <div class="card stack" style="gap:8px"><span class="label">Propojení</span>
@@ -4246,13 +4263,13 @@ function handle(a, v, el){
     case "pet":
       if (p) { const m0 = moods(p); updateMe(pp => { pp.energy = m0.energy; pp.mood = Math.min(100, m0.mood + 20); pp.moodSetAt = now(); }); floatText(m0.mood >= 100 ? "Nálada 100 % 💛" : "+20 % nálady 😊"); }
       if (p && !p.isSleeping && moods(p).energy < 20 && Math.random() < .6) { care("pet"); homePose("yawn", 1800); say(pick(["Jsem Mjšina… 🥺", "Mjšina potřebuje pohladit 🥺", "Jsem Mjšina, ale s tebou je mi líp 💛"])); break; }
-      if (p && p.trait && TRAIT_LINES[p.trait] && !p.isSleeping && Math.random() < .25 && S.home.pose === "idle") { care("pet"); homePose("happy", 1800); say(pick(TRAIT_LINES[p.trait])); break; }
+      if (false && p && p.trait && TRAIT_LINES[p.trait] && !p.isSleeping && Math.random() < .25 && S.home.pose === "idle") { care("pet"); homePose("happy", 1800); say(pick(TRAIT_LINES[p.trait])); break; }
       if (S.home.pose === "sleep" || p.isSleeping || idleActivity(p) === "sleeping") { wakeUp(); break; }
       care("pet"); homePose("petted", 2000); say(ph.petted()); burst("💗", "#home-scene"); maybeFind(0.12); break;
     case "visitor": { const o = partner(); if (o) { say(P(o.gender).visitor()); burst("👋", "#home-scene"); } break; }
     case "feed": openSheet("feed"); break;
     case "doFeed": closeSheet(); wakeQuiet(); care("feed"); homePose("eat:" + CAT.food[v][1], 2500);
-      if (p.fav === v) { care("pet"); say(`Moje nejoblíbenější! ${CAT.food[v][1]} Ty mě znáš nejlíp 💛`); burst("💛", "#home-scene"); } else say(ph.fed(v));
+      if (false && p.fav === v) { care("pet"); say(`Moje nejoblíbenější! ${CAT.food[v][1]} Ty mě znáš nejlíp 💛`); burst("💛", "#home-scene"); } else say(ph.fed(v));
       burst(CAT.food[v][1], "#home-scene"); maybeFind(p.trait === "foodie" ? 0.4 : 0.25); break;
     case "drink": wakeQuiet(); care("drink"); homePose("drink", 2500); say(ph.drank()); burst("💧", "#home-scene"); break;
     case "sleep":

@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -68,7 +68,9 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{min-height:100%;overscroll-behavior:none}
+html,body{min-height:100%;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+input,textarea,select{font-size:max(16px,1em)}
+button,a,[data-act],[data-tab]{touch-action:manipulation}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15.5px;font-weight:600;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -693,7 +695,7 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 
 /* v8: stav, fotky */
 .status-box{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
-.status-box input{padding:10px 14px;font-size:15px}
+.status-box input{padding:10px 14px;font-size:16px}
 .status-box small{font-size:11px}
 .status-box.thought{border-top:0;padding-top:0;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .photo-btn{position:absolute;right:12px;top:52px;z-index:4;width:42px;height:42px;border-radius:50%;background:color-mix(in srgb,var(--card) 85%,transparent);backdrop-filter:blur(6px);box-shadow:var(--shadow-sm);font-size:20px;border:1px solid var(--line)}
@@ -811,8 +813,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 33;
+const APP_VERSION = 34;
 const CHANGELOG = {
+  34: ["Hru už nejde přiblížit ani oddálit prsty nebo dvojitým klepnutím, obrazovka zůstává pořád stejně velká"],
   33: ["Dolní panel se záložkami drží pevně u spodního okraje obrazovky a nehýbe se při posouvání. Při psaní se schová, aby nepřekážel klávesnici"],
   32: ["Nové okno 💭 Na co myslím: napiš, na co tvůj syslík právě myslí. Druhý syslík to uvidí v panelu Jak se má… a přijde mu oznámení"],
   31: ["Na kole má syslík obuté botky, které má vybrané v Šatníku 👟"],
@@ -4096,6 +4099,12 @@ document.addEventListener("change", ev => {
   if (t.matches && t.matches('input[type=range][data-k]')) { setMood(t.dataset.k, Number(t.value)); return; }
   if ((t.id === "tl-color" || t.id === "tl-color2") && S.sheet && S.sheet.draft) { S.sheet.draft[t.id === "tl-color" ? "color" : "color2"] = t.value; renderSheet(); }
 });
+/* bez zoomu: gesta se dvěma prsty, dvojklepnutí a ctrl+kolečko */
+["gesturestart","gesturechange","gestureend"].forEach(n => document.addEventListener(n, e => e.preventDefault(), {passive:false}));
+document.addEventListener("touchmove", e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, {passive:false});
+document.addEventListener("wheel", e => { if (e.ctrlKey) e.preventDefault(); }, {passive:false});
+(() => { let m = document.querySelector('meta[name="viewport"]'); if (!m) { m = document.createElement("meta"); m.name = "viewport"; document.head.appendChild(m); }
+  m.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"; })();
 document.addEventListener("focusin", ev => { const t = ev.target; if (t && (t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && !["range","color","checkbox","radio"].includes(t.type)))) document.body.classList.add("typing"); });
 document.addEventListener("focusout", () => setTimeout(() => { const a = document.activeElement; if (!a || !(a.tagName === "TEXTAREA" || a.tagName === "INPUT")) document.body.classList.remove("typing"); }, 50));
 document.addEventListener("keydown", ev => {

@@ -337,6 +337,7 @@ textarea:focus,input[type=text]:focus{border-color:var(--accent);outline:none}
 .chip-float{z-index:3}
 .chip-float.low.left{right:auto;left:12px;cursor:pointer;color:var(--ink)}
 .place{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.gfurn{position:absolute;left:0;right:0;bottom:0;width:100%;height:100%;pointer-events:none;z-index:0}
 .place .deco{position:absolute;transform:translate(-50%,-50%);line-height:1}
 .night{position:absolute;inset:0;background:var(--night);pointer-events:none}
 .skdoor{position:absolute;left:6%;top:50%;width:56px;height:66px;border-radius:28px 28px 4px 4px;background:#8A5A3C;border:4px solid #6B4430;box-shadow:inset 0 -10px 0 rgba(0,0,0,.12)}
@@ -813,8 +814,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 34;
+const APP_VERSION = 35;
 const CHANGELOG = {
+  35: ["Na zahrádce: syslík může sekat trávu 🌱, oba si můžou dát na zahradním nábytku Tafíčko ☕ a syslice může navlékat korálky na dece 📿"],
   34: ["Hru už nejde přiblížit ani oddálit prsty nebo dvojitým klepnutím, obrazovka zůstává pořád stejně velká"],
   33: ["Dolní panel se záložkami drží pevně u spodního okraje obrazovky a nehýbe se při posouvání. Při psaní se schová, aby nepřekážel klávesnici"],
   32: ["Nové okno 💭 Na co myslím: napiš, na co tvůj syslík právě myslí. Druhý syslík to uvidí v panelu Jak se má… a přijde mu oznámení"],
@@ -1702,6 +1704,23 @@ function clothSwatch(it, key){
 }
 
 /* ============ Prostředí ============ */
+const GARDEN_ACTS = new Set(["garden","mow","tafi","deka"]);
+/* zahradní nábytek: stolek a dvě židle */
+function gardenSet(x, y, sc){
+  const chair = (cx, flip) => `<g transform="translate(${cx} 0) scale(${flip ? -1 : 1} 1)"><rect x="-16" y="-58" width="5" height="62" rx="2" fill="#8B5A3C"/>${[-50,-40,-30].map(yy => `<rect x="-16" y="${yy}" width="30" height="5" rx="2" fill="#B07A50"/>`).join("")}<rect x="-18" y="-16" width="36" height="7" rx="3" fill="#B07A50"/><rect x="-16" y="-10" width="4" height="14" fill="#8B5A3C"/><rect x="12" y="-10" width="4" height="14" fill="#8B5A3C"/></g>`;
+  return `<g transform="translate(${x} ${y}) scale(${sc})">${chair(-58, false)}${chair(58, true)}<ellipse cx="0" cy="-30" rx="38" ry="8" fill="#FFFFFF" stroke="#E3D3BC" stroke-width="2"/><rect x="-3" y="-30" width="6" height="34" fill="#8B5A3C"/><rect x="-16" y="2" width="32" height="4" rx="2" fill="#8B5A3C"/>
+    <rect x="-14" y="-44" width="11" height="12" rx="3" fill="#E8846A"/><path d="M-3 -40 q5 0 5 4 q0 4 -5 4" stroke="#E8846A" stroke-width="2" fill="none"/><ellipse cx="12" cy="-34" rx="10" ry="3" fill="#F7E3B5"/><circle cx="9" cy="-36" r="3" fill="#D9A066"/><circle cx="15" cy="-36" r="3" fill="#C49A6C"/></g>`;
+}
+function gardenHTML(act, hab){
+  const cut = act === "mow";
+  const svg = `<svg class="gfurn" viewBox="0 0 400 350" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    ${cut ? `<path d="M0 300 L170 288 L170 350 L0 350 Z" fill="#7FB86A" opacity=".55"/>${Array.from({length:14}, (_, i) => `<path d="M${200 + i*14} 300 l3 -12 l3 12" stroke="#4E8A3E" stroke-width="2" fill="none"/>`).join("")}` : ""}
+    ${act === "tafi" ? "" : gardenSet(act === "deka" ? 320 : 330, 268, act === "deka" ? .9 : .8)}
+    ${act === "garden" || cut ? `<path d="M30 300 L30 250 M44 300 L44 262" stroke="#5E9E5A" stroke-width="3"/><circle cx="30" cy="246" r="7" fill="#F48FA6"/><circle cx="44" cy="258" r="6" fill="#F2D16B"/>` : ""}
+    ${act === "tafi" ? `<g transform="translate(330 282)"><ellipse cx="0" cy="-30" rx="34" ry="7" fill="#FFFFFF" stroke="#E3D3BC" stroke-width="2"/><rect x="-3" y="-30" width="6" height="32" fill="#8B5A3C"/><rect x="-14" y="0" width="28" height="4" rx="2" fill="#8B5A3C"/><ellipse cx="-6" cy="-33" rx="9" ry="3" fill="#F7E3B5"/><circle cx="-8" cy="-35" r="3" fill="#D9A066"/><circle cx="-2" cy="-35" r="3" fill="#C49A6C"/><path d="M8 -46 q-3 -5 0 -10 M14 -46 q-3 -5 0 -10" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".8"/><rect x="5" y="-44" width="12" height="12" rx="3" fill="#9ED9C8"/></g>` : ""}
+  </svg>`;
+  return `<div class="place pl-garden">${habitatHTML(hab || "meadow", true)}${svg}</div>`;
+}
 function habitatHTML(h, door){
   const deco = (DECOS[h] || []).map(([e,x,y,s]) => `<span class="deco" style="left:${x}%;top:${y}%;font-size:${s}px">${e}</span>`).join("");
   const stars = [[10,10],[30,20],[55,8],[68,25],[42,30]].map(([x,y]) => `<i class="star" style="left:${x}%;top:${y}%"></i>`).join("");
@@ -1805,7 +1824,7 @@ function rideHTML(k, riders){
   return `<div class="ride ridecar"><div class="carbox ${k}"><svg class="cb" viewBox="0 0 220 100" aria-hidden="true">${carSVG(k, "back", true, true)}</svg><div class="riders">${riders.join("")}</div><svg class="cf" viewBox="0 0 220 100" aria-hidden="true">${carSVG(k, "front", true, true)}</svg></div></div>`;
 }
 /* ============ Rekvizity a animace činností ============ */
-const ACT_ART_KEYS = new Set(["wipe","practice","coubeads","cupik","coucupik","vacuum","carP","shop","hangar","ballet","watch","swim","cphswim","fish","relax","garden","fireplace","cook","atpl","run","bike","cou","snack","bed","nap","window","gswim","wash","jetski","bar","waiter","chalet","audience","gsunset","stroll","visit","engineering","ramp","trail","prun","pbike","pswim","drive","mx5","evoque","jetY","jetG","jetP","cou2","ballnap","cats","cphread","cphcook","flightsim","cphbed"]);
+const ACT_ART_KEYS = new Set(["mow","tafi","deka","wipe","practice","coubeads","cupik","coucupik","vacuum","carP","shop","hangar","ballet","watch","swim","cphswim","fish","relax","garden","fireplace","cook","atpl","run","bike","cou","snack","bed","nap","window","gswim","wash","jetski","bar","waiter","chalet","audience","gsunset","stroll","visit","engineering","ramp","trail","prun","pbike","pswim","drive","mx5","evoque","jetY","jetG","jetP","cou2","ballnap","cats","cphread","cphcook","flightsim","cphbed"]);
 function actArt(act, c){
   const paw = (x, y, r = 0) => pawG(x, y, 8.5, 10.5, r, c.dk);
   const star = (x, y, r, col, d) => `<path class="twinkle" style="animation-delay:${d}s" d="M${x} ${y-r} Q${x} ${y} ${x+r} ${y} Q${x} ${y} ${x} ${y+r} Q${x} ${y} ${x-r} ${y} Q${x} ${y} ${x} ${y-r} Z" fill="${col}"/>`;
@@ -1845,6 +1864,13 @@ function actArt(act, c){
       `<g class="can"><rect x="132" y="134" width="38" height="30" rx="9" fill="#7CC6C2"/><path d="M168 146 L192 126" stroke="#5FA9A5" stroke-width="5.5" stroke-linecap="round"/><ellipse cx="194" cy="124" rx="5" ry="3.5" fill="#5FA9A5"/><path d="M138 134 Q151 112 164 134" stroke="#5FA9A5" stroke-width="4" fill="none"/>${paw(140,150)}</g>
        <circle class="drip" cx="194" cy="130" r="2.6" fill="#8FD0F0"/><circle class="drip" style="animation-delay:.33s" cx="197" cy="132" r="2.1" fill="#8FD0F0"/><circle class="drip" style="animation-delay:.66s" cx="191" cy="133" r="2.3" fill="#8FD0F0"/>
        <path d="M190 230 L190 202 M176 230 L176 210" stroke="#5E9E5A" stroke-width="3"/><circle cx="190" cy="198" r="7.5" fill="#F48FA6"/><circle cx="190" cy="198" r="3" fill="#FFE08A"/><circle cx="176" cy="206" r="6" fill="#B79CE8"/><circle cx="176" cy="206" r="2.4" fill="#FFE08A"/>`};
+    case "tafi": return {hide:"both",
+      back:`<rect x="40" y="70" width="10" height="150" rx="4" fill="#8B5A3C"/><rect x="150" y="70" width="10" height="150" rx="4" fill="#8B5A3C"/>${[84,108,132,156].map(y => `<rect x="40" y="${y}" width="120" height="12" rx="4" fill="#B07A50"/>`).join("")}<rect x="30" y="196" width="140" height="14" rx="5" fill="#C49A6C"/><rect x="38" y="208" width="8" height="30" fill="#8B5A3C"/><rect x="154" y="208" width="8" height="30" fill="#8B5A3C"/>`,
+      front:`<rect x="85" y="132" width="30" height="31" rx="7" fill="#9ED9C8"/><path d="M115 140 q11 0 11 8 q0 8 -11 8" stroke="#9ED9C8" stroke-width="4.5" fill="none"/><ellipse cx="100" cy="134" rx="13" ry="3.4" fill="#8A5A3C"/><path d="M88 150 q6 -6 12 0 q6 -6 12 0" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".8"/>${paw(83,150,20)}${paw(117,150,-20)}${steam(94,128,0)}${steam(106,126,.8)}`};
+    case "mow": return {hide:"R", front:`<path d="M126 148 L170 196" stroke="#5C6577" stroke-width="5" stroke-linecap="round"/><path d="M120 142 L134 154" stroke="#2B2A33" stroke-width="8" stroke-linecap="round"/>${paw(126,148,-30)}
+      <path d="M150 196 L196 196 L192 218 L154 218 Z" fill="#E8546B"/><rect x="156" y="188" width="34" height="10" rx="4" fill="#C23A50"/><rect x="146" y="214" width="54" height="6" rx="2" fill="#2B2A33"/><circle cx="158" cy="224" r="7" fill="#2B2A33"/><circle cx="190" cy="224" r="7" fill="#2B2A33"/><circle cx="158" cy="224" r="2.5" fill="#C9CFD8"/><circle cx="190" cy="224" r="2.5" fill="#C9CFD8"/>
+      <g class="drip">${[[140,226],[146,222],[134,230]].map(([x, y]) => `<path d="M${x} ${y} l3 -6" stroke="#5E9E5A" stroke-width="2.2" stroke-linecap="round"/>`).join("")}</g>`};
+    case "deka": { const r = actArt("coubeads", c); return {hide:"both", back:`<ellipse cx="100" cy="226" rx="96" ry="18" fill="#F48FA6"/><g opacity=".55">${[0,1,2,3,4,5,6].map(i => `<path d="M${16 + i*28} 212 L${4 + i*28} 242" stroke="#FFFFFF" stroke-width="6"/>`).join("")}</g><ellipse cx="100" cy="226" rx="96" ry="18" fill="none" stroke="#E8546B" stroke-width="2.5" stroke-dasharray="5 4"/>`, front:r.front}; }
     case "fireplace": return {hide:"both", front:
       `<rect x="85" y="132" width="30" height="31" rx="7" fill="#E8846A"/><path d="M115 140 q11 0 11 8 q0 8 -11 8" stroke="#E8846A" stroke-width="4.5" fill="none"/><ellipse cx="100" cy="134" rx="13" ry="3.4" fill="#8A5A3C"/><path d="M92 156 h16" stroke="#fff" stroke-opacity=".4" stroke-width="2.5"/>${paw(83,150,20)}${paw(117,150,-20)}${steam(94,128,0)}${steam(106,126,.8)}`};
     case "cook": return {hide:"R", front:
@@ -1963,7 +1989,8 @@ const PLACES = {
           fireplace:{n:"U krbu", e:"🔥", v:["se hřeje u krbu","se hřeje u krbu"]},
           cook:{n:"Vařit", e:"🍲", v:["vaří","vaří"]}, sofa:{n:"Zasyslit se na gauči", e:"🛋️", v:["se zasyslil na gauči","se zasyslila na gauči"]},
           cou:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká na Čou","kouká na Čou"]}, cupik:{n:"Dát si čupík", e:"🌽", v:["si dává čupík","si dává čupík"]},
-          garden:{n:"Ven na zahrádku", e:"🌼", v:["je venku na zahrádce","je venku na zahrádce"]}}}
+          garden:{n:"Ven na zahrádku", e:"🌼", v:["je venku na zahrádce","je venku na zahrádce"]}, mow:{n:"Sekat trávu", e:"🌱", g:"male", v:["seká trávu na zahrádce","seká trávu na zahrádce"]},
+          tafi:{n:"Tafíčko na zahrádce", e:"☕", v:["si dává na zahrádce Tafíčko","si dává na zahrádce Tafíčko"]}, deka:{n:"Korálky na dece", e:"📿", g:"female", v:["navléká na zahrádce korálky na dece","navléká na zahrádce korálky na dece"]}}}
 };
 const ACT_LOOK = {
   shop:{pose:"walk"}, hangar:{pose:"work", costume:[{type:"vest", color:"#F5D93B", sas:true},{type:"earmuffs", color:"#F28C28"}]},
@@ -1971,7 +1998,7 @@ const ACT_LOOK = {
   watch:{pose:"clap", costume:[{type:"frak", color:"#15151B"},{type:"bowtie", color:"#111116"}]},
   swim:{pose:"swim", costume:[{type:"swimcap", color:"#E8546B"},{type:"goggles", color:"#2F3A56"}]},
   fish:{pose:"fish", costume:[{type:"bucket", color:"#8E9B6A"}]}, relax:{pose:"relax", costume:[{type:"sunglasses", color:"#2F3A56"}]},
-  garden:{pose:"garden"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
+  garden:{pose:"garden"}, mow:{pose:"work"}, tafi:{pose:"mug"}, deka:{pose:"tv"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
   atpl:{pose:"study", costume:[{type:"pilot", color:"#FFFFFF"},{type:"pilotcap", color:"#16264A"}]},
   cphswim:{pose:"swim", costume:[{type:"swimcap", color:"#3B6FB6"},{type:"goggles", color:"#F2D16B"}]},
   run:{pose:"run", costume:[{type:"runner", color:"#7CC6C2"},{type:"headband", color:"#E8546B"}]},
@@ -2023,7 +2050,7 @@ function actInfo(place, act){ const pl = PLACES[place] || PLACES.home; return pl
 const OUTFIT_CATS = {kolo:["🚴","Kolo"], beh:["🏃","Běh"], plavani:["🏊","Plavání"], rande:["💞","Rande"], prace:["🛠️","Práce"], divadlo:["🎭","Divadlo"], doma:["🏡","Doma"], spani:["😴","Spaní"], vylet:["🧳","Výlet"]};
 const ACT_CAT = {};
 [["kolo","bike pbike"],["beh","run trail prun"],["plavani","cphswim gswim pswim swim"],["vylet","jetski"],["rande","date"],["prace","visit ramp engineering atpl flightsim bar waiter chalet wash vacuum"],
- ["divadlo","ballet practice watch audience"],["doma","nest sofa cou cou2 coucupik cupik fireplace cook cphread cphcook garden cats wipe"],["spani","bed cphbed ballnap"],["vylet","shop gelato gboat gsunset relax fish window mx5 evoque"]]
+ ["divadlo","ballet practice watch audience"],["doma","nest sofa cou cou2 coucupik cupik fireplace cook cphread cphcook garden cats wipe mow tafi deka"],["spani","bed cphbed ballnap"],["vylet","shop gelato gboat gsunset relax fish window mx5 evoque"]]
  .forEach(([c, l]) => l.split(" ").forEach(a => { ACT_CAT[a] = c; }));
 function outfitOf(p, cat){ const o = p && p.outfits && p.outfits[cat]; return Array.isArray(o) ? o.filter(it => it && CLOTH[it.type]) : []; }
 function wearFor(p, act, cat){
@@ -2519,6 +2546,7 @@ function placeHTML(place, act, hab, extra){
   if (place === "jungle") return jungleHTML(act);
   if (place === "garda") return gardaHTML(act);
   if (place === "home" && ["prun","pbike","pswim"].includes(act)) return pragueHTML(act);
+  if (place === "home" && GARDEN_ACTS.has(act)) return gardenHTML(act, hab);
   if (place === "home" && act !== "garden") return apartmentHTML(act || "nest");
   return habitatHTML(hab || "meadow", true);
 }

@@ -814,8 +814,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 35;
+const APP_VERSION = 36;
 const CHANGELOG = {
+  36: ["Malovaný pruh na hrnečku lemuje hrdlo a kopíruje jeho oblouk, stejně jako puntíky, proužky a srdíčka pod ním ☕"],
   35: ["Na zahrádce: syslík může sekat trávu 🌱, oba si můžou dát na zahradním nábytku Tafíčko ☕ a syslice může navlékat korálky na dece 📿"],
   34: ["Hru už nejde přiblížit ani oddálit prsty nebo dvojitým klepnutím, obrazovka zůstává pořád stejně velká"],
   33: ["Dolní panel se záložkami drží pevně u spodního okraje obrazovky a nehýbe se při posouvání. Při psaní se schová, aby nepřekážel klávesnici"],
@@ -3695,17 +3696,19 @@ function motifSVG(m, x, y, sc, c){
 }
 function mugSVG(d, size = 120, id = "m"){
   const c = d.color || "#FFFFFF", c2 = d.color2 || "#E8546B", pid = "mp" + id;
-  /* ozdoby lemují hrdlo: jedna řada těsně pod okrajem */
-  const rim = d.pattern === "dots" ? Array.from({length:10}, (_, i) => `<circle cx="${26 + i * 6.7}" cy="39" r="2.3" fill="${c2}"/>`).join("")
-    : d.pattern === "stripes" ? `<rect x="20" y="36" width="72" height="2.6" fill="${c2}"/><rect x="20" y="41" width="72" height="2.6" fill="${c2}" opacity=".7"/>`
-    : d.pattern === "hearts" ? Array.from({length:8}, (_, i) => `<path transform="translate(${28 + i * 8} 39) scale(.45)" d="M0 6 C-8 0 -6 -7 -2 -7 C0 -7 0 -5 0 -4 C0 -5 0 -7 2 -7 C6 -7 8 0 0 6 Z" fill="${c2}"/>`).join("") : "";
+  /* malovaný pruh a ozdoby lemují hrdlo: kopírují oblouk okraje */
+  const ry = x => { const u = (x - 56) / 36; return 7 * (1 - u * u); };
+  const band = `<path d="M20.2 31 Q56 45 91.8 31 L91.4 37 Q56 51 20.6 37 Z" fill="${c2}" opacity=".95"/>`;
+  const rim = d.pattern === "dots" ? Array.from({length:9}, (_, i) => { const x = 27 + i * 7.25; return `<circle cx="${x.toFixed(1)}" cy="${(42 + ry(x)).toFixed(1)}" r="2.2" fill="${c2}"/>`; }).join("")
+    : d.pattern === "stripes" ? `<path d="M21 40 Q56 54 91 40" stroke="${c2}" stroke-width="2.4" fill="none"/><path d="M21.3 45 Q56 59 90.7 45" stroke="${c2}" stroke-width="2.4" fill="none" opacity=".7"/>`
+    : d.pattern === "hearts" ? Array.from({length:7}, (_, i) => { const x = 29 + i * 9; return `<path transform="translate(${x} ${(42 + ry(x)).toFixed(1)}) scale(.45)" d="M0 6 C-8 0 -6 -7 -2 -7 C0 -7 0 -5 0 -4 C0 -5 0 -7 2 -7 C6 -7 8 0 0 6 Z" fill="${c2}"/>`; }).join("") : "";
   const pat = "";
   const txt = (d.text || "").slice(0, 16);
   return `<svg viewBox="0 0 120 120" width="${size}" height="${size}" aria-hidden="true"><defs>${pat}</defs><ellipse cx="56" cy="106" rx="40" ry="6" fill="#000" opacity=".12"/>
     <path d="M90 46 Q112 46 112 66 Q112 86 88 86" stroke="${c2}" stroke-width="9" fill="none" stroke-linecap="round"/>
-    <path d="M20 30 L92 30 L88 98 Q88 104 82 104 L30 104 Q24 104 24 98 Z" fill="${c}" stroke="rgba(0,0,0,.08)"/>${rim}
-    <ellipse cx="56" cy="30" rx="36" ry="7" fill="${shade(c, .9)}"/><ellipse cx="56" cy="30" rx="31" ry="5" fill="#6B4430"/><rect x="20" y="28" width="72" height="5" fill="${c2}" opacity=".9"/>
-    ${motifSVG(d.motif || "heart", 56, txt ? 58 : 66, 2.6, c2)}
+    <path d="M20 30 L92 30 L88 98 Q88 104 82 104 L30 104 Q24 104 24 98 Z" fill="${c}" stroke="rgba(0,0,0,.08)"/>${band}${rim}
+    <ellipse cx="56" cy="30" rx="36" ry="7" fill="${shade(c, .9)}"/><ellipse cx="56" cy="30" rx="31" ry="5" fill="#6B4430"/>
+    ${motifSVG(d.motif || "heart", 56, txt ? 62 : 70, 2.6, c2)}
     ${txt ? `<text x="56" y="88" font-size="${txt.length > 10 ? 9 : 11}" font-weight="800" fill="${lum(c) > .5 ? "#3A2E2A" : "#FFFFFF"}" text-anchor="middle" font-family="Baloo 2,sans-serif">${esc(txt)}</text>` : ""}
     <path d="M44 16 q-5 -6 0 -12 M58 14 q-5 -6 0 -12" stroke="#BFC6CF" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/></svg>`;
 }

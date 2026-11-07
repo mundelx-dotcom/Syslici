@@ -68,7 +68,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{min-height:100%}
+html,body{min-height:100%;overscroll-behavior:none}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15.5px;font-weight:600;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -91,7 +91,8 @@ body.chatting .wrap{padding-bottom:196px}
 
 /* floating tab bar */
 .tabs{position:fixed;z-index:6;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));
-  max-width:540px;margin:0 auto;background:var(--card);border-radius:26px;box-shadow:0 10px 30px rgba(90,50,30,.16);padding:6px;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+  max-width:540px;margin:0 auto;transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden;background:var(--card);border-radius:26px;box-shadow:0 10px 30px rgba(90,50,30,.16);padding:6px;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+body.typing .tabs{visibility:hidden}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 0 5px;border-radius:20px;font-size:10px;font-weight:700;color:var(--ink-soft);transition:background .2s}
 .tab .e{font-size:22px;line-height:1.15;filter:grayscale(.6);opacity:.7;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
 .tab[aria-current="page"]{color:var(--ink);background:var(--accent-soft)}
@@ -810,8 +811,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 32;
+const APP_VERSION = 33;
 const CHANGELOG = {
+  33: ["Dolní panel se záložkami drží pevně u spodního okraje obrazovky a nehýbe se při posouvání. Při psaní se schová, aby nepřekážel klávesnici"],
   32: ["Nové okno 💭 Na co myslím: napiš, na co tvůj syslík právě myslí. Druhý syslík to uvidí v panelu Jak se má… a přijde mu oznámení"],
   31: ["Na kole má syslík obuté botky, které má vybrané v Šatníku 👟"],
   30: ["Syslíkovo kolo má větší kola 🚴"],
@@ -4094,6 +4096,8 @@ document.addEventListener("change", ev => {
   if (t.matches && t.matches('input[type=range][data-k]')) { setMood(t.dataset.k, Number(t.value)); return; }
   if ((t.id === "tl-color" || t.id === "tl-color2") && S.sheet && S.sheet.draft) { S.sheet.draft[t.id === "tl-color" ? "color" : "color2"] = t.value; renderSheet(); }
 });
+document.addEventListener("focusin", ev => { const t = ev.target; if (t && (t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && !["range","color","checkbox","radio"].includes(t.type)))) document.body.classList.add("typing"); });
+document.addEventListener("focusout", () => setTimeout(() => { const a = document.activeElement; if (!a || !(a.tagName === "TEXTAREA" || a.tagName === "INPUT")) document.body.classList.remove("typing"); }, 50));
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape" && S.sheet) closeSheet();
   if (ev.key === "Enter" && ev.target.id === "todo-text") { ev.preventDefault(); todoAdd(); }

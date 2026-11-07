@@ -814,8 +814,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 38;
+const APP_VERSION = 39;
 const CHANGELOG = {
+  39: ["Mávající tlapka je kratší a mávání vypadá přirozeněji 👋"],
   38: ["Kytici od syslíka můžeš rozkliknout a přesunout jinam, nebo ji schovat do Doupěte, kde se usuší a zachová navždy 🥀"],
   37: ["Sekání trávy: syslík je vidět z boku a jde se sekačkou ve směru sekání 🌱",
        "Nová zahrádka: plot, živý plot, jabloň, záhonky s tulipány, budka pro ptáčky a pruhovaný trávník",
@@ -1388,7 +1389,7 @@ function syslikInner(lookIn, pose, key, wear, act){
   const cuddle = pose === "cuddle-l" || pose === "cuddle-r";
   const pawFill = W.outer ? W.outer.color : Bd ? Bd.color : dk;
   const pawR = wave
-    ? `<g class="pawR"><path d="M60 146 Q36 132 30 104" stroke="${pawFill}" stroke-width="15" fill="none" stroke-linecap="round"/>${pawG(29, 96, 8.5, 9.5, -10, dk)}</g>`
+    ? `<g class="pawR"><path d="M62 150 Q40 142 35 122" stroke="${pawFill}" stroke-width="14" fill="none" stroke-linecap="round"/>${pawG(34, 114, 8.5, 9.5, -14, dk)}</g>`
     : `<g class="pawRe">${pawG(122, 153, 8.5, 11, cuddle ? 24 : -14, dk)}</g>`;
   const art = act ? actArt(act, {fur, dk, belly, id, W}) : null;
   const hideL = art && (art.hide === "L" || art.hide === "both"), hideR = art && (art.hide === "R" || art.hide === "both");

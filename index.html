@@ -820,7 +820,7 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 /* ============ Verze a novinky ============ */
 const APP_VERSION = 43;
 const CHANGELOG = {
-  43: ["Nový přirozený culík: vlasy sčesané dozadu s jemnou linií u čela, vysoký culík vzadu s gumičkou, který přirozeně padá za hlavou dolů 🎀"],
+  43: ["Nový culík podle předlohy: šikmá ofinka z velkých pramenů, pramínek podél tváře, lesk na vlasech a bohatý zvlněný culík vzadu na boku s kudrnatými konečky 🎀"],
   41: ["Nová kytara: vypadá jako opravdová akustická, s pražci, ladicími kolíčky, kobylkou a ozdobou kolem otvoru 🎸",
        "Vlásky pro syslici jsou teď tři a jsou hezčí: Ofinka (mikádo s ofinkou), Culík (bohatý, zvlněný, s gumičkou) a Drdůlek (s gumičkou a pramínky)",
        "V nastavení syslíka už se nevybírá povaha ani nejoblíbenější pamlsek"],
@@ -1239,13 +1239,14 @@ function hairParts(L, view){
       <path d="M62 56 Q66 36 76 24 M86 55 Q88 36 92 18 M110 55 Q110 36 108 18 M134 56 Q132 36 124 24" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".55"/>
       ${sheen("M60 30 Q84 16 112 17")}${sheen("M126 22 Q138 26 146 34", 3)}`};
   if (h === "ponytail") return {
-    back:`<path d="M116 20 Q168 2 192 46 Q206 84 192 122 Q182 148 162 160 Q156 162 158 154 Q174 132 176 106 Q178 72 154 50 Q138 36 116 34 Z" fill="${hc}"/>
-      <path d="M150 22 Q184 40 188 80 Q190 112 174 140" stroke="${sh2}" stroke-width="2.2" fill="none" opacity=".45"/><path d="M140 30 Q170 50 172 88 Q172 116 164 134" stroke="${sh2}" stroke-width="1.6" fill="none" opacity=".4"/>
-      <path d="M164 24 Q190 40 194 70" stroke="${hl}" stroke-width="5" fill="none" opacity=".4" stroke-linecap="round"/>`,
-    front:`<path d="M40 66 Q36 12 100 10 Q164 12 160 66 Q155 52 142 45 Q122 35 100 35 Q78 35 58 45 Q45 52 40 66 Z" fill="${hc}"/>
-      <path d="M52 52 Q70 30 120 18 M64 42 Q88 26 128 16 M80 37 Q104 24 134 15 M120 36 Q134 26 140 16 M144 46 Q148 30 144 18" stroke="${sh2}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".42"/>
-      ${sheen("M60 30 Q86 14 118 14")}
-      ${scrunch(136, 14, 7)}`};
+    back:`<path d="M62 24 Q30 10 12 36 Q-2 60 8 88 Q-2 102 4 120 Q12 140 32 146 Q22 132 26 120 Q36 132 50 128 Q38 114 42 98 Q50 108 60 104 Q48 88 52 70 Q56 52 70 44 Z" fill="${hc}"/>
+      <path d="M50 32 Q22 44 18 76 Q16 98 26 116 M58 44 Q36 62 36 88 Q36 104 44 116" stroke="${sh2}" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
+      <path d="M38 24 Q18 34 14 58" stroke="${hl}" stroke-width="6" fill="none" opacity=".55" stroke-linecap="round"/><path d="M14 92 Q10 104 14 116" stroke="${hl}" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>`,
+    front:`<path d="M38 72 Q30 20 84 9 Q124 3 152 24 Q170 42 164 74 Q162 92 156 108 Q148 96 148 80 Q146 68 140 62 Q138 56 132 52 L127 64 Q121 50 112 46 L105 60 Q98 47 88 46 L79 60 Q72 51 64 52 Q54 56 50 66 Q45 72 43 84 Q38 80 38 72 Z" fill="${hc}"/>
+      <path d="M127 64 Q126 44 116 30 M105 60 Q104 40 98 26 M79 60 Q80 42 82 28 M148 80 Q148 56 140 40 M50 66 Q52 44 64 30" stroke="${sh2}" stroke-width="1.7" fill="none" opacity=".5" stroke-linecap="round"/>
+      <path d="M58 30 Q92 12 132 20" stroke="${hl}" stroke-width="7" fill="none" opacity=".55" stroke-linecap="round"/><path d="M142 32 Q154 42 156 56" stroke="${hl}" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>
+      ${sheen("M70 22 Q92 14 114 15", 3)}
+      <path d="M100 10 Q102 -2 112 -2 Q106 2 108 10" stroke="${hc}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`};
   if (h === "bun") return {back:"",
     front:`<path d="M42 64 Q38 13 100 11 Q162 13 158 64 Q150 46 130 42 Q100 38 70 42 Q50 46 42 64 Z" fill="${hc}"/>
       <path d="M52 52 Q70 26 96 16 M148 52 Q130 26 104 16 M70 46 Q84 26 98 18 M130 46 Q116 26 102 18" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".5"/>

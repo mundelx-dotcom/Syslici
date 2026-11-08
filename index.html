@@ -337,6 +337,10 @@ textarea:focus,input[type=text]:focus{border-color:var(--accent);outline:none}
 .chip-float{z-index:3}
 .chip-float.low.left{right:auto;left:12px;cursor:pointer;color:var(--ink)}
 .place{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.fw{position:fixed;z-index:3000;width:10px;height:10px;margin:-5px;border-radius:50%;pointer-events:none;animation:fw 1.4s cubic-bezier(.2,.7,.3,1) forwards;box-shadow:0 0 6px currentColor}
+@keyframes fw{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) + 30px)) scale(.4);opacity:0}}
+.bigmsg{position:fixed;left:50%;top:38%;z-index:3001;transform:translate(-50%,-50%);background:var(--card);color:var(--ink);font-family:var(--font-display);font-size:24px;font-weight:800;padding:14px 22px;border-radius:22px;box-shadow:var(--shadow);white-space:nowrap;animation:bigpop 2.6s ease forwards;pointer-events:none}
+@keyframes bigpop{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}12%{transform:translate(-50%,-50%) scale(1.08);opacity:1}20%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0}}
 .plushrow{position:absolute;left:3%;right:3%;bottom:26%;z-index:3;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
 .plushrow .pg{display:flex;align-items:flex-end;gap:0}
 .plush{pointer-events:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));animation:plushbob 3.2s ease-in-out infinite}
@@ -826,8 +830,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 48;
+const APP_VERSION = 49;
 const CHANGELOG = {
+  49: ["Když syslice přidává věc do Požídit, musí potvrdit: Je to opravdu potšeba? 🤔 Po Ano přijde „No tak to požídíme!“ a malý ohňostroj 🎆"],
   48: ["Když Vepčík, Tukys a Pežíčko řádí, sedí pěkně u sebe 🎉"],
   47: ["Když jste v postýlce, můžete Převléct pelíšek 🛏️: vyberete barvu peřiny, polštářů a prostěradla. Každá postel si pamatuje svoje povlečení"],
   46: ["Plyšáci 🧸: Vepčík, Pjincezna, Tůja, Velký Krupičák, Malý Krupičák, Tukys a Pežíčko. Najdeš je v postýlce tam, kde zrovna jsou",
@@ -3072,13 +3077,18 @@ function todoList(){
 function todoSheet(s){
   const l = todoList(), open = l.filter(x => !x.done).length, done = l.length - open;
   return head("Požídit 📝") + `<p class="small muted center" style="margin:-4px 0 0">Společný seznam všeho, co je potřeba pořídit. Vidíte ho oba.</p>
-    <div class="row" style="gap:8px"><input type="text" id="todo-text" maxlength="80" placeholder="Co je potřeba požídit…" value="${esc(s.text || "")}" autocomplete="off"><button class="round send" data-act="todoAdd" aria-label="Přidat" ${(s.text || "").trim() ? "" : "disabled"} id="todo-add">＋</button></div>
+    ${s.confirm ? `<div class="card stack center" style="gap:10px;align-items:center"><b style="font-family:var(--font-display);font-size:20px">Je to opravdu potšeba? 🤔</b><span class="small muted">„${esc((s.text || "").trim())}“</span>
+      <div class="row" style="gap:8px;width:100%"><button class="btn" data-act="todoYes">Ano</button><button class="btn ghost" data-act="todoNo">Ne</button></div></div>` : ""}
+    <div class="row" style="gap:8px${s.confirm ? ";display:none" : ""}"><input type="text" id="todo-text" maxlength="80" placeholder="Co je potřeba požídit…" value="${esc(s.text || "")}" autocomplete="off"><button class="round send" data-act="todoAdd" aria-label="Přidat" ${(s.text || "").trim() ? "" : "disabled"} id="todo-add">＋</button></div>
     ${l.length ? `<div class="todo">${l.map(x => `<div class="todo-it ${x.done ? "done" : ""}"><button class="todo-ck" data-act="todoToggle" data-id="${esc(x.id)}" aria-pressed="${x.done}" aria-label="${x.done ? "Vrátit" : "Odškrtnout"}">${x.done ? "✓" : ""}</button><span class="todo-tx"><b>${esc(x.text)}</b><small class="muted">${esc(x.by || "")}${x.done && x.doneBy ? " · požízeno ✓ " + esc(x.doneBy) : ""}</small></span><button class="x" data-act="todoDel" data-id="${esc(x.id)}" aria-label="Smazat">✕</button></div>`).join("")}</div>`
       : `<div class="card center muted">Zatím je všechno požízené. 🌻</div>`}
     ${done ? `<button class="btn ghost" data-act="todoClear">Smazat hotové (${done})</button>` : ""}`;
 }
-function todoAdd(){
+function todoAdd(force){
   const s = S.sheet; const t = s && (s.text || "").trim(); if (!t) return;
+  if (!force && me() && me().gender === "female") { s.confirm = true; renderSheet(); return; }
+  s.confirm = false;
+  if (force) setTimeout(() => { fireworks(); bigMsg("No tak to požídíme! 🎆"); }, 80);
   send("todoAdd", {text:t.slice(0, 80)}); s.text = ""; const i = $("#todo-text"); if (i) i.value = "";
   renderSheet(); render(); setTimeout(() => { const i2 = $("#todo-text"); if (i2) i2.focus(); }, 30);
 }
@@ -3171,6 +3181,17 @@ function say(text, ms = 3200){
   clearTimeout(bubbleT); S.home.bubble = text; render();
   bubbleT = setTimeout(() => { S.home.bubble = null; render(); }, ms);
 }
+function fireworks(){
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const fx = $("#fx"), cols = ["#F2D16B","#E8546B","#8EC5E8","#9ED9A0","#B79CE8","#F7B267","#FFFFFF"];
+  for (let b = 0; b < 5; b++) setTimeout(() => {
+    const cx = innerWidth * (.2 + Math.random() * .6), cy = innerHeight * (.15 + Math.random() * .35), col = cols[b % cols.length];
+    for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2, d = 80 + Math.random() * 50, s = document.createElement("i");
+      s.className = "fw"; s.style.cssText = `left:${cx}px;top:${cy}px;background:${i % 3 ? col : cols[(b + 2) % cols.length]};--dx:${(Math.cos(a) * d).toFixed(0)}px;--dy:${(Math.sin(a) * d).toFixed(0)}px`;
+      document.body.appendChild(s); setTimeout(() => s.remove(), 1500); }
+  }, b * 260);
+}
+function bigMsg(t){ const fx = $("#fx"), d = document.createElement("div"); d.className = "bigmsg"; d.textContent = t; fx.appendChild(d); setTimeout(() => d.remove(), 2600); }
 function burst(emoji, sel){
   if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const el = sel ? $(sel) : null; const fx = $("#fx");
@@ -4423,6 +4444,8 @@ function handle(a, v, el){
       updateMe(pp => { pp.wardrobe = (pp.wardrobe || []).concat([it]); pp.wearing = wearingOf(pp).filter(x => CLOTH[x.type].slot !== sl).concat([plainItem(it)]); pp.luxMade = (pp.luxMade || 0) + 1; });
       closeSheet(); toast(`${CLOTH[d.kind].e} Hotovo! Najdeš to v Šatníku`); burst("✨"); render(); break; }
     case "todoAdd": todoAdd(); break;
+    case "todoYes": todoAdd(true); break;
+    case "todoNo": S.sheet.confirm = false; S.sheet.text = ""; renderSheet(); toast("Tak to nepožídíme 😌"); break;
     case "todoToggle": { const x = todoList().find(t => t.id === el.dataset.id); if (!x) break; send("todoDone", {ref:x.id, done:!x.done}); if (!x.done) burst("✅"); renderSheet(); render(); break; }
     case "todoDel": send("todoDel", {ref:el.dataset.id}); renderSheet(); render(); break;
     case "todoClear": { const refs = todoList().filter(t => t.done).map(t => t.id); if (refs.length) send("todoDel", {refs}); renderSheet(); render(); break; }

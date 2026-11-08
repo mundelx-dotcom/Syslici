@@ -818,8 +818,10 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 43;
+const APP_VERSION = 44;
 const CHANGELOG = {
+  44: ["Culík má o trochu méně vlasů, kratší ofinku a je na pravé straně",
+       "Syslík může vyrobit gumičku do vlasů 🎀 a darovat ji syslici. Ta ji nosí v culíku nebo v drdůlku (v Šatníku Do vlasů)"],
   43: ["Nový culík podle předlohy: šikmá ofinka z velkých pramenů, pramínek podél tváře, lesk na vlasech a bohatý zvlněný culík vzadu na boku s kudrnatými konečky 🎀"],
   41: ["Nová kytara: vypadá jako opravdová akustická, s pražci, ladicími kolíčky, kobylkou a ozdobou kolem otvoru 🎸",
        "Vlásky pro syslici jsou teď tři a jsou hezčí: Ofinka (mikádo s ofinkou), Culík (bohatý, zvlněný, s gumičkou) a Drdůlek (s gumičkou a pramínky)",
@@ -1006,6 +1008,7 @@ const CLOTH = {
   neckpillow:{slot:"neck", name:"Cestovní polštářek", e:"💤", pat:false, hidden:true},
   scarf:{slot:"neck", name:"Šála", e:"🧣", pat:true}, bandana:{slot:"neck", name:"Šátek na krk", e:"🔻", pat:true},
   bowtie:{slot:"neck", name:"Motýlek", e:"🎩", pat:true}, beads:{slot:"neck", name:"Korálky", e:"📿", pat:false}, beadsPaw:{slot:"paw", name:"Korálky na tlapce", e:"📿", pat:false, hidden:true},
+  scrunchie:{slot:"hairtie", name:"Gumička do vlasů", e:"🎀", pat:false, craft:true},
   pajamas:{slot:"body", name:"Pyžamo na spaní", e:"🌙", pat:true}, socks:{slot:"feet", name:"Ponožky", e:"🧦", pat:true}, sneakers:{slot:"feet", name:"Tenisky", e:"👟", pat:false}, slippers:{slot:"feet", name:"Bačkory", e:"🥿", pat:true},
   coat:{slot:"outer", name:"Kabát", e:"🧥", pat:true}, blazer:{slot:"outer", name:"Sako", e:"🤵", pat:true}, puffer:{slot:"outer", name:"Vesta", e:"🦺", pat:true}, handbag:{slot:"bag", name:"Kabelka", e:"👜", pat:true, lux:true},
   sweater:{slot:"body", name:"Svetr", e:"🧶", pat:true}, tshirt:{slot:"body", name:"Tričko", e:"👕", pat:true},
@@ -1018,7 +1021,7 @@ const CLOTH = {
   chef:{slot:"head", name:"Kuchařská čepice", e:"👨‍🍳", pat:false, hidden:true}, headband:{slot:"head", name:"Čelenka", e:"🎽", pat:false, hidden:true},
   helmet:{slot:"head", name:"Cyklistická helma", e:"⛑️", pat:false, hidden:true}, goggles:{slot:"face", name:"Plavecké brýle", e:"🥽", pat:false, hidden:true}
 };
-const SLOTS = {head:"Na hlavu", face:"Na oči", neck:"Na krk", body:"Na tělo", outer:"Přes to", bag:"Kabelky", feet:"Na tlapky"};
+const SLOTS = {head:"Na hlavu", face:"Na oči", hairtie:"Do vlasů", neck:"Na krk", body:"Na tělo", outer:"Přes to", bag:"Kabelky", feet:"Na tlapky"};
 const CLOTH_COLORS = ["#EE8E8E","#E8546B","#F4A6C8","#F7B267","#F2D16B","#9ED9A0","#5E9E5A","#7CC6C2","#8EC5E8","#3B6FB6","#8C9EEB","#B79CE8","#FFFFFF","#E9DCC9","#6B5249","#2F3A56","#24222C"];
 const PATTERNS = {none:"Hladké", stripes:"Proužky", dots:"Puntíky", hearts:"Srdíčka", stars:"Hvězdičky", checks:"Kostičky", zigzag:"Cik-cak", flowers:"Kytičky", moons:"Měsíčky"};
 const LUX_PATTERNS = {none:"Hladké", tartan:"Károvaný", quilted:"Prošívaný", monogram:"Monogram", oblique:"Šikmé proužky"};
@@ -1209,12 +1212,12 @@ function patchSVG(it, x, y, sc = 1){
 /* Holčičí vlásky: back = za hlavou, front = přes temeno. view: front | side | back */
 function hairParts(L, view){
   const h = ({long:"ponytail", pigtails:"ponytail", curls:"bangs"})[L.hair] || L.hair; if (!h || h === "none" || !CAT.hair[h]) return {back:"", front:""};
-  const hc = (CAT.hairc[L.hairc] || CAT.hairc.brown)[1], hd = shade(hc, .78), bow = "#F48FA6";
+  const hc = (CAT.hairc[L.hairc] || CAT.hairc.brown)[1], hd = shade(hc, .78), bow = L.tie || "#F48FA6";
   const braid = (pts) => pts.map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="10" ry="9" fill="${hc}" stroke="${hd}" stroke-width="1.4"/>`).join("");
   if (view === "side") {
     const cap = `<path d="M58 54 Q58 20 112 20 Q164 22 168 58 Q150 40 124 44 Q96 38 58 54 Z" fill="${hc}"/><path d="M80 36 Q110 26 150 36" stroke="${hd}" stroke-width="2" fill="none" opacity=".6"/>`;
     const back = h === "long" ? `<path d="M74 44 Q38 66 44 150 Q60 162 78 144 Q72 100 90 58 Z" fill="${hc}"/>`
-      : h === "ponytail" ? `<path d="M74 30 Q36 30 26 70 Q18 110 34 140 Q40 150 46 144 Q36 116 42 86 Q48 58 76 48 Z" fill="${hc}"/><path d="M58 40 Q34 60 32 100 Q32 124 40 138" stroke="${shade(hc, .62)}" stroke-width="1.8" fill="none" opacity=".45"/><circle cx="74" cy="36" r="7" fill="${bow}"/>`
+      : h === "ponytail" ? `<path d="M74 30 Q36 30 26 70 Q18 110 34 140 Q40 150 46 144 Q36 116 42 86 Q48 58 76 48 Z" fill="${hc}"/><path d="M58 40 Q34 60 32 100 Q32 124 40 138" stroke="${shade(hc, .62)}" stroke-width="1.8" fill="none" opacity=".45"/>${L.tie ? `<circle cx="74" cy="36" r="7" fill="${bow}"/>` : ""}`
       : h === "pigtails" ? braid([[74,86],[70,104],[68,122],[67,140]]) + `<circle cx="76" cy="72" r="6" fill="${bow}"/>`
       : h === "bun" ? `<circle cx="104" cy="12" r="18" fill="${hc}"/><path d="M94 10 q10 -10 20 0" stroke="${hd}" stroke-width="2" fill="none"/>` : "";
     const front = h === "curls" ? [[66,46],[78,32],[94,24],[112,22],[130,24],[146,32],[158,44]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="10" fill="${hc}"/>`).join("")
@@ -1239,14 +1242,14 @@ function hairParts(L, view){
       <path d="M62 56 Q66 36 76 24 M86 55 Q88 36 92 18 M110 55 Q110 36 108 18 M134 56 Q132 36 124 24" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".55"/>
       ${sheen("M60 30 Q84 16 112 17")}${sheen("M126 22 Q138 26 146 34", 3)}`};
   if (h === "ponytail") return {
-    back:`<path d="M62 24 Q30 10 12 36 Q-2 60 8 88 Q-2 102 4 120 Q12 140 32 146 Q22 132 26 120 Q36 132 50 128 Q38 114 42 98 Q50 108 60 104 Q48 88 52 70 Q56 52 70 44 Z" fill="${hc}"/>
-      <path d="M50 32 Q22 44 18 76 Q16 98 26 116 M58 44 Q36 62 36 88 Q36 104 44 116" stroke="${sh2}" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
-      <path d="M38 24 Q18 34 14 58" stroke="${hl}" stroke-width="6" fill="none" opacity=".55" stroke-linecap="round"/><path d="M14 92 Q10 104 14 116" stroke="${hl}" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>`,
-    front:`<path d="M38 72 Q30 20 84 9 Q124 3 152 24 Q170 42 164 74 Q162 92 156 108 Q148 96 148 80 Q146 68 140 62 Q138 56 132 52 L127 64 Q121 50 112 46 L105 60 Q98 47 88 46 L79 60 Q72 51 64 52 Q54 56 50 66 Q45 72 43 84 Q38 80 38 72 Z" fill="${hc}"/>
-      <path d="M127 64 Q126 44 116 30 M105 60 Q104 40 98 26 M79 60 Q80 42 82 28 M148 80 Q148 56 140 40 M50 66 Q52 44 64 30" stroke="${sh2}" stroke-width="1.7" fill="none" opacity=".5" stroke-linecap="round"/>
-      <path d="M58 30 Q92 12 132 20" stroke="${hl}" stroke-width="7" fill="none" opacity=".55" stroke-linecap="round"/><path d="M142 32 Q154 42 156 56" stroke="${hl}" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>
-      ${sheen("M70 22 Q92 14 114 15", 3)}
-      <path d="M100 10 Q102 -2 112 -2 Q106 2 108 10" stroke="${hc}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`};
+    back:`<g transform="translate(200 0) scale(-1 1)"><path d="M60 28 Q32 16 18 40 Q8 62 16 86 Q8 100 14 116 Q20 132 36 138 Q28 126 32 116 Q40 126 52 122 Q42 110 46 96 Q52 104 60 100 Q50 86 54 70 Q58 54 70 46 Z" fill="${hc}"/>
+      <path d="M50 34 Q26 46 24 76 Q22 96 30 112 M58 46 Q40 62 40 86 Q40 100 46 110" stroke="${sh2}" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
+      <path d="M40 28 Q24 36 20 58" stroke="${hl}" stroke-width="5" fill="none" opacity=".5" stroke-linecap="round"/></g>`,
+    front:`<g transform="translate(200 0) scale(-1 1)"><path d="M42 66 Q34 20 86 10 Q126 4 152 26 Q166 42 160 66 Q157 76 154 84 Q148 74 146 64 Q142 56 134 52 L128 58 Q121 47 112 45 L106 53 Q98 45 88 45 L80 54 Q72 47 64 50 Q54 54 50 62 Q46 66 44 72 Z" fill="${hc}"/>
+      <path d="M128 58 Q126 42 116 30 M106 53 Q104 38 98 26 M80 54 Q80 40 82 28 M50 62 Q52 44 64 30" stroke="${sh2}" stroke-width="1.6" fill="none" opacity=".45" stroke-linecap="round"/>
+      <path d="M60 30 Q92 13 130 21" stroke="${hl}" stroke-width="6" fill="none" opacity=".5" stroke-linecap="round"/>
+      <path d="M100 10 Q102 -1 111 -1 Q105 3 107 10" stroke="${hc}" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+      ${L.tie ? scrunch(142, 30, 8) : ""}`};
   if (h === "bun") return {back:"",
     front:`<path d="M42 64 Q38 13 100 11 Q162 13 158 64 Q150 46 130 42 Q100 38 70 42 Q50 46 42 64 Z" fill="${hc}"/>
       <path d="M52 52 Q70 26 96 16 M148 52 Q130 26 104 16 M70 46 Q84 26 98 18 M130 46 Q116 26 102 18" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".5"/>
@@ -1299,6 +1302,7 @@ function syslikInner(lookIn, pose, key, wear, act){
     if (L.ears === "big") return `<circle cx="${cx + (left?-3:3)}" cy="28" r="23" fill="${fur}"/><circle cx="${cx + (left?-3:3)}" cy="30" r="13" fill="${inner}"/>`;
     return `<circle cx="${cx}" cy="33" r="17" fill="${fur}"/><circle cx="${cx}" cy="35" r="9" fill="${inner}"/>`;
   };
+  L.tie = W.hairtie ? W.hairtie.color : null;
   const HP = hairParts(L, "front");
   let pattern = "";
   if (L.pattern === "dots") pattern = `<g clip-path="url(#${id}b)" fill="${dk}" opacity=".55">${[[-42,-22],[-48,8],[-36,32],[40,-20],[47,10],[36,34]].map(([x,y]) => `<circle cx="${100+x}" cy="${161+y}" r="5"/>`).join("")}</g>`;
@@ -1310,7 +1314,7 @@ function syslikInner(lookIn, pose, key, wear, act){
   else mouth = `<path d="${big ? "M89 94 Q100 105 111 94" : "M92 95 Q100 101 108 95"}" stroke="${ink}" stroke-width="2.4" stroke-linecap="round" fill="none"/><rect x="95.5" y="${big?99:98}" width="9" height="8" rx="2.2" fill="#fff"/><line x1="100" y1="${big?99:98}" x2="100" y2="${big?107:106}" stroke="${ink}" stroke-opacity=".22"/>`;
 
   /* --- oblečení --- */
-  const H = W.head, F = W.face, N = W.neck, Bd = W.body;
+  const H = W.head, F = W.face, N = W.neck, Bd = W.body; L.tie = W.hairtie ? W.hairtie.color : null;
   const outerWear = W.outer ? outerSVG(W.outer, fillOf(W.outer), id, "front") : "", bagWear = W.bag ? bagSVG(W.bag, fillOf(W.bag)) : "";
   let headWear = "", faceWear = "", neckWear = "", bodyWear = "";
   let tails = "";
@@ -1479,7 +1483,7 @@ function syslikAlt(view, lookIn, pose, key, wear, act){
     if (!it.pattern || it.pattern === "none" || !CLOTH[it.type].pat) return it.color;
     const pid = id + "pt" + it.i; defs.push(patternDef(pid, it.color, it.pattern)); return `url(#${pid})`;
   };
-  const H = W.head, F = W.face, N = W.neck, Bd = W.body;
+  const H = W.head, F = W.face, N = W.neck, Bd = W.body; L.tie = W.hairtie ? W.hairtie.color : null;
   const outerWear = W.outer ? outerSVG(W.outer, fillOf(W.outer), id, view) : "", bagWear = "";
   const tailTip = L.tail === "tip" ? belly : dk;
   const paw = (x, y, r = 0, c = dk, cls = "") => `${cls ? `<g class="${cls}">` : ""}${view === "back" ? `<ellipse cx="${x}" cy="${y}" rx="8.5" ry="10.5" fill="${c}" transform="rotate(${r} ${x} ${y})"/>` : pawG(x, y, 8.5, 10.5, r, c)}${cls ? "</g>" : ""}`;
@@ -3895,6 +3899,11 @@ function sheetHTML(s){
     case "wardrobe": return wardrobeSheet(s);
     case "todo": return todoSheet(s);
     case "atelier": return atelierSheet(s);
+    case "tie": { const o2 = partner(); const prevLook = o2 && o2.look && (o2.look.hair === "ponytail" || o2.look.hair === "bun") ? o2.look : {fur:"peach", belly:"blush", hair:"ponytail", hairc:"ginger"};
+      return head("Vyrobit gumičku 🎀") + `<div class="preview tailor-prev">${syslikSVG(prevLook, "happy", 160, {key:"tie", wear:[{id:"tp", type:"scrunchie", color:s.color, pattern:"none"}]})}</div>
+        <p class="small muted center" style="margin:0">Nařasená gumička do culíku nebo drdůlku pro ${esc(o2 ? o2.name : "syslici")}.</p>
+        <span class="label">Barva</span><div class="swatches">${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="tieColor" data-v="${c}" aria-pressed="${s.color === c}" aria-label="Barva"></button>`).join("")}</div>
+        <button class="btn" data-act="tieSend" ${o2 ? "" : "disabled"}>Darovat ${esc(o2 ? o2.name : "")} 🎁</button>`; }
     case "cloth": return clothSheet(s);
     case "tailor": return tailorSheet(s);
     case "sportDone": { const sp = SPORT[s.cur.act], pl = PLACES[s.cur.place] || PLACES.home, a0 = actInfo(s.cur.place, s.cur.act), vb = sp.v[p.gender === "female" ? 1 : 0];
@@ -3997,8 +4006,9 @@ function wardrobeSheet(s){
   const p = me(), items = wardrobe(), cat = s && OUTFIT_CATS[s.cat] ? s.cat : "", worn = cat ? outfitOf(p, cat) : wearingOf(p);
   const acts = cat ? [...new Set(Object.values(PLACES).flatMap(pl => Object.entries(pl.acts).filter(([k]) => ACT_CAT[k] === cat).map(([, a]) => a.n)))] : [];
   const chips = `<div class="chips" style="justify-content:center">${[["", "👕", "Běžně"]].concat(Object.entries(OUTFIT_CATS).map(([k, a]) => [k, a[0], a[1]])).map(([k, e, t]) => `<button class="chip" data-act="outfitCat" data-v="${k}" aria-pressed="${cat === k}">${e} ${t}${k && outfitOf(p, k).length ? " ✓" : ""}</button>`).join("")}</div>`;
-  const rails = Object.entries(SLOTS).map(([slot, title]) => {
+  const rails = Object.entries(SLOTS).filter(([slot]) => slot !== "hairtie" || p.gender === "female").map(([slot, title]) => {
     const list = items.filter(it => CLOTH[it.type].slot === slot);
+    if (slot === "hairtie" && !list.length) return `<div class="stack" style="gap:6px"><span class="label">${title}</span><p class="small muted" style="margin:0">Gumičku do culíku nebo drdůlku ti může vyrobit syslík 🎀</p></div>`;
     return `<div class="stack" style="gap:6px"><span class="label">${title}</span><div class="rail">
       ${list.map((it, i) => `<button class="cloth" data-act="wear" data-id="${esc(it.id)}" aria-pressed="${worn.some(w => w.id === it.id)}">
         ${clothSwatch(it, slot + i)}<small>${esc(it.name || CLOTH[it.type].name)}</small>
@@ -4039,12 +4049,12 @@ function clothSheet(s){
 }
 const PATCHABLE = new Set(["sweater","tshirt","dress","hoodie","overalls","apron","cap","beanie","beret"]);
 function craftButtons(p){
-  return `<div class="craftrow"><button class="card craftb" data-act="openMug"><span>☕</span><b>Vyrobit hrneček</b></button>${p.gender === "male" && partner() ? `<button class="card craftb" data-act="openBouquet"><span>💐</span><b>Uvázat kytici</b></button>` : ""}${p.gender === "female" ? `<button class="card craftb" data-act="openBeads"><span>📿</span><b>Navlékat korálky</b></button>` : ""}</div>`;
+  return `<div class="craftrow"><button class="card craftb" data-act="openMug"><span>☕</span><b>Vyrobit hrneček</b></button>${p.gender === "male" && partner() ? `<button class="card craftb" data-act="openBouquet"><span>💐</span><b>Uvázat kytici</b></button><button class="card craftb" data-act="openTie"><span>🎀</span><b>Vyrobit gumičku</b></button>` : ""}${p.gender === "female" ? `<button class="card craftb" data-act="openBeads"><span>📿</span><b>Navlékat korálky</b></button>` : ""}</div>`;
 }
 function tailorSheet(s){
   const p = me(), d = s.draft, t = CLOTH[d.type];
   const preview = wearingOf(p).filter(x => CLOTH[x.type].slot !== t.slot).concat([Object.assign({id:"draft"}, d, {letter:(p.name || "")[0]})]);
-  const types = Object.entries(SLOTS).map(([slot, title]) => `<div class="stack" style="gap:6px"><small class="muted" style="font-weight:700">${title}</small><div class="chips">${Object.entries(CLOTH).filter(([, c]) => c.slot === slot && !c.hidden && !c.lux).map(([k, c]) => `<button class="chip" data-act="tlType" data-v="${k}" aria-pressed="${d.type === k}">${c.e} ${c.name}</button>`).join("")}</div></div>`).join("");
+  const types = Object.entries(SLOTS).map(([slot, title]) => `<div class="stack" style="gap:6px"><small class="muted" style="font-weight:700">${title}</small><div class="chips">${Object.entries(CLOTH).filter(([, c]) => c.slot === slot && !c.hidden && !c.lux && !c.craft).map(([k, c]) => `<button class="chip" data-act="tlType" data-v="${k}" aria-pressed="${d.type === k}">${c.e} ${c.name}</button>`).join("")}</div></div>`).join("");
   const sw = (act, cur) => CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="${act}" data-v="${c}" aria-pressed="${cur === c}" aria-label="Barva ${c}"></button>`).join("");
   const own1 = !CLOTH_COLORS.includes(d.color), own2 = d.color2 && !CLOTH_COLORS.includes(d.color2);
   return head(s.editId ? "Upravit kousek" : "Krejčovství ✂️") + `<div class="preview tailor-prev">${syslikSVG(p.look, "happy", 170, {key:"tl", wear:preview})}<button class="dice" data-act="tlRandom" aria-label="Překvap mě">🎲</button></div>
@@ -4423,6 +4433,9 @@ function handle(a, v, el){
     case "openMug": openSheet("mug", {d:{color:"#FFFFFF", color2:"#E8546B", pattern:"none", motif:"heart", text:""}}); break;
     case "theatreFlowers": openSheet("bouquet", {theatre:true, d:{flowers:{rose:7, tulip:0, sunflower:0, peony:3, daisy:0, lavender:0}, wrap:"#FFFFFF", ribbon:"#E8546B", card:"Brava!"}}); break;
     case "openBouquet": openSheet("bouquet", {d:{flowers:{rose:3, tulip:0, sunflower:0, peony:2, daisy:2, lavender:0}, wrap:"#F7E3B5", ribbon:"#E8546B", card:""}}); break;
+    case "openTie": openSheet("tie", {color:"#F48FA6"}); break;
+    case "tieColor": S.sheet.color = v; renderSheet(); break;
+    case "tieSend": { const item = {id:"c-" + uid(), type:"scrunchie", color:S.sheet.color, pattern:"none", name:"Gumička do vlasů"}; send("clothGift", {item}); closeSheet(); toast("Gumička je na cestě 🎀"); homePose("happy", 1500); break; }
     case "openBeads": openSheet("beads", {d:{beads:[], shape:"round"}}); break;
     case "mugSet": S.sheet.d[el.dataset.k] = v; renderSheet(); break;
     case "bqSet": S.sheet.d[el.dataset.k] = v; renderSheet(); break;

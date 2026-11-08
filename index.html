@@ -826,8 +826,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 46;
+const APP_VERSION = 47;
 const CHANGELOG = {
+  47: ["Když jste v postýlce, můžete Převléct pelíšek 🛏️: vyberete barvu peřiny, polštářů a prostěradla. Každá postel si pamatuje svoje povlečení"],
   46: ["Plyšáci 🧸: Vepčík, Pjincezna, Tůja, Velký Krupičák, Malý Krupičák, Tukys a Pežíčko. Najdeš je v postýlce tam, kde zrovna jsou",
        "Vepčík pořád vtipkuje, jinak je strašně hodný. Když je ale v jedné místnosti s Tukysem a Pežíčkem, společně řádí 🎉",
        "Pjincezna jezdí automaticky všude se syslicí",
@@ -1785,6 +1786,16 @@ function guitarLine(together){
   return `🎶 ${w(0)}, ${w(1)}… ${w(2)} a ${w(3)}! la la 🎸`;
 }
 setInterval(() => { if (S.tab === "home" && !S.sheet && S.guitarOn && !document.hidden) render(); }, 8000);
+/* ============ Povlečení ============ */
+const BED_DEF = {duvet:"#F4A6C8", pillow:"#FFFFFF", sheet:"#F7EFE3"};
+const BED_COLORS = ["#F4A6C8","#E8546B","#F7B267","#F2D16B","#9ED9A0","#9ED9C8","#8EC5E8","#3B6FB6","#B79CE8","#FFFFFF","#F7EFE3","#E8DCC8","#C49A6C","#2F3A56"];
+function bedding(place){ for (let i = S.events.length - 1; i >= 0; i--) { const e = S.events[i]; if (e.type === "bedding" && e.payload && e.payload.place === place) return Object.assign({}, BED_DEF, e.payload.bed || {}); } return Object.assign({}, BED_DEF); }
+function bedFrontHTML(){ const l = S.slot ? locationOf(S.slot) : null, d = bedding(l ? l.place : "home").duvet; return `<div class="bedfront" style="background:linear-gradient(${d},${shade(d, .86)})"><i></i></div>`; }
+function bedTint(html, act, place){ if (!BED_ACTS.has(act)) return html; const b = bedding(place); return html.split('rx="18" fill="#FFFFFF"').join(`rx="18" fill="${b.pillow}"`).split('fill="#F7EFE3"').join(`fill="${b.sheet}"`); }
+function bedPreview(b){
+  return `<svg viewBox="0 0 220 130" width="220" height="130" aria-hidden="true"><path d="M20 120 V40 Q110 6 200 40 V120 Z" fill="#A0704A"/><rect x="30" y="54" width="70" height="30" rx="14" fill="${b.pillow}" stroke="rgba(0,0,0,.08)"/><rect x="120" y="54" width="70" height="30" rx="14" fill="${b.pillow}" stroke="rgba(0,0,0,.08)"/>
+    <rect x="16" y="76" width="188" height="24" rx="8" fill="${b.sheet}" stroke="rgba(0,0,0,.08)"/><rect x="10" y="88" width="200" height="36" rx="14" fill="${b.duvet}"/><g opacity=".22">${[0,1,2,3,4,5,6,7].map(i => `<path d="M${20 + i*24} 124 L${36 + i*24} 88" stroke="#FFFFFF" stroke-width="8"/>`).join("")}</g><rect x="4" y="118" width="212" height="10" rx="3" fill="#8B5A3C"/></svg>`;
+}
 /* ============ Plyšáci ============ */
 const PLUSH = {
   vepcik:{n:"Vepčík", e:"🐷", d:"plyšové prasátko, které pořád vtipkuje"},
@@ -2184,7 +2195,7 @@ function actsFor(place, gender){ const A = PLACES[place].acts; return Object.key
 function actPose(act, together, idx){ if (CUDDLE_ACTS.has(act) && together) return idx ? "cuddle-l" : "cuddle-r"; return (ACT_LOOK[act] || {}).pose || "idle"; }
 const BED_ACTS = new Set(["bed","ballnap","cphbed","millbed"]), CUDDLE_ACTS = new Set(["sofa","cphbed","bed","millbed"]);
 function frontFX(act){ if (act === "mx5" || act === "evoque") return "";
-  if (act === "bar") return `<div class="datefront"><svg viewBox="0 0 400 110" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><rect x="0" y="34" width="400" height="76" fill="#8B5A3C"/><rect x="0" y="26" width="400" height="12" rx="4" fill="#A0704A"/>${[0,1,2,3,4,5,6,7].map(i => `<path d="M${i*52} 38 V110" stroke="#6B4430" stroke-width="2"/>`).join("")}<rect x="40" y="8" width="10" height="20" rx="3" fill="#C9CFD8"/><rect x="56" y="12" width="10" height="16" rx="3" fill="#C9CFD8"/><text x="320" y="24" font-size="18">🍋🍹</text></svg></div>`; if (act === "gboat") return dateFront("boat"); return SWIM_ACTS.has(act) ? '<div class="wfront"></div>' : BED_ACTS.has(act) ? '<div class="bedfront"><i></i></div>' : ""; }
+  if (act === "bar") return `<div class="datefront"><svg viewBox="0 0 400 110" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><rect x="0" y="34" width="400" height="76" fill="#8B5A3C"/><rect x="0" y="26" width="400" height="12" rx="4" fill="#A0704A"/>${[0,1,2,3,4,5,6,7].map(i => `<path d="M${i*52} 38 V110" stroke="#6B4430" stroke-width="2"/>`).join("")}<rect x="40" y="8" width="10" height="20" rx="3" fill="#C9CFD8"/><rect x="56" y="12" width="10" height="16" rx="3" fill="#C9CFD8"/><text x="320" y="24" font-size="18">🍋🍹</text></svg></div>`; if (act === "gboat") return dateFront("boat"); return SWIM_ACTS.has(act) ? '<div class="wfront"></div>' : BED_ACTS.has(act) ? bedFrontHTML() : ""; }
 function actInfo(place, act){ const pl = PLACES[place] || PLACES.home; return pl.acts[act] || Object.values(pl.acts)[0]; }
 const OUTFIT_CATS = {kolo:["🚴","Kolo"], beh:["🏃","Běh"], plavani:["🏊","Plavání"], rande:["💞","Rande"], prace:["🛠️","Práce"], divadlo:["🎭","Divadlo"], doma:["🏡","Doma"], spani:["😴","Spaní"], vylet:["🧳","Výlet"]};
 const ACT_CAT = {};
@@ -3434,7 +3445,7 @@ function homeView(){
   const curA = (PLACES[loc.place] || PLACES.home).acts[loc.act];
   const changeBtn = `<button class="card row small" data-act="changeAct" style="padding:10px 14px;text-align:left;width:100%">🔄 <span style="min-width:0"><b>Změnit činnost</b>${loc.explicit && curA ? ` · ${curA.e} ${esc(curA.n)}` : ""}</span><span class="muted" style="margin-left:auto;flex:none">›</span></button>`;
   return `${S.netNote ? `<div class="card small center muted">${esc(S.netNote)}</div>` : ""}
-  <section class="scene" id="home-scene" style="height:350px">${placeHTML(loc.place, sceneAct, p.habitat, loc.play || (oloc && oloc.place === "theatre" ? oloc.play : null))}
+  <section class="scene" id="home-scene" style="height:350px">${bedTint(placeHTML(loc.place, sceneAct, p.habitat, loc.play || (oloc && oloc.place === "theatre" ? oloc.play : null)), sceneAct, loc.place)}
     ${S.home.bubble ? `<div class="bubble">${esc(S.home.bubble)}</div>` : S.guitarOn ? `<div class="bubble">${esc(guitarLine(withPartner && (loc.act === "listen" || oloc.act === "listen")))}</div>` : withPartner && CUDDLE_ACTS.has(loc.act) && CUDDLE_ACTS.has(oloc.act) ? `<div class="bubble">Syslííííímeee, Syslííííímeee! 🐿️💞</div>` : label ? `<div class="chip-float">${esc(label)}</div>` : ""}
     ${buddy ? `<div class="chip-float low">${esc(o.name)} ${far ? "je na druhém břehu 👋" : withPartner ? "je tu s tebou 💞" : "je tu na návštěvě 🏡"}</div>` : ""}
     ${goListen ? `<button class="chip-float low left" data-act="goListen">🎶 Jít poslouchat ${esc(o.name)}</button>` : ""}
@@ -3448,6 +3459,7 @@ function homeView(){
   </section>
   ${partnerPanel()}
   ${changeBtn}
+  ${BED_ACTS.has(sceneAct) ? `<button class="card row small" data-act="bedding" style="padding:10px 14px;text-align:left;width:100%">🛏️ <span style="min-width:0"><b>Převléct pelíšek</b></span><span class="muted" style="margin-left:auto;flex:none">›</span></button>` : ""}
   ${["cou","cou2","coucupik"].includes(loc.act) ? `<div class="chips" style="justify-content:center" role="group" aria-label="K Čou">${Object.entries(COU_WITH).map(([k, a]) => `<button class="chip" data-act="couWith" data-v="${k}" aria-pressed="${(COU_WITH[p.couWith] ? p.couWith : "none") === k}">${a[0]} ${a[1]}</button>`).join("")}</div>` : ""}
   ${homeBelow(p, m)}`;
 }
@@ -3976,6 +3988,10 @@ function sheetHTML(s){
     case "wardrobe": return wardrobeSheet(s);
     case "todo": return todoSheet(s);
     case "atelier": return atelierSheet(s);
+    case "bedding": { const b = s.bed, row = (k, t) => `<span class="label">${t}</span><div class="swatches">${BED_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="bedSet" data-k="${k}" data-v="${c}" aria-pressed="${b[k] === c}" aria-label="${t}"></button>`).join("")}</div>`;
+      return head("Převléct pelíšek 🛏️") + `<div class="preview" style="padding:14px 0">${bedPreview(b)}</div><p class="small muted center" style="margin:0">${esc((PLACES[s.place] || PLACES.home).name)} · uvidíte to oba</p>
+        ${row("duvet", "Peřina")}${row("pillow", "Polštáře")}${row("sheet", "Prostěradlo")}
+        <button class="btn" data-act="bedSave">Převléct 🛏️✨</button><button class="btn ghost" data-act="bedReset">Původní povlečení</button>`; }
     case "tie": { const o2 = partner(); const prevLook = o2 && o2.look && (o2.look.hair === "ponytail" || o2.look.hair === "bun") ? o2.look : {fur:"peach", belly:"blush", hair:"ponytail", hairc:"ginger"};
       return head("Vyrobit gumičku 🎀") + `<div class="preview tailor-prev">${syslikSVG(prevLook, "happy", 160, {key:"tie", wear:[{id:"tp", type:"scrunchie", color:s.color, pattern:"none"}]})}</div>
         <p class="small muted center" style="margin:0">Nařasená gumička do culíku nebo drdůlku pro ${esc(o2 ? o2.name : "syslici")}.</p>
@@ -4558,6 +4574,10 @@ function handle(a, v, el){
     case "goHome": doTravel("home", "nest", false); break;
     case "couWith": updateMe(pp => { pp.couWith = COU_WITH[v] ? v : "none"; }); S.home.pose = "idle"; burst(COU_WITH[v] ? COU_WITH[v][0] : "📺", "#home-scene"); render(); break;
     case "goListen": doTravel("home", "listen", false); break;
+    case "bedding": { const pl = locationOf(S.slot).place; openSheet("bedding", {place:pl, bed:bedding(pl)}); break; }
+    case "bedSet": S.sheet.bed[el.dataset.k] = v; renderSheet(); break;
+    case "bedReset": S.sheet.bed = Object.assign({}, BED_DEF); renderSheet(); break;
+    case "bedSave": { send("bedding", {place:S.sheet.place, bed:clone(S.sheet.bed)}); closeSheet(); toast("Pelíšek je převlečený 🛏️✨"); burst("✨", "#home-scene"); render(); break; }
     case "plushTake": { const a0 = S.sheet.plush || []; S.sheet.plush = a0.includes(v) ? a0.filter(x => x !== v) : a0.concat([v]); renderSheet(); break; }
     case "plushInfo": { const P0 = PLUSH[v]; if (P0) toast(`${P0.e} ${P0.n}: ${P0.d}`); break; }
     case "changeAct": { const l = locationOf(S.slot); if (l.date) { toast("Jste spolu na rande 💞"); break; } openSheet("travel", {place:l.place, act:l.act, change:true, play:l.play || null}); break; }

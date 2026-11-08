@@ -826,8 +826,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 47;
+const APP_VERSION = 48;
 const CHANGELOG = {
+  48: ["Když Vepčík, Tukys a Pežíčko řádí, sedí pěkně u sebe 🎉"],
   47: ["Když jste v postýlce, můžete Převléct pelíšek 🛏️: vyberete barvu peřiny, polštářů a prostěradla. Každá postel si pamatuje svoje povlečení"],
   46: ["Plyšáci 🧸: Vepčík, Pjincezna, Tůja, Velký Krupičák, Malý Krupičák, Tukys a Pežíčko. Najdeš je v postýlce tam, kde zrovna jsou",
        "Vepčík pořád vtipkuje, jinak je strašně hodný. Když je ale v jedné místnosti s Tukysem a Pežíčkem, společně řádí 🎉",
@@ -1835,7 +1836,8 @@ function plushHTML(place, act){
   if (!place || !(BED_PLACE[act] || place === "garda")) return "";
   const list = plushAt(place); if (!list.length) return "";
   const party = list.includes("vepcik") && list.includes("tukys") && list.includes("pezicko");
-  const left = list.filter((_, i) => i % 2 === 0), right = list.filter((_, i) => i % 2 === 1);
+  const trio = ["vepcik","tukys","pezicko"], rest = list.filter(id => !trio.includes(id));
+  const left = party ? trio : list.filter((_, i) => i % 2 === 0), right = party ? rest : list.filter((_, i) => i % 2 === 1);
   const one = id => `<span class="plush${party && ["vepcik","tukys","pezicko"].includes(id) ? " party" : ""}" data-act="plushInfo" data-v="${id}" role="button" aria-label="${PLUSH[id].n}">${plushSVG(id, id === "velky" ? 54 : id === "maly" || id === "tukys" || id === "pezicko" ? 34 : 42)}</span>`;
   const say = party ? "🎉 Vepčík, Tukys a Pežíčko řádí! Kvík! Kvá! Píp!" : list.includes("vepcik") ? VEP_JOKES[Math.floor(now() / 12000) % VEP_JOKES.length] : "";
   return `<div class="plushrow"><div class="pg">${left.map(one).join("")}</div><div class="pg">${right.map(one).join("")}</div></div>${say ? `<div class="plushsay">${esc(say)}</div>` : ""}`;

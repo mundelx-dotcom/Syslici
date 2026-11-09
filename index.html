@@ -830,8 +830,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 52;
+const APP_VERSION = 53;
 const CHANGELOG = {
+  53: ["Reakce Bouí je teď Bolí 🤕","Nové reakce: Nevžískej a To je Amatérismus tohle","Udělat humor přidá i 100 % energie ⚡"],
   52: ["Syslice vidí MX-5 v garáži i v nabídce cestování. Když ji ale zkusí řídit, dozví se, že je to manuál a to rozhodně neutlapíkuje 🐾"],
   51: ["Čůrákovat na chatkách je teď Čůrákovat na srubech",
        "Auta zůstávají tam, kam s nimi kdo odjel: když syslík nebo syslice odjede autem do divadla, na Čílenej nebo na Gardici, auto tam stojí a zpátky se jede jen jím 🚗",
@@ -1066,18 +1067,19 @@ const PRESETS = [
   {id:"p-pajamas", type:"pajamas", color:"#B9C8F2", pattern:"moons", name:"Modré pyžamo"}
 ];
 const REACTIONS = [["Čau sysle","wave","👋"],["Dobý","happy","🙂"],["Taaak Dobý","jump","😄"],["Nežíkej","idle","🤨"],["Čupr","dance","👍"],
-  ["Ty jsi takovej upravenej syslí","love","✨"],["Ty Sysle, Ty se mi líbíš","love","😍"],["Bouí","dance","🤕"],["Tak zase pšíště","wave","👋"],["Ty Mizejo!","jump","😜"],["Udělat humor","jump","😂"]];
-const REACT_MOOD = {"Nežíkej":-5, "Dobý":15, "Čau sysle":15, "Taaak Dobý":15, "Čupr":20, "Ty jsi takovej upravenej syslí":50, "Ty Sysle, Ty se mi líbíš":80, "Bouí":-25, "Udělat humor":100};
+  ["Ty jsi takovej upravenej syslí","love","✨"],["Ty Sysle, Ty se mi líbíš","love","😍"],["Bolí","dance","🤕"],["Nevžískej","idle","🙄"],["To je Amatérismus tohle","idle","🤦"],["Tak zase pšíště","wave","👋"],["Ty Mizejo!","jump","😜"],["Udělat humor","jump","😂"]];
+const REACT_ENERGY = {"Udělat humor":100};
+const REACT_MOOD = {"Nežíkej":-5, "Dobý":15, "Čau sysle":15, "Taaak Dobý":15, "Čupr":20, "Ty jsi takovej upravenej syslí":50, "Ty Sysle, Ty se mi líbíš":80, "Bouí":-25, "Bolí":-25, "Udělat humor":100};
 /* Reakce od druhého syslíka mění mou náladu (i ty, co přišly, když jsem tu nebyl). */
 function applyReactions(){
   const p = me(), o = partner(); if (!p || !o) return 0;
   if (p.reactAt === undefined) { updateMe(pp => { pp.reactAt = now(); }); return 0; }
   const since = p.reactAt;
-  const list = S.events.filter(e => e.type === "reaction" && e.author === other(S.slot) && e.at > since && e.payload && REACT_MOOD[e.payload.text] !== undefined);
+  const list = S.events.filter(e => e.type === "reaction" && e.author === other(S.slot) && e.at > since && e.payload && (REACT_MOOD[e.payload.text] !== undefined || REACT_ENERGY[e.payload.text] !== undefined));
   if (!list.length) return 0;
-  const delta = list.reduce((a, e) => a + REACT_MOOD[e.payload.text], 0), last = Math.max(...list.map(e => e.at));
+  const delta = list.reduce((a, e) => a + (REACT_MOOD[e.payload.text] || 0), 0), dE = list.reduce((a, e) => a + (REACT_ENERGY[e.payload.text] || 0), 0), last = Math.max(...list.map(e => e.at));
   const m = moods(p);
-  updateMe(pp => { pp.energy = m.energy; pp.mood = Math.max(0, Math.min(100, m.mood + delta)); pp.moodSetAt = now(); pp.reactAt = last; });
+  updateMe(pp => { pp.energy = Math.max(0, Math.min(100, m.energy + dE)); pp.drainAt = dE ? now() : pp.drainAt; pp.mood = Math.max(0, Math.min(100, m.mood + delta)); pp.moodSetAt = now(); pp.reactAt = last; });
   return delta;
 }
 const STICKERS = [["wave","Ahoj! 👋"],["love","love"],["cuddle-r","Zasyslíme? 🐿️"],["jump","Hurá! 🎉"],["eat:🍓","Mňam 🍓"],["dance","Tancuj! 🎶"],["sleep","Dobrou 😴"],["happy","Těším se! 🥰"]];
@@ -1791,7 +1793,7 @@ function guitarSVG(x, y, sc, rot){
     <path d="M-14 -30 Q-8 -36 0 -37" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`;
 }
 const LUCIE = ["Medvídek","Amerika","Černí andělé","Šrouby do hlavy","Chci zas v tobě spát","Lucie","Panic","Sluníčko"];
-const SYSLI_WORDS = ["Syslííímeee","Tlapík","Mjšina","čupík","Tafíčko","Sklípek","Čou","Dobý","Taaak Dobý","Nežíkej","Čupr","Bouí","Ty Sysle","Ty Mizejo","Čau sysle","Tak zase pšíště","syslíček","pšenička","norička","Syslííííímeee"];
+const SYSLI_WORDS = ["Syslííímeee","Tlapík","Mjšina","čupík","Tafíčko","Sklípek","Čou","Dobý","Taaak Dobý","Nežíkej","Čupr","Bolí","Ty Sysle","Ty Mizejo","Čau sysle","Tak zase pšíště","syslíček","pšenička","norička","Syslííííímeee"];
 function guitarLine(together){
   const b = Math.floor(now() / 8000);
   if (!together) return `🎸 Zpívám Lucii: „${LUCIE[b % LUCIE.length]}“ 🎶`;

@@ -830,8 +830,12 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 50;
+const APP_VERSION = 51;
 const CHANGELOG = {
+  51: ["Čůrákovat na chatkách je teď Čůrákovat na srubech",
+       "Auta zůstávají tam, kam s nimi kdo odjel: když syslík nebo syslice odjede autem do divadla, na Čílenej nebo na Gardici, auto tam stojí a zpátky se jede jen jím 🚗",
+       "Syslice může zkusit řídit MX-5, ale je to manuál a to rozhodně neutlapíkuje 🐾",
+       "Z hlediště je na jevišti buď prázdno, nebo syslice, pokud tančí stejné představení, na které se syslík dívá 🩰"],
   50: ["Na Gardici se můžete zasyslit ve stanu ⛺ u jezera pod hvězdami",
        "Nová činnost Jít na ferraty 🧗: přilba, sedák a ocelové lano ve skalách nad jezerem"],
   49: ["Když syslice přidává věc do Požídit, musí potvrdit: Je to opravdu potšeba? 🤔 Po Ano přijde „No tak to požídíme!“ a malý ohňostroj 🎆"],
@@ -2135,7 +2139,7 @@ const PLACES = {
     acts:{swim:{n:"Koupání", e:"🛟", v:["se koupe","se koupe"]}, trail:{n:"Trailový běh", e:"⛰️", v:["běží trail kolem zátoky","běží trail kolem zátoky"]}, jetski:{n:"Vodní skútr", e:"🚤", v:["jezdí na vodním skútru","jezdí na vodním skútru"]},
           fish:{n:"Rybaření", e:"🎣", v:["rybaří","rybaří"]}, relax:{n:"Odpočinek u vody", e:"🌿", v:["odpočívá u vody","odpočívá u vody"]},
           bar:{n:"Čůrákovat za barem", e:"🍹", v:["čůrákuje za barem","čůrákuje za barem"]}, waiter:{n:"Obsluha prasat", e:"🍽️", v:["obsluhuje prasata na svatbě","obsluhuje prasata na svatbě"]},
-          chalet:{n:"Čůrákovat na chatkách", e:"🧹", v:["čůrákuje a uklízí chatky","čůrákuje a uklízí chatky"]}, millbed:{n:"Zasyslit se v posteli v podkroví", e:"🛏️", v:["se zasyslil v podkrovní posteli","se zasyslila v podkrovní posteli"]}}},
+          chalet:{n:"Čůrákovat na srubech", e:"🧹", v:["čůrákuje a uklízí sruby","čůrákuje a uklízí sruby"]}, millbed:{n:"Zasyslit se v posteli v podkroví", e:"🛏️", v:["se zasyslil v podkrovní posteli","se zasyslila v podkrovní posteli"]}}},
   jungle:{name:"Džungle", sub:"barák s Miu a Chanel", loc:"v Džungli", to:"do Džungle", e:"🐈", ride:"🚶", x:256, y:352,
     acts:{cou2:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká na Čou s kočkami","kouká na Čou s kočkami"]}, cupik:{n:"Dát si čupík", e:"🌽", v:["si dává čupík","si dává čupík"]}, ballnap:{n:"Spinkat v baletním pokojíčku", e:"🩰", g:"female", v:["spinká v baletním pokojíčku","spinká v baletním pokojíčku"]},
           cats:{n:"Hrát si s Miu a Chanel", e:"🐈", v:["si hraje s Miu a Chanel","si hraje s Miu a Chanel"]}, wipe:{n:"Utírat chcanky", e:"🧻", v:["utírá chcanky","utírá chcanky"]}}},
@@ -2294,14 +2298,22 @@ const fmtDist = (d, u) => `${String(Math.round(d * 10) / 10).replace(".", ",")} 
 const PLAYS = ["Labutí jezero","Louskáček","Giselle","Romeo a Julie","Šípková Růženka","Popelka","Don Quijote","Bajadéra"];
 const YARD = new Set(["home","garage","jungle"]), CAR_TO = new Set(["theatre","mill","garda","garage"]);
 /* Autem jen mezi Čílenym, Gardicí, Garáží a Národním divadlem; mezi Sklípkem, Garáží a Džunglí se přebíhá zahradou. */
+function carPlace(k){
+  for (let i = S.events.length - 1; i >= 0; i--) { const e = S.events[i], pp = e.payload || {}; if (e.type === "travel" && (pp.car === k || pp.car === "both") && PLACES[pp.place]) return CAR_TO.has(pp.place) ? pp.place : "garage"; }
+  return "garage";
+}
 function transportFor(from, to){
   if (!to || from === to || from === "copenhagen" || to === "copenhagen") return [];
+  const here = from === "garage" ? [] : ["mx5","evoque"].filter(k => carPlace(k) === from);
+  if (here.length) { const own = me() && me().gender === "female" ? "evoque" : "mx5"; return here.concat(here.length === 2 ? ["both"] : []).concat(here.includes(own) ? [] : ["walk","mhd"]); }
   if (YARD.has(from) && YARD.has(to)) return ["garden"];
-  return (CAR_TO.has(to) ? ["mx5","evoque","both"] : []).concat(["walk","mhd"]);
+  const atG = ["mx5","evoque"].filter(k => carPlace(k) === "garage");
+  return (CAR_TO.has(to) ? atG.concat(atG.length === 2 ? ["both"] : []) : []).concat(["walk","mhd"]);
 }
-function trOpts(from, to, canTogether){ const fem = me() && me().gender === "female"; return transportFor(from, to).filter(k => (k !== "both" || canTogether) && (k !== "mx5" || !fem || canTogether)); }
+const MANUAL_MSG = "Bohužel, MX-5 je manuál a to syslice rozhodně neutlapíkuje! 🐾";
+function trOpts(from, to, canTogether){ return transportFor(from, to).filter(k => k !== "both" || canTogether); }
 function canGoTogether(from){ const o = partner(); if (!o) return false; const ol = locationOf(other(S.slot)); return !!(ol && !ol.date && ol.place === from); }
-const trOf = (s0, from) => { from = from || locationOf(S.slot).place; const opts = s0.kind === "dateInvite" ? transportFor(from, s0.place || s0.to) : trOpts(from, s0.place || s0.to, canGoTogether(from)); if (!opts.length) return null; if (s0.car && opts.includes(s0.car)) return s0.car; const own = me() && me().gender === "female" ? "evoque" : "mx5"; return opts.includes(own) ? own : opts[0]; };
+const trOf = (s0, from) => { from = from || locationOf(S.slot).place; const opts = s0.kind === "dateInvite" ? transportFor(from, s0.place || s0.to) : trOpts(from, s0.place || s0.to, canGoTogether(from)); if (!opts.length) return null; if (s0.car && opts.includes(s0.car)) return s0.car; const own = me() && me().gender === "female" ? "evoque" : "mx5"; return opts.includes(own) ? own : (opts.find(k => k !== "mx5" || !(me() && me().gender === "female")) || opts[0]); };
 const CAR_PLACES = new Set(["theatre","mill","garda","garage","home","jungle"]);
 function cphHTML(){
   const cs = ["#E9A23B","#D9534F","#F2D16B","#5B8DB8","#E07A5F","#7FB77E","#F4A6C8","#C46A3B"];
@@ -2471,7 +2483,7 @@ function theatreAudHTML(play){
   return svgPlace("pl-aud", `<rect width="400" height="350" fill="#1E1424"/><path d="M0 0 H400 V40 Q200 70 0 40 Z" fill="#2A1A2E"/>
     <rect x="90" y="50" width="220" height="150" fill="#3A2232"/><rect x="90" y="150" width="220" height="50" fill="#8A5A3C"/><ellipse cx="200" cy="168" rx="90" ry="24" fill="#FFE9B0" opacity=".35"/>
     <path d="M90 50 Q120 120 104 200 L90 200 Z M310 50 Q280 120 296 200 L310 200 Z" fill="#B8253F"/><rect x="86" y="42" width="228" height="16" fill="#E6B94F"/><text x="200" y="54" font-size="9" font-weight="800" fill="#5E3B12" text-anchor="middle" letter-spacing="2" font-family="Baloo 2,sans-serif">NÁRODNÍ DIVADLO</text>
-    <g class="tiny"><circle cx="200" cy="132" r="7" fill="#F2B49B"/><circle cx="195" cy="126" r="3" fill="#F2B49B"/><circle cx="205" cy="126" r="3" fill="#F2B49B"/><path d="M194 140 Q200 136 206 140 L206 150 L194 150 Z" fill="#F9CFE0"/><ellipse cx="200" cy="152" rx="16" ry="4" fill="#F7B5C4"/><path d="M196 154 v10 M204 154 v10" stroke="#F2B49B" stroke-width="3"/><path d="M192 138 L184 122 M208 138 L216 122" stroke="#F2B49B" stroke-width="3" stroke-linecap="round"/></g>
+    ${S.stageDancer || ""}
     ${play ? `<rect x="140" y="64" width="120" height="16" rx="4" fill="#FFF3C4"/><text x="200" y="76" font-size="9" font-weight="800" fill="#5E3B12" text-anchor="middle" font-family="Baloo 2,sans-serif">Dnes: ${esc(play)}</text>` : ""}
     <polygon points="140,0 260,0 230,170 170,170" fill="#FFF3C4" opacity=".08"/>
     ${seats(236, 9, .9, .7)}${seats(276, 7, 1.2, .85)}${seats(322, 5, 1.6, 1)}`);
@@ -2805,7 +2817,10 @@ function doTravel(place, act, together, car, play, dist, jet){
   if (tiredDrain(p, now()) > 0) { const cur = moods(p); updateMe(pp => { pp.energy = cur.energy; pp.mood = cur.mood; pp.contentment = cur.contentment; pp.moodSetAt = now(); pp.drainAt = now(); }); }
   if (together) { const list = actsFor(place, o.gender); acts[other(S.slot)] = list.includes(act) ? act : list[0]; }
   const takeP = S.sheet && S.sheet.kind === "travel" && Array.isArray(S.sheet.plush) ? S.sheet.plush.filter(id => plushPlace(id) === from && id !== "pjincezna") : [];
-  send("travel", Object.assign({place, together, acts}, takeP.length ? {plush:takeP} : {}, from === place && !together ? {change:true} : {}, car ? {car} : {}, play ? {play} : {}, dist ? {dist} : {}, jet && together ? {jet} : {}));
+  let tr = transportFor(from, place).includes(car) ? car : null;
+  if (!together && tr === "mx5" && p.gender === "female") { toast(MANUAL_MSG); return; }
+  if (!together && tr === "both") tr = p.gender === "female" ? "evoque" : "mx5";
+  send("travel", Object.assign({place, together, acts}, takeP.length ? {plush:takeP} : {}, from === place && !together ? {change:true} : {}, tr ? {car:tr} : {}, play ? {play} : {}, dist ? {dist} : {}, jet && together ? {jet} : {}));
   wakeQuiet(); care(together ? "together" : "habitat");
   const pl = PLACES[place], a = pl.acts[act] || Object.values(pl.acts)[0];
   const arrive = () => {
@@ -2815,8 +2830,6 @@ function doTravel(place, act, together, car, play, dist, jet){
     burst(a.e, "#home-scene");
   };
   if (from === place && !together) { arrive(); return; }
-  let tr = transportFor(from, place).includes(car) ? car : null;
-  if (!together && (tr === "both" || (tr === "mx5" && p.gender === "female"))) tr = p.gender === "female" ? "evoque" : "mx5";
   openSheet("trip", {full:true, place, together, ride:rideFor(from, place), car:tr});
   setTimeout(arrive, 3100);
 }
@@ -3449,7 +3462,7 @@ function homeView(){
   const atHome = loc.place === "home";
   const samePlace = !!(oloc && oloc.place === loc.place);
   /* Na stejné obrazovce jen při stejné činnosti; výjimky: nákupy + sport (druhý břeh), divadlo (balet + divák) a dvě auta za sebou. */
-  const withPartner = samePlace && ((loc.act === "guitar" && oloc.act === "listen") || (loc.act === "listen" && oloc.act === "guitar") || loc.act === oloc.act || (loc.act === "shop" && !!SPORT[oloc.act]) || (oloc.act === "shop" && !!SPORT[loc.act]) || loc.place === "theatre" || (CAR_ACTS.has(loc.act) && CAR_ACTS.has(oloc.act)));
+  const withPartner = samePlace && ((loc.act === "guitar" && oloc.act === "listen") || (loc.act === "listen" && oloc.act === "guitar") || loc.act === oloc.act || (loc.act === "shop" && !!SPORT[oloc.act]) || (oloc.act === "shop" && !!SPORT[loc.act]) || (loc.place === "theatre" && (loc.play || "") === (oloc.play || "")) || (CAR_ACTS.has(loc.act) && CAR_ACTS.has(oloc.act)));
   const vEv = !withPartner && o ? [...S.events].reverse().find(e => e.type === "visit" && e.author === other(S.slot)) : null;
   const visiting = !!(vEv && now() - vEv.at < 6 * 36e5 && atHome);
   const buddy = withPartner || visiting ? o : null;
@@ -3469,6 +3482,7 @@ function homeView(){
     if (!label && moods(p).energy < 20) label = "🥺 " + esc(p.name) + " je Mjšina";
   }
   const buddyPose = withPartner ? actPose(theirAct, true, 1) : "wave";
+  S.stageDancer = myAct === "audience" && withPartner && theirAct === "ballet" ? `<svg x="168" y="92" width="64" height="81" viewBox="0 -14 200 254" overflow="visible">${syslikInner(o.look, "ballet", "stage", wearFor(o, "ballet"), "ballet")}</svg>` : "";
   S.guitarOn = loc.act === "guitar" || (withPartner && oloc.act === "guitar");
   const goListen = !withPartner && p.gender === "female" && oloc && oloc.place === "home" && oloc.act === "guitar" && loc.place === "home" && !loc.date;
   const themCar = !!(withPartner && CAR_ACTS.has(theirAct));
@@ -3493,14 +3507,14 @@ function homeView(){
   return `${S.netNote ? `<div class="card small center muted">${esc(S.netNote)}</div>` : ""}
   <section class="scene" id="home-scene" style="height:350px">${bedTint(placeHTML(loc.place, sceneAct, p.habitat, loc.play || (oloc && oloc.place === "theatre" ? oloc.play : null)), sceneAct, loc.place)}
     ${S.home.bubble ? `<div class="bubble">${esc(S.home.bubble)}</div>` : S.guitarOn ? `<div class="bubble">${esc(guitarLine(withPartner && (loc.act === "listen" || oloc.act === "listen")))}</div>` : withPartner && CUDDLE_ACTS.has(loc.act) && CUDDLE_ACTS.has(oloc.act) ? `<div class="bubble">Syslííííímeee, Syslííííímeee! 🐿️💞</div>` : label ? `<div class="chip-float">${esc(label)}</div>` : ""}
-    ${buddy ? `<div class="chip-float low">${esc(o.name)} ${far ? "je na druhém břehu 👋" : withPartner ? "je tu s tebou 💞" : "je tu na návštěvě 🏡"}</div>` : ""}
+    ${buddy ? `<div class="chip-float low">${esc(o.name)} ${far ? "je na druhém břehu 👋" : S.stageDancer ? "tančí na jevišti 🩰" : withPartner ? "je tu s tebou 💞" : "je tu na návštěvě 🏡"}</div>` : ""}
     ${goListen ? `<button class="chip-float low left" data-act="goListen">🎶 Jít poslouchat ${esc(o.name)}</button>` : ""}
     ${loc.place !== "home" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}
     ${loc.place === "theatre" && p.gender === "male" && o ? `<button class="photo-btn flower-btn" data-act="theatreFlowers" aria-label="Přinést kytici">💐</button>` : ""}
     ${far ? `<div class="slot farbank" style="bottom:${farBottom(myAct, theirAct)}%" data-act="visitor" role="button" aria-label="Pozdravit">${syslikSVG(o.look, actPose(theirAct, false, 0), 92, {key:"far", wear:buddyWear, act:theirAct})}</div>` : ""}
     <div class="cast ${buddy && !far && !duo && loc.act !== "jetski" ? "together" : ""}" style="${castStyle(sceneAct)}">
       ${carList ? `<div class="slot carslot" data-act="pet" role="button" aria-label="Pohladit">${carsSVG(carList, "home")}</div>` : duo ? `<div class="slot" data-act="pet" role="button" aria-label="Pohladit">${jetDuoSVG(loc.driver === S.slot ? p : o, loc.driver === S.slot ? o : p, 190, "duo")}</div>` : `<div class="slot" data-act="pet" role="button" aria-label="Pohladit">${syslikSVG(p.look, pose, myAct === "evoque" ? 94 : myAct === "audience" || myAct === "mx5" ? 150 : buddy && !far ? 168 : 215, {key:"home", wear:wearFor(p, loc.act), act:sceneAct === "bed" ? "bed" : S.home.pose === "idle" ? myAct : ""})}</div>`}
-      ${buddy && !far && !duo && !carList && !themCar ? `<div class="slot" data-act="visitor" role="button" aria-label="Pozdravit">${syslikSVG(o.look, buddyPose, 168, {flip:!(VIEW_OF[theirAct] === "side" && VIEW_OF[myAct] === "side"), key:"visit", wear:buddyWear, act:withPartner ? theirAct : ""})}</div>` : ""}
+      ${buddy && !far && !duo && !carList && !themCar && !S.stageDancer ? `<div class="slot" data-act="visitor" role="button" aria-label="Pozdravit">${syslikSVG(o.look, buddyPose, 168, {flip:!(VIEW_OF[theirAct] === "side" && VIEW_OF[myAct] === "side"), key:"visit", wear:buddyWear, act:withPartner ? theirAct : ""})}</div>` : ""}
     </div>${frontFX(sceneAct)}${plushHTML(loc.date ? "" : loc.place, sceneAct)}${decorHTML(loc.place)}<button class="photo-btn" data-act="photo" aria-label="Vyfotit">📸</button>
   </section>
   ${partnerPanel()}
@@ -4562,7 +4576,7 @@ function handle(a, v, el){
     /* cestování */
     case "travelTo": openSheet("travel", {place:v}); break;
     case "trAct": S.sheet.act = v; S.sheet.dist = ""; renderSheet(); break;
-    case "trCar": S.sheet.car = v || null; renderSheet(); break;
+    case "trCar": if (v === "mx5" && p.gender === "female") { toast(MANUAL_MSG); if (!canGoTogether(locationOf(S.slot).place)) break; } S.sheet.car = v || null; renderSheet(); break;
     case "trJet": S.sheet.jet = v; renderSheet(); break;
     case "reactions": if (partner()) openSheet("reactions"); break;
     case "react": {

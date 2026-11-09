@@ -830,8 +830,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 51;
+const APP_VERSION = 52;
 const CHANGELOG = {
+  52: ["Syslice vidí MX-5 v garáži i v nabídce cestování. Když ji ale zkusí řídit, dozví se, že je to manuál a to rozhodně neutlapíkuje 🐾"],
   51: ["Čůrákovat na chatkách je teď Čůrákovat na srubech",
        "Auta zůstávají tam, kam s nimi kdo odjel: když syslík nebo syslice odjede autem do divadla, na Čílenej nebo na Gardici, auto tam stojí a zpátky se jede jen jím 🚗",
        "Syslice může zkusit řídit MX-5, ale je to manuál a to rozhodně neutlapíkuje 🐾",
@@ -2144,7 +2145,7 @@ const PLACES = {
     acts:{cou2:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká na Čou s kočkami","kouká na Čou s kočkami"]}, cupik:{n:"Dát si čupík", e:"🌽", v:["si dává čupík","si dává čupík"]}, ballnap:{n:"Spinkat v baletním pokojíčku", e:"🩰", g:"female", v:["spinká v baletním pokojíčku","spinká v baletním pokojíčku"]},
           cats:{n:"Hrát si s Miu a Chanel", e:"🐈", v:["si hraje s Miu a Chanel","si hraje s Miu a Chanel"]}, wipe:{n:"Utírat chcanky", e:"🧻", v:["utírá chcanky","utírá chcanky"]}}},
   garage:{name:"Garáž", sub:"Evoque a MX-5", loc:"v garáži", to:"do garáže", e:"🚗", ride:"🚶", x:300, y:384,
-    acts:{wash:{n:"Umýt autíčko", e:"🫧", g:"male", v:["myje autíčko","myje autíčko"]}, vacuum:{n:"Vysávat autíčko", e:"🧹", g:"male", v:["vysává autíčko","vysává autíčko"]}, mx5:{n:"Projížďka v MX-5", e:"🏎️", g:"male", v:["se projíždí v černé MX-5","se projíždí v černé MX-5"]},
+    acts:{wash:{n:"Umýt autíčko", e:"🫧", g:"male", v:["myje autíčko","myje autíčko"]}, vacuum:{n:"Vysávat autíčko", e:"🧹", g:"male", v:["vysává autíčko","vysává autíčko"]}, mx5:{n:"Projížďka v MX-5", e:"🏎️", v:["se projíždí v černé MX-5","se projíždí v černé MX-5"]},
           evoque:{n:"Projížďka v Evoque", e:"🚙", v:["se projíždí v červeném Evoque","se projíždí v červeném Evoque"]}}},
   garda:{name:"Gardice", sub:"Lago di Garda · Itálie", loc:"na Gardici", to:"na Gardici", e:"🍋", ride:"🚗", x:196, y:498,
     acts:{gswim:{n:"Koupání v jezeře", e:"🏊", v:["se koupe v jezeře","se koupe v jezeře"]}, gelato:{n:"Gelato na promenádě", e:"🍨", v:["baští gelato na promenádě","baští gelato na promenádě"]},
@@ -2311,7 +2312,11 @@ function transportFor(from, to){
   return (CAR_TO.has(to) ? atG.concat(atG.length === 2 ? ["both"] : []) : []).concat(["walk","mhd"]);
 }
 const MANUAL_MSG = "Bohužel, MX-5 je manuál a to syslice rozhodně neutlapíkuje! 🐾";
-function trOpts(from, to, canTogether){ return transportFor(from, to).filter(k => k !== "both" || canTogether); }
+function trOpts(from, to, canTogether){
+  const o = transportFor(from, to).filter(k => k !== "both" || canTogether);
+  if (me() && me().gender === "female" && !o.includes("mx5") && (o.some(k => CARS[k]) || CAR_TO.has(to))) o.splice(o.includes("evoque") ? o.indexOf("evoque") + 1 : 0, 0, "mx5");
+  return o;
+}
 function canGoTogether(from){ const o = partner(); if (!o) return false; const ol = locationOf(other(S.slot)); return !!(ol && !ol.date && ol.place === from); }
 const trOf = (s0, from) => { from = from || locationOf(S.slot).place; const opts = s0.kind === "dateInvite" ? transportFor(from, s0.place || s0.to) : trOpts(from, s0.place || s0.to, canGoTogether(from)); if (!opts.length) return null; if (s0.car && opts.includes(s0.car)) return s0.car; const own = me() && me().gender === "female" ? "evoque" : "mx5"; return opts.includes(own) ? own : (opts.find(k => k !== "mx5" || !(me() && me().gender === "female")) || opts[0]); };
 const CAR_PLACES = new Set(["theatre","mill","garda","garage","home","jungle"]);
@@ -2818,7 +2823,7 @@ function doTravel(place, act, together, car, play, dist, jet){
   if (together) { const list = actsFor(place, o.gender); acts[other(S.slot)] = list.includes(act) ? act : list[0]; }
   const takeP = S.sheet && S.sheet.kind === "travel" && Array.isArray(S.sheet.plush) ? S.sheet.plush.filter(id => plushPlace(id) === from && id !== "pjincezna") : [];
   let tr = transportFor(from, place).includes(car) ? car : null;
-  if (!together && tr === "mx5" && p.gender === "female") { toast(MANUAL_MSG); return; }
+  if ((!together && tr === "mx5" && p.gender === "female") || (act === "mx5" && p.gender === "female" && !together)) { toast(MANUAL_MSG); return; }
   if (!together && tr === "both") tr = p.gender === "female" ? "evoque" : "mx5";
   send("travel", Object.assign({place, together, acts}, takeP.length ? {plush:takeP} : {}, from === place && !together ? {change:true} : {}, tr ? {car:tr} : {}, play ? {play} : {}, dist ? {dist} : {}, jet && together ? {jet} : {}));
   wakeQuiet(); care(together ? "together" : "habitat");
@@ -4575,7 +4580,7 @@ function handle(a, v, el){
 
     /* cestování */
     case "travelTo": openSheet("travel", {place:v}); break;
-    case "trAct": S.sheet.act = v; S.sheet.dist = ""; renderSheet(); break;
+    case "trAct": if (v === "mx5" && p.gender === "female") toast(MANUAL_MSG); S.sheet.act = v; S.sheet.dist = ""; renderSheet(); break;
     case "trCar": if (v === "mx5" && p.gender === "female") { toast(MANUAL_MSG); if (!canGoTogether(locationOf(S.slot).place)) break; } S.sheet.car = v || null; renderSheet(); break;
     case "trJet": S.sheet.jet = v; renderSheet(); break;
     case "reactions": if (partner()) openSheet("reactions"); break;

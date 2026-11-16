@@ -408,6 +408,9 @@ textarea:focus,input[type=text]:focus{border-color:var(--accent);outline:none}
 @keyframes ride{to{left:110%}}
 .trip-t{position:absolute;left:0;right:0;bottom:16%;text-align:center;font-size:26px}
 .map{display:block;width:100%;height:auto;border-radius:20px}
+.mapzoom{overflow:hidden;border-radius:20px;touch-action:pan-y}.mapzoom.zoomed{touch-action:none}
+.mapinner{transform-origin:0 0;will-change:transform}
+.mapreset{position:absolute;right:16px;top:16px;width:38px;height:38px;border-radius:50%;background:var(--card);box-shadow:var(--shadow-sm);font-size:18px;font-weight:800;color:var(--ink)}
 .mlabel{fill:var(--map-ink);font-weight:700;letter-spacing:.2em;opacity:.55;font-family:var(--font-body)}
 .mname{fill:var(--map-ink);font-size:11.5px;font-weight:700;font-family:var(--font-body)}
 .dests{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -830,8 +833,15 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 53;
+const APP_VERSION = 54;
 const CHANGELOG = {
+  54: ["Nové místo Bjed ☕: dánská kavárna kousek od Sklípku. Zajdete si na Tafíčko, vajíško, koláček, dortík, nebo na všechno dohromady",
+       "Mapičku v Cestách jde přiblížit dvěma prsty a posouvat 🔍",
+       "V garáži se syslík může zašpinit v servisu a pomáhat s pneumatikami 🛞",
+       "Sklípek, Džungle, Garáž, Národní divadlo a Bjed jsou na mapě v kroužku Praha",
+       "Mezi Prahou a Kodaní je políčko Let ✈️: zadáš, v kolik přistaneš, a v letadle můžeš číst, baštit čupík, poslouchat hudbu nebo koukat na Čou. Po přistání přijde druhému zpráva, že jsi v pořádku 🛬",
+       "Učit se na ATPL jde i ve Sklípku 📚",
+       "Auta: z garáže se dá vyjet jen přímo z garáže, a jen na Čílenej, do divadla a na Gardici"],
   53: ["Reakce Bouí je teď Bolí 🤕","Nové reakce: Nevžískej a To je Amatérismus tohle","Udělat humor přidá i 100 % energie ⚡"],
   52: ["Syslice vidí MX-5 v garáži i v nabídce cestování. Když ji ale zkusí řídit, dozví se, že je to manuál a to rozhodně neutlapíkuje 🐾"],
   51: ["Čůrákovat na chatkách je teď Čůrákovat na srubech",
@@ -1160,7 +1170,7 @@ function P(gender){
 /* ============ Nálady bez trestů ============ */
 const FLOOR = 40, GENTLE = 55;
 const clamp = (v, lo = FLOOR) => Math.min(100, Math.max(lo, v));
-const TIRING = new Set(["gferrata","ballet","practice","ramp","hangar","engineering","cphswim","gswim","pswim","swim","run","bike","trail","prun","pbike","jetski"]);
+const TIRING = new Set(["tyre","gferrata","ballet","practice","ramp","hangar","engineering","cphswim","gswim","pswim","swim","run","bike","trail","prun","pbike","jetski"]);
 /* Náročná činnost postupně vezme až 75 % energie (za ~30 minut). */
 function tiredDrain(p, t){
   const s = ["a","b"].find(x => S.players[x] === p); if (!s) return 0;
@@ -1801,6 +1811,35 @@ function guitarLine(together){
   return `🎶 ${w(0)}, ${w(1)}… ${w(2)} a ${w(3)}! la la 🎸`;
 }
 setInterval(() => { if (S.tab === "home" && !S.sheet && S.guitarOn && !document.hidden) render(); }, 8000);
+/* ============ Let Praha ⇄ Kodaň ============ */
+function openFlight(dest){
+  const t = new Date(now() + 90 * 60000); t.setMinutes(Math.round(t.getMinutes() / 5) * 5, 0, 0);
+  openSheet("flight", {dest, time:t.toTimeString().slice(0, 5), act:"fread"});
+}
+function boardFlight(together){
+  const sh = S.sheet, p = me(), o = partner(); if (!sh || !p) return;
+  const cur0 = locationOf(S.slot);
+  if (cur0.date) { toast("Jste spolu na rande 💞 Nejdřív ho ukončete."); return; }
+  if (SPORT[cur0.act] && cur0.explicit && !sportLogged(cur0) && !(p.gender === "female" && SWIM_ACTS.has(cur0.act))) { openSheet("sportDone", {cur:{act:cur0.act, place:cur0.place, at:cur0.at}, next:null, dist:""}); return; }
+  const [hh, mm] = String(sh.time || "").split(":").map(Number); if (!(hh >= 0 && hh < 24 && mm >= 0 && mm < 60)) { toast("Zadej, v kolik přistaneš 🕐"); return; }
+  const d = new Date(); d.setHours(hh, mm, 0, 0); let arrive = d.getTime(); if (arrive <= now() + 60000) arrive += 864e5;
+  together = !!(together && o && canGoTogether(cur0.place));
+  const acts = {[S.slot]:sh.act}; if (together) acts[other(S.slot)] = actsFor("flight", o.gender).includes(sh.act) ? sh.act : "fread";
+  send("travel", {place:"flight", together, acts, arrive, dest:sh.dest, from:cur0.place}); wakeQuiet();
+  openSheet("trip", {full:true, place:"flight", together, ride:"✈️", car:null});
+  setTimeout(() => { if (S.sheet && S.sheet.kind === "trip") closeSheet(); S.tab = "home"; S.home.pose = "idle"; window.scrollTo(0, 0); render(); toast(`Boarding hotový ✈️ Přistání ${PLACES[sh.dest].loc} v ${new Date(arrive).toLocaleTimeString("cs-CZ", {hour:"2-digit", minute:"2-digit"})}`); }, 3100);
+}
+function checkLandings(){
+  if (!S.booted || !S.slot) return;
+  ["a","b"].forEach(s0 => { const pp = S.players[s0]; if (!pp) return; const l = locationOf(s0); if (!l || !l.landed || now() - l.at > 12 * 36e5) return;
+    const key = "arr-" + l.flightId, txt = `Jsem v pořádku ${PLACES[l.place].loc} 🛬💛`;
+    if (!S.chat.some(m => m.id === key)) { const msg = {author:s0, text:txt, at:l.at, auto:true};
+      if (S.mode === "local") { S.chat.push(Object.assign({id:key}, msg)); B.saveLocal(); } else if (B.db) B.db.doc("chat/" + key).set(msg).catch(() => {}); }
+    if (ls.get("syslik.landed") !== key + s0 && !(ls.get("syslik.landedSeen") || "").includes(key)) { ls.set("syslik.landedSeen", ((ls.get("syslik.landedSeen") || "") + "|" + key).slice(-400));
+      toast(s0 === S.slot ? `Přistání ${PLACES[l.place].loc} 🛬 Vítej!` : `${pp.name} je v pořádku ${PLACES[l.place].loc} 🛬💛`); render(); }
+  });
+}
+setInterval(checkLandings, 15000); setTimeout(checkLandings, 4000);
 /* ============ Povlečení ============ */
 const BED_DEF = {duvet:"#F4A6C8", pillow:"#FFFFFF", sheet:"#F7EFE3"};
 const BED_COLORS = ["#F4A6C8","#E8546B","#F7B267","#F2D16B","#9ED9A0","#9ED9C8","#8EC5E8","#3B6FB6","#B79CE8","#FFFFFF","#F7EFE3","#E8DCC8","#C49A6C","#2F3A56"];
@@ -1987,7 +2026,7 @@ function rideHTML(k, riders){
   return `<div class="ride ridecar"><div class="carbox ${k}"><svg class="cb" viewBox="0 0 220 100" aria-hidden="true">${carSVG(k, "back", true, true)}</svg><div class="riders">${riders.join("")}</div><svg class="cf" viewBox="0 0 220 100" aria-hidden="true">${carSVG(k, "front", true, true)}</svg></div></div>`;
 }
 /* ============ Rekvizity a animace činností ============ */
-const ACT_ART_KEYS = new Set(["gtent","gferrata","millbed","guitar","mow","tafi","deka","wipe","practice","coubeads","cupik","coucupik","vacuum","carP","shop","hangar","ballet","watch","swim","cphswim","fish","relax","garden","fireplace","cook","atpl","run","bike","cou","snack","bed","nap","window","gswim","wash","jetski","bar","waiter","chalet","audience","gsunset","stroll","visit","engineering","ramp","trail","prun","pbike","pswim","drive","mx5","evoque","jetY","jetG","jetP","cou2","ballnap","cats","cphread","cphcook","flightsim","cphbed"]);
+const ACT_ART_KEYS = new Set(["tyre","btafi","bvajicko","bkolacek","bdort","bvse","fread","fcupik","fmusic","fcou","gtent","gferrata","millbed","guitar","mow","tafi","deka","wipe","practice","coubeads","cupik","coucupik","vacuum","carP","shop","hangar","ballet","watch","swim","cphswim","fish","relax","garden","fireplace","cook","atpl","run","bike","cou","snack","bed","nap","window","gswim","wash","jetski","bar","waiter","chalet","audience","gsunset","stroll","visit","engineering","ramp","trail","prun","pbike","pswim","drive","mx5","evoque","jetY","jetG","jetP","cou2","ballnap","cats","cphread","cphcook","flightsim","cphbed"]);
 function actArt(act, c){
   const paw = (x, y, r = 0) => pawG(x, y, 8.5, 10.5, r, c.dk);
   const star = (x, y, r, col, d) => `<path class="twinkle" style="animation-delay:${d}s" d="M${x} ${y-r} Q${x} ${y} ${x+r} ${y} Q${x} ${y} ${x} ${y+r} Q${x} ${y} ${x-r} ${y} Q${x} ${y} ${x} ${y-r} Z" fill="${col}"/>`;
@@ -2079,6 +2118,22 @@ function actArt(act, c){
       <g class="yoke"><rect x="96" y="160" width="8" height="22" fill="#5C6577"/><path d="M70 150 Q70 166 84 166 L116 166 Q130 166 130 150" stroke="#2B2A33" stroke-width="8" fill="none" stroke-linecap="round"/><rect x="92" y="156" width="16" height="8" rx="2" fill="#2B2A33"/>${paw(72,150,10)}${paw(128,150,-10)}</g>
       <g transform="translate(150 158)"><rect x="0" y="12" width="30" height="12" rx="3" fill="#2B2A33"/><path d="M8 12 L6 -2 M20 12 L22 0" stroke="#5C6577" stroke-width="4" stroke-linecap="round"/><circle cx="6" cy="-4" r="4" fill="#2B2A33"/><circle cx="22" cy="-2" r="4" fill="#2B2A33"/></g><rect x="30" y="172" width="40" height="8" rx="2" fill="#E3E7EC"/>`};
     case "cphbed": case "millbed": case "gtent": return {noBlanket:true};
+    case "fread": return actArt("cphread", c);
+    case "fcupik": return actArt("cupik", c);
+    case "fmusic": return {hide:"both", front:`<rect x="88" y="152" width="24" height="40" rx="5" fill="#2B2A33"/><rect x="91" y="156" width="18" height="30" rx="3" fill="#7FC6E8"/><circle cx="100" cy="171" r="5" fill="#FFFFFF" opacity=".8"/><path d="M98 168 l4 3 l-4 3 Z" fill="#7FC6E8"/>${paw(84,176,24)}${paw(116,176,-24)}
+      <text class="twinkle" x="150" y="80" font-size="22" fill="#B79CE8">♪</text><text class="twinkle" style="animation-delay:.5s" x="30" y="96" font-size="20" fill="#F48FA6">♫</text><text class="twinkle" style="animation-delay:1s" x="164" y="120" font-size="16" fill="#8EC5E8">♪</text>`};
+    case "fcou": return {hide:"both", front:`<rect x="62" y="140" width="76" height="52" rx="6" fill="#2B2A33"/><defs><linearGradient id="${c.id || "x"}cou" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F48FA6"/><stop offset="1" stop-color="#8E9BE8"/></linearGradient></defs><rect x="66" y="144" width="68" height="44" rx="3" fill="url(#${c.id || "x"}cou)"/><text x="100" y="171" font-size="13" font-weight="800" fill="#FFFFFF" text-anchor="middle" font-family="Baloo 2,sans-serif">ČOU</text>${paw(62,170,30)}${paw(138,170,-30)}`};
+    case "tyre": return {hide:"both", back:`<g transform="translate(176 196)">${[0,1,2].map(i => `<ellipse cx="0" cy="${-i * 14}" rx="22" ry="8" fill="#1E1E24"/><ellipse cx="0" cy="${-i * 14 - 3}" rx="22" ry="8" fill="#2B2A33"/><ellipse cx="0" cy="${-i * 14 - 3}" rx="10" ry="3.5" fill="#111"/>`).join("")}</g>`,
+      front:`<g class="tool"><circle cx="100" cy="166" r="34" fill="#1E1E24"/><circle cx="100" cy="166" r="27" fill="none" stroke="#2F2F38" stroke-width="3" stroke-dasharray="4 3"/><circle cx="100" cy="166" r="17" fill="#AEB6C2"/>${[0,1,2,3,4].map(i => { const a = i * Math.PI * 2 / 5; return `<circle cx="${(100 + 10 * Math.cos(a)).toFixed(1)}" cy="${(166 + 10 * Math.sin(a)).toFixed(1)}" r="2.2" fill="#5C6577"/>`; }).join("")}<circle cx="100" cy="166" r="4" fill="#5C6577"/>${paw(64,160,40)}${paw(136,160,-40)}</g>
+      <g fill="#2B2A33" opacity=".35"><ellipse cx="70" cy="196" rx="7" ry="4"/><ellipse cx="128" cy="204" rx="6" ry="3.5"/><ellipse cx="60" cy="130" rx="5" ry="3"/><ellipse cx="146" cy="126" rx="6" ry="3"/><ellipse cx="126" cy="96" rx="5" ry="3"/></g>
+      <path d="M20 226 L48 214" stroke="#AEB6C2" stroke-width="5" stroke-linecap="round"/><circle cx="18" cy="227" r="5" fill="none" stroke="#AEB6C2" stroke-width="3"/>`};
+    case "btafi": case "bvajicko": case "bkolacek": case "bdort": case "bvse": {
+      const items = {btafi:["cup"], bvajicko:["egg"], bkolacek:["bun"], bdort:["cake"], bvse:["cup","egg","bun","cake"]}[act], xs = items.length === 1 ? [118] : [34, 76, 124, 166];
+      const draw = (k, x) => k === "cup" ? `<ellipse cx="${x}" cy="184" rx="14" ry="3.5" fill="#F7F3E6"/><path d="M${x - 9} 168 L${x + 9} 168 L${x + 7} 182 L${x - 7} 182 Z" fill="#FFFFFF"/><path d="M${x + 9} 171 q6 0 6 4 q0 4 -6 4" stroke="#FFFFFF" stroke-width="2.4" fill="none"/><ellipse cx="${x}" cy="168" rx="9" ry="2.4" fill="#6B4430"/>${steam(x - 3, 162, 0)}`
+        : k === "egg" ? `<path d="M${x - 8} 182 L${x + 8} 182 L${x + 6} 172 L${x - 6} 172 Z" fill="#FFFFFF"/><ellipse cx="${x}" cy="164" rx="8" ry="10" fill="#FFF3D6"/><path d="M${x - 8} 162 l3 -3 l3 3 l3 -3 l3 3 l3 -3 l1 3" stroke="#E8DCC8" stroke-width="1.4" fill="none"/><ellipse cx="${x}" cy="158" rx="5" ry="2.4" fill="#F2B84C"/><path d="M${x + 10} 156 L${x + 16} 182" stroke="#C9CFD8" stroke-width="2"/>`
+        : k === "bun" ? `<ellipse cx="${x}" cy="182" rx="15" ry="3.5" fill="#F7F3E6"/><circle cx="${x}" cy="173" r="10" fill="#C9864A"/><path d="M${x} 173 m0 0 a3 3 0 1 1 3 3 a6 6 0 1 1 -7 -6 a8 8 0 1 1 9 9" stroke="#8B5A2B" stroke-width="1.8" fill="none"/><circle cx="${x - 3}" cy="168" r="1" fill="#FFFFFF"/><circle cx="${x + 4}" cy="176" r="1" fill="#FFFFFF"/>`
+        : `<ellipse cx="${x}" cy="182" rx="15" ry="3.5" fill="#F7F3E6"/><path d="M${x - 11} 180 L${x + 11} 180 L${x + 11} 166 L${x - 11} 172 Z" fill="#F7E3B5"/><path d="M${x - 11} 175 L${x + 11} 172" stroke="#F48FA6" stroke-width="3"/><path d="M${x - 11} 172 L${x + 11} 166 L${x + 11} 163 L${x - 11} 169 Z" fill="#FFFFFF"/><circle cx="${x + 5}" cy="161" r="3.2" fill="#E8546B"/>`;
+      return {hide:"both", front:`<rect x="6" y="182" width="188" height="12" rx="4" fill="#E8D5B5"/><rect x="6" y="182" width="188" height="3" rx="1.5" fill="#F5E8D2"/><rect x="24" y="194" width="6" height="40" fill="#B08A5C"/><rect x="170" y="194" width="6" height="40" fill="#B08A5C"/>${items.map((k, i) => draw(k, xs[i])).join("")}${paw(items.length === 1 ? 70 : 100, 180, 20)}${items.length === 1 ? paw(96, 180, -20) : ""}`}; }
     case "gferrata": return {hide:"both", front:`<path d="M58 140 Q28 112 30 74" stroke="${c.fur}" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M142 140 Q174 108 172 66" stroke="${c.fur}" stroke-width="14" fill="none" stroke-linecap="round"/>${paw(30,68,-14)}${paw(172,60,14)}<path d="M18 78 L46 56 M160 70 L186 50" stroke="#C9CFD8" stroke-width="3"/>
       <path d="M58 150 Q100 166 142 150 L144 160 Q100 178 56 160 Z" fill="#2F3A56"/><path d="M76 160 L72 196 M124 160 L128 196" stroke="#2F3A56" stroke-width="5"/><circle cx="100" cy="168" r="5" fill="#C9CFD8"/>
       <path d="M100 168 Q150 168 178 128" stroke="#E8546B" stroke-width="3" fill="none"/><path d="M100 168 Q146 178 184 144" stroke="#3B6FB6" stroke-width="3" fill="none"/>
@@ -2135,26 +2190,33 @@ const PLACES = {
           atpl:{n:"Učit se na ATPL", e:"📚", g:"male", v:["se učí na zkoušky ATPL","se učí na zkoušky ATPL"]}, cphswim:{n:"Plavání", e:"🏊", g:"male", v:["plave v bazénu","plave v bazénu"]},
           run:{n:"Běhání", e:"🏃", g:"male", v:["běhá kolem jezer","běhá kolem jezer"]}, bike:{n:"Silniční kolo", e:"🚴", g:"male", v:["jede na silničním kole","jede na silničním kole"]},
           cou:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká na Čou","kouká na Čou"]}, cupik:{n:"Dát si čupík", e:"🌽", v:["si dává čupík","si dává čupík"]}}},
-  theatre:{name:"Národní divadlo", sub:"Praha", loc:"v Národním divadle", to:"do Národního divadla", e:"🎭", ride:"🚋", x:282, y:300,
+  theatre:{name:"Národní divadlo", sub:"Praha", loc:"v Národním divadle", to:"do Národního divadla", e:"🎭", ride:"🚋", x:292, y:298,
     acts:{ballet:{n:"Tančit balet", e:"🩰", g:"female", v:["tančí balet","tančí balet"]}, practice:{n:"Trénink baletu", e:"🎀", g:"female", v:["trénuje balet","trénuje balet"]}, watch:{n:"Koukat čelem (smoking)", e:"🤵", g:"male", v:["kouká na balet ve smokingu","kouká na balet ve smokingu"]},
           audience:{n:"Sedět v hledišti (zády)", e:"🪑", g:"male", v:["sedí v hledišti a kouká na jeviště","sedí v hledišti a kouká na jeviště"]}}},
-  mill:{name:"Čílenej", sub:"Hubenovská zátoka", loc:"na Čílenym", to:"na Čílenej", e:"🌊", ride:"🚗", x:178, y:398,
+  mill:{name:"Čílenej", sub:"Hubenovská zátoka", loc:"na Čílenym", to:"na Čílenej", e:"🌊", ride:"🚗", x:150, y:404,
     acts:{swim:{n:"Koupání", e:"🛟", v:["se koupe","se koupe"]}, trail:{n:"Trailový běh", e:"⛰️", v:["běží trail kolem zátoky","běží trail kolem zátoky"]}, jetski:{n:"Vodní skútr", e:"🚤", v:["jezdí na vodním skútru","jezdí na vodním skútru"]},
           fish:{n:"Rybaření", e:"🎣", v:["rybaří","rybaří"]}, relax:{n:"Odpočinek u vody", e:"🌿", v:["odpočívá u vody","odpočívá u vody"]},
           bar:{n:"Čůrákovat za barem", e:"🍹", v:["čůrákuje za barem","čůrákuje za barem"]}, waiter:{n:"Obsluha prasat", e:"🍽️", v:["obsluhuje prasata na svatbě","obsluhuje prasata na svatbě"]},
           chalet:{n:"Čůrákovat na srubech", e:"🧹", v:["čůrákuje a uklízí sruby","čůrákuje a uklízí sruby"]}, millbed:{n:"Zasyslit se v posteli v podkroví", e:"🛏️", v:["se zasyslil v podkrovní posteli","se zasyslila v podkrovní posteli"]}}},
-  jungle:{name:"Džungle", sub:"barák s Miu a Chanel", loc:"v Džungli", to:"do Džungle", e:"🐈", ride:"🚶", x:256, y:352,
+  jungle:{name:"Džungle", sub:"barák s Miu a Chanel", loc:"v Džungli", to:"do Džungle", e:"🐈", ride:"🚶", x:268, y:348,
     acts:{cou2:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká na Čou s kočkami","kouká na Čou s kočkami"]}, cupik:{n:"Dát si čupík", e:"🌽", v:["si dává čupík","si dává čupík"]}, ballnap:{n:"Spinkat v baletním pokojíčku", e:"🩰", g:"female", v:["spinká v baletním pokojíčku","spinká v baletním pokojíčku"]},
           cats:{n:"Hrát si s Miu a Chanel", e:"🐈", v:["si hraje s Miu a Chanel","si hraje s Miu a Chanel"]}, wipe:{n:"Utírat chcanky", e:"🧻", v:["utírá chcanky","utírá chcanky"]}}},
-  garage:{name:"Garáž", sub:"Evoque a MX-5", loc:"v garáži", to:"do garáže", e:"🚗", ride:"🚶", x:300, y:384,
-    acts:{wash:{n:"Umýt autíčko", e:"🫧", g:"male", v:["myje autíčko","myje autíčko"]}, vacuum:{n:"Vysávat autíčko", e:"🧹", g:"male", v:["vysává autíčko","vysává autíčko"]}, mx5:{n:"Projížďka v MX-5", e:"🏎️", v:["se projíždí v černé MX-5","se projíždí v černé MX-5"]},
+  garage:{name:"Garáž", sub:"Evoque a MX-5", loc:"v garáži", to:"do garáže", e:"🚗", ride:"🚶", x:314, y:384,
+    acts:{tyre:{n:"Zašpinit se v servisu", e:"🛞", g:"male", v:["pomáhá v servisu s pneumatikami","pomáhá v servisu s pneumatikami"]}, wash:{n:"Umýt autíčko", e:"🫧", g:"male", v:["myje autíčko","myje autíčko"]}, vacuum:{n:"Vysávat autíčko", e:"🧹", g:"male", v:["vysává autíčko","vysává autíčko"]}, mx5:{n:"Projížďka v MX-5", e:"🏎️", v:["se projíždí v černé MX-5","se projíždí v černé MX-5"]},
           evoque:{n:"Projížďka v Evoque", e:"🚙", v:["se projíždí v červeném Evoque","se projíždí v červeném Evoque"]}}},
   garda:{name:"Gardice", sub:"Lago di Garda · Itálie", loc:"na Gardici", to:"na Gardici", e:"🍋", ride:"🚗", x:196, y:498,
     acts:{gswim:{n:"Koupání v jezeře", e:"🏊", v:["se koupe v jezeře","se koupe v jezeře"]}, gelato:{n:"Gelato na promenádě", e:"🍨", v:["baští gelato na promenádě","baští gelato na promenádě"]},
           gboat:{n:"Projížďka lodí", e:"⛵", v:["se plaví po jezeře","se plaví po jezeře"]}, gsunset:{n:"Západ slunce na molu", e:"🌅", v:["kouká na západ slunce","kouká na západ slunce"]},
           gtent:{n:"Zasyslit se ve stanu", e:"⛺", v:["se zasyslil ve stanu u jezera","se zasyslila ve stanu u jezera"]}, gferrata:{n:"Jít na ferraty", e:"🧗", v:["leze po ferratě nad jezerem","leze po ferratě nad jezerem"]}}},
-  home:{name:"Sklípek", sub:"náš útulný byt v Praze", loc:"doma ve Sklípku", to:"domů do Sklípku", e:"🏡", ride:"🚗", x:212, y:336,
-    acts:{nest:{n:"Pohoda v obýváku", e:"🏠", v:["si hoví v obýváku","si hoví v obýváku"]}, guitar:{n:"Hrát na kytaru", e:"🎸", g:"male", v:["hraje na kytaru","hraje na kytaru"]}, listen:{n:"Poslouchat Syslíka", e:"🎶", g:"female", v:["poslouchá, jak syslík hraje","poslouchá, jak syslík hraje"]},
+  bjed:{name:"Bjed", sub:"dánská kavárna kousek od Sklípku", loc:"v Bjedu", to:"do Bjedu", e:"☕", ride:"🚶", x:218, y:392,
+    acts:{btafi:{n:"Na Tafíčko", e:"☕", v:["si dává v Bjedu Tafíčko","si dává v Bjedu Tafíčko"]}, bvajicko:{n:"Na vajíško", e:"🥚", v:["si dává v Bjedu vajíško","si dává v Bjedu vajíško"]},
+          bkolacek:{n:"Na koláček", e:"🥐", v:["baští v Bjedu koláček","baští v Bjedu koláček"]}, bdort:{n:"Na dortík", e:"🍰", v:["baští v Bjedu dortík","baští v Bjedu dortík"]},
+          bvse:{n:"Na všechno dohromady", e:"🍽️", v:["si v Bjedu dává Tafíčko, vajíško, koláček i dortík","si v Bjedu dává Tafíčko, vajíško, koláček i dortík"]}}},
+  flight:{name:"Let", sub:"Praha ⇄ Kodaň", loc:"v letadle", to:"do letadla", e:"✈️", ride:"✈️", x:312, y:192,
+    acts:{fread:{n:"Číst si", e:"📖", v:["si v letadle čte","si v letadle čte"]}, fcupik:{n:"Baštit čupík", e:"🌽", v:["baští v letadle čupík","baští v letadle čupík"]},
+          fmusic:{n:"Poslouchat hudbu", e:"🎧", v:["poslouchá v letadle hudbu","poslouchá v letadle hudbu"]}, fcou:{n:"Koukat na Čou", e:"📺", g:"female", v:["kouká v letadle na Čou","kouká v letadle na Čou"]}}},
+  home:{name:"Sklípek", sub:"náš útulný byt v Praze", loc:"doma ve Sklípku", to:"domů do Sklípku", e:"🏡", ride:"🚗", x:222, y:322,
+    acts:{nest:{n:"Pohoda v obýváku", e:"🏠", v:["si hoví v obýváku","si hoví v obýváku"]}, atpl:{n:"Učit se na ATPL", e:"📚", g:"male", v:["se učí na zkoušky ATPL","se učí na zkoušky ATPL"]}, guitar:{n:"Hrát na kytaru", e:"🎸", g:"male", v:["hraje na kytaru","hraje na kytaru"]}, listen:{n:"Poslouchat Syslíka", e:"🎶", g:"female", v:["poslouchá, jak syslík hraje","poslouchá, jak syslík hraje"]},
           prun:{n:"Běh po Praze", e:"🏃", g:"male", v:["běhá po náplavce","běhá po náplavce"]}, pbike:{n:"Kolo po Praze a okolí", e:"🚴", g:"male", v:["jezdí na kole po Praze","jezdí na kole po Praze"]},
           pswim:{n:"Plavání v Podolí", e:"🏊", g:"male", v:["plave v Podolí","plave v Podolí"]}, bed:{n:"Zasyslit se v posteli", e:"🛏️", v:["se zasyslil v naší velké posteli","se zasyslila v naší velké posteli"]},
 
@@ -2169,7 +2231,9 @@ const ACT_LOOK = {
   watch:{pose:"clap", costume:[{type:"frak", color:"#15151B"},{type:"bowtie", color:"#111116"}]},
   swim:{pose:"swim", costume:[{type:"swimcap", color:"#E8546B"},{type:"goggles", color:"#2F3A56"}]},
   fish:{pose:"fish", costume:[{type:"bucket", color:"#8E9B6A"}]}, relax:{pose:"relax", costume:[{type:"sunglasses", color:"#2F3A56"}]},
-  garden:{pose:"garden"}, mow:{pose:"walk"}, guitar:{pose:"happy"}, listen:{pose:"love"}, tafi:{pose:"mug"}, deka:{pose:"tv"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
+  garden:{pose:"garden"}, mow:{pose:"walk"}, tyre:{pose:"work", costume:[{type:"overalls", color:"#3B4E78"}]},
+  btafi:{pose:"happy"}, bvajicko:{pose:"munch"}, bkolacek:{pose:"munch"}, bdort:{pose:"munch"}, bvse:{pose:"munch"},
+  fread:{pose:"study", costume:[{type:"headset", color:"#2B2A33"}]}, fcupik:{pose:"munch", costume:[{type:"headset", color:"#2B2A33"}]}, fmusic:{pose:"relax", costume:[{type:"headset", color:"#2B2A33"}]}, fcou:{pose:"tv", costume:[{type:"headset", color:"#2B2A33"}]}, guitar:{pose:"happy"}, listen:{pose:"love"}, tafi:{pose:"mug"}, deka:{pose:"tv"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
   atpl:{pose:"study", costume:[{type:"pilot", color:"#FFFFFF"},{type:"pilotcap", color:"#16264A"}]},
   cphswim:{pose:"swim", costume:[{type:"swimcap", color:"#3B6FB6"},{type:"goggles", color:"#F2D16B"}]},
   run:{pose:"run", costume:[{type:"runner", color:"#7CC6C2"},{type:"headband", color:"#E8546B"}]},
@@ -2220,8 +2284,8 @@ function frontFX(act){ if (act === "mx5" || act === "evoque") return "";
 function actInfo(place, act){ const pl = PLACES[place] || PLACES.home; return pl.acts[act] || Object.values(pl.acts)[0]; }
 const OUTFIT_CATS = {kolo:["🚴","Kolo"], beh:["🏃","Běh"], plavani:["🏊","Plavání"], rande:["💞","Rande"], prace:["🛠️","Práce"], divadlo:["🎭","Divadlo"], doma:["🏡","Doma"], spani:["😴","Spaní"], vylet:["🧳","Výlet"]};
 const ACT_CAT = {};
-[["kolo","bike pbike"],["beh","run trail prun"],["plavani","cphswim gswim pswim swim"],["vylet","jetski"],["rande","date"],["prace","visit ramp engineering atpl flightsim bar waiter chalet wash vacuum"],
- ["divadlo","ballet practice watch audience"],["doma","nest sofa cou cou2 coucupik cupik fireplace cook cphread cphcook garden cats wipe mow tafi deka guitar listen"],["spani","bed cphbed ballnap millbed gtent"],["vylet","gferrata"],["vylet","shop gelato gboat gsunset relax fish window mx5 evoque"]]
+[["kolo","bike pbike"],["beh","run trail prun"],["plavani","cphswim gswim pswim swim"],["vylet","jetski"],["rande","date"],["prace","visit ramp engineering atpl flightsim bar waiter chalet wash vacuum tyre"],
+ ["divadlo","ballet practice watch audience"],["doma","nest sofa cou cou2 coucupik cupik fireplace cook cphread cphcook garden cats wipe mow tafi deka guitar listen"],["spani","bed cphbed ballnap millbed gtent"],["vylet","gferrata"],["vylet","shop gelato gboat gsunset relax fish window mx5 evoque btafi bvajicko bkolacek bdort bvse fread fcupik fmusic fcou"]]
  .forEach(([c, l]) => l.split(" ").forEach(a => { ACT_CAT[a] = c; }));
 function outfitOf(p, cat){ const o = p && p.outfits && p.outfits[cat]; return Array.isArray(o) ? o.filter(it => it && CLOTH[it.type]) : []; }
 function wearFor(p, act, cat){
@@ -2278,6 +2342,12 @@ function locationOf(s){
     const acts = e.payload.acts || {};
     if (e.author === s || (e.payload.together && acts[s])) {
       const act = PLACES[e.payload.place].acts[acts[s]] ? acts[s] : Object.keys(PLACES[e.payload.place].acts)[0];
+      if (e.payload.place === "flight") {
+        const dest = PLACES[e.payload.dest] ? e.payload.dest : "home", arrive = e.payload.arrive || 0;
+        if (now() >= arrive) { const la = dest === "copenhagen" ? (p.gender === "female" ? "cou" : "cphread") : dest === "home" ? "nest" : Object.keys(PLACES[dest].acts)[0];
+          return {place:dest, act:la, at:arrive, together:!!e.payload.together, explicit:true, landed:true, flightId:e.id, flyer:s}; }
+        return {place:"flight", act, at:e.at, together:!!e.payload.together, explicit:true, arrive, dest, flightId:e.id};
+      }
       return {place:e.payload.place, act, at:e.at, together:!!e.payload.together, explicit:true, play:e.payload.play || null, dist:e.author === s ? e.payload.dist || null : null, jet:e.payload.jet || null, driver:e.author};
     }
   }
@@ -2286,6 +2356,7 @@ function locationOf(s){
 function whereText(s){ const p = S.players[s], l = locationOf(s), pl = PLACES[l.place];
   if (l.date) return `na rande · ${DATES[l.date].n} ${DATES[l.date].e}`;
   const a = actInfo(l.place, l.act); let t = `${pl.loc} · ${a.v[p.gender === "female" ? 1 : 0]}${couSuffix(s, l.act)}`;
+  if (l.place === "flight") t += ` · přistání ${PLACES[l.dest].loc} v ${new Date(l.arrive).toLocaleTimeString("cs-CZ", {hour:"2-digit", minute:"2-digit"})}`;
   if (l.play && (l.act === "ballet" || l.act === "watch" || l.act === "audience")) t += ` ${l.act === "ballet" ? "v představení" : "na"} ${l.play}`;
   if (l.dist && SPORT[l.act]) t += ` · ${SPORT[l.act].v[p.gender === "female" ? 1 : 0]} ${fmtDist(l.dist, SPORT[l.act].u)}`;
   return t + ` ${a.e}`; }
@@ -2301,6 +2372,7 @@ const fmtDist = (d, u) => `${String(Math.round(d * 10) / 10).replace(".", ",")} 
 const PLAYS = ["Labutí jezero","Louskáček","Giselle","Romeo a Julie","Šípková Růženka","Popelka","Don Quijote","Bajadéra"];
 const YARD = new Set(["home","garage","jungle"]), CAR_TO = new Set(["theatre","mill","garda","garage"]);
 /* Autem jen mezi Čílenym, Gardicí, Garáží a Národním divadlem; mezi Sklípkem, Garáží a Džunglí se přebíhá zahradou. */
+const NEAR_BJED = new Set(["home","jungle","garage"]);
 function carPlace(k){
   for (let i = S.events.length - 1; i >= 0; i--) { const e = S.events[i], pp = e.payload || {}; if (e.type === "travel" && (pp.car === k || pp.car === "both") && PLACES[pp.place]) return CAR_TO.has(pp.place) ? pp.place : "garage"; }
   return "garage";
@@ -2309,14 +2381,16 @@ function transportFor(from, to){
   if (!to || from === to || from === "copenhagen" || to === "copenhagen") return [];
   const here = from === "garage" ? [] : ["mx5","evoque"].filter(k => carPlace(k) === from);
   if (here.length) { const own = me() && me().gender === "female" ? "evoque" : "mx5"; return here.concat(here.length === 2 ? ["both"] : []).concat(here.includes(own) ? [] : ["walk","mhd"]); }
+  if (from === "flight" || to === "flight") return [];
+  if ((to === "bjed" && NEAR_BJED.has(from)) || (from === "bjed" && NEAR_BJED.has(to))) return ["walk"];
   if (YARD.has(from) && YARD.has(to)) return ["garden"];
-  const atG = ["mx5","evoque"].filter(k => carPlace(k) === "garage");
+  const atG = from === "garage" ? ["mx5","evoque"].filter(k => carPlace(k) === "garage") : [];
   return (CAR_TO.has(to) ? atG.concat(atG.length === 2 ? ["both"] : []) : []).concat(["walk","mhd"]);
 }
 const MANUAL_MSG = "Bohužel, MX-5 je manuál a to syslice rozhodně neutlapíkuje! 🐾";
 function trOpts(from, to, canTogether){
   const o = transportFor(from, to).filter(k => k !== "both" || canTogether);
-  if (me() && me().gender === "female" && !o.includes("mx5") && (o.some(k => CARS[k]) || CAR_TO.has(to))) o.splice(o.includes("evoque") ? o.indexOf("evoque") + 1 : 0, 0, "mx5");
+  if (me() && me().gender === "female" && !o.includes("mx5") && (o.some(k => CARS[k]) || (from === "garage" && CAR_TO.has(to)))) o.splice(o.includes("evoque") ? o.indexOf("evoque") + 1 : 0, 0, "mx5");
   return o;
 }
 function canGoTogether(from){ const o = partner(); if (!o) return false; const ol = locationOf(other(S.slot)); return !!(ol && !ol.date && ol.place === from); }
@@ -2449,10 +2523,11 @@ function roadHTML(){
 }
 function studyHTML(){ return cphFlatHTML("study"); }
 /* Kodaňský byt: obývák, kuchyňka, pracovna s PC, ložnice s postýlkou */
-function cphFlatHTML(room){
-  const win = (x, y, w, h) => `<rect x="${x-6}" y="${y-6}" width="${w+12}" height="${h+12}" rx="4" fill="#FFFFFF"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#BFE0F6"/>
+function cphFlatHTML(room, pg){
+  const winC = (x, y, w, h) => `<rect x="${x-6}" y="${y-6}" width="${w+12}" height="${h+12}" rx="4" fill="#FFFFFF"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#BFE0F6"/>
     ${["#E9A23B","#D9534F","#F2D16B","#5B8DB8","#7FB77E","#F4A6C8"].map((c, i) => `<rect x="${x + i*(w/6)}" y="${y + h*.5 + (i%2)*6}" width="${w/6}" height="${h*.5 - (i%2)*6}" fill="${c}" opacity=".85"/><path d="M${x + i*(w/6)} ${y + h*.5 + (i%2)*6} L${x + i*(w/6) + w/12} ${y + h*.38 + (i%2)*6} L${x + (i+1)*(w/6)} ${y + h*.5 + (i%2)*6} Z" fill="${shade(c,.75)}" opacity=".85"/>`).join("")}
     <rect x="${x}" y="${y + h - 10}" width="${w}" height="10" fill="#6FB3D9"/><text class="fly" x="${x + 6}" y="${y + 20}" font-size="14">✈️</text><rect x="${x + w/2 - 2}" y="${y}" width="4" height="${h}" fill="#FFFFFF"/>`;
+  const win = pg ? homeWin : winC;
   const floor = `<rect y="250" width="400" height="100" fill="#E3D2BC"/>${[0,1,2,3].map(i => `<path d="M0 ${262 + i*22} H400" stroke="#D2BEA4" stroke-width="2"/>`).join("")}<rect y="244" width="400" height="8" fill="#FFFFFF"/>`;
   const lamp = (x) => `<path d="M${x} 250 V150" stroke="#2B2A33" stroke-width="3"/><path d="M${x-22} 150 Q${x} 118 ${x+22} 150 Z" fill="#E8DCC4"/><circle cx="${x}" cy="160" r="26" fill="#FFF3C4" opacity=".25"/>`;
   let inner = "";
@@ -2585,6 +2660,20 @@ function apartmentHTML(act){
     ${floor}<ellipse cx="200" cy="304" rx="${room === "bed" ? 150 : 130}" ry="24" fill="${room === "kitchen" ? "#9ED9C8" : "#F4A9A8"}" opacity=".55"/>
     ${inner}${act === "cou" || act === "coucupik" ? "" : room === "living" ? `<text x="96" y="252" font-size="22">🧶</text>` : ""}</svg>
     ${act === "cou" || act === "coucupik" ? tvHTML() : ""}<div class="night"></div></div>`;
+}
+function bjedHTML(act){
+  const lamp = (x, y) => `<path d="M${x} 0 V${y}" stroke="#2B2A33" stroke-width="1.5"/><path d="M${x - 22} ${y + 14} Q${x} ${y - 6} ${x + 22} ${y + 14} Z" fill="#F7F3E6"/><path d="M${x - 16} ${y + 22} Q${x} ${y + 6} ${x + 16} ${y + 22} Z" fill="#EDE5D3"/><path d="M${x - 10} ${y + 28} Q${x} ${y + 18} ${x + 10} ${y + 28} Z" fill="#E3D8C0"/><ellipse cx="${x}" cy="${y + 34}" rx="30" ry="10" fill="#FFF3C4" opacity=".35"/>`;
+  const chair = (x) => `<g transform="translate(${x} 0)"><path d="M-16 222 Q-18 196 -14 186 L14 186 Q18 196 16 222" stroke="#B08A5C" stroke-width="4" fill="none"/><rect x="-18" y="220" width="36" height="6" rx="3" fill="#C9A274"/><path d="M-14 226 L-16 260 M14 226 L16 260" stroke="#B08A5C" stroke-width="4"/></g>`;
+  return svgPlace("pl-bjed", `<rect width="400" height="350" fill="#F6F1E7"/><rect y="0" width="400" height="12" fill="#EDE5D3"/>
+    <rect x="18" y="56" width="132" height="150" rx="6" fill="#FFFFFF"/><rect x="24" y="62" width="120" height="138" fill="#CFE6F3"/><path d="M24 150 L144 140 L144 200 L24 200 Z" fill="#E3D8C0"/>${["#E9A23B","#D9534F","#5B8DB8","#F2D16B"].map((c, i) => `<rect x="${28 + i * 29}" y="${96 + (i % 2) * 10}" width="26" height="${56 - (i % 2) * 10}" fill="${c}" opacity=".8"/>`).join("")}<path d="M84 62 V200 M24 130 H144" stroke="#FFFFFF" stroke-width="4"/><circle cx="56" cy="186" r="9" fill="none" stroke="#2B2A33" stroke-width="2"/><circle cx="80" cy="186" r="9" fill="none" stroke="#2B2A33" stroke-width="2"/><path d="M56 186 L66 174 L80 186 M66 174 L72 174" stroke="#2B2A33" stroke-width="2" fill="none"/>
+    <rect x="196" y="26" width="120" height="40" rx="6" fill="#2F3A56"/><text x="256" y="56" font-size="28" font-weight="800" fill="#F6F1E7" text-anchor="middle" letter-spacing="4" font-family="Georgia,serif">BJED</text><text x="256" y="78" font-size="9" fill="#8E7A72" text-anchor="middle" letter-spacing="2" font-family="Baloo 2,sans-serif">DANSK KAFFEBAR</text>
+    <g transform="translate(330 44)"><path d="M0 0 V26" stroke="#8B5A3C" stroke-width="2"/><rect x="0" y="0" width="22" height="15" fill="#C8102E"/><rect x="6" y="0" width="3" height="15" fill="#FFFFFF"/><rect x="0" y="6" width="22" height="3" fill="#FFFFFF"/></g>
+    <rect x="196" y="96" width="186" height="5" rx="2" fill="#C9A274"/>${[208,232,256,280,304,328,352].map((x, i) => `<rect x="${x}" y="${84 - (i % 2) * 2}" width="14" height="${12 + (i % 2) * 2}" rx="2" fill="${["#FFFFFF","#9ED9C8","#F7E3B5","#FFFFFF","#F4A6C8","#FFFFFF","#8EC5E8"][i]}"/>`).join("")}
+    <rect x="236" y="132" width="164" height="118" rx="6" fill="#C9A274"/><rect x="242" y="138" width="152" height="48" rx="4" fill="#E3F1F8" opacity=".85"/>${[[262,170,"#C9864A"],[290,172,"#F7E3B5"],[318,168,"#E8546B"],[346,172,"#C9864A"],[372,170,"#F2D16B"]].map(([x, y, c]) => `<ellipse cx="${x}" cy="${y}" rx="11" ry="7" fill="${c}"/>`).join("")}<rect x="236" y="190" width="164" height="60" fill="#B08A5C"/>${[0,1,2,3,4,5].map(i => `<rect x="${242 + i * 26}" y="196" width="20" height="50" rx="2" fill="#C9A274"/>`).join("")}
+    ${lamp(80, 18)}${lamp(170, 26)}
+    <rect y="250" width="400" height="100" fill="#D8BE94"/>${Array.from({length:9}, (_, i) => `<path d="M${i * 50} 250 V350" stroke="#C9A97C" stroke-width="2"/>`).join("")}<rect y="246" width="400" height="6" fill="#E8D5B5"/>
+    ${chair(40)}${chair(196)}
+    <path d="M362 250 L368 214 L388 214 L394 250 Z" fill="#FFFFFF"/><path d="M378 214 Q362 186 370 160 Q382 182 378 214 M378 214 Q396 188 392 164 Q380 186 378 214" fill="#5FAF6B"/>`);
 }
 function cabinHTML(act){
   /* Pohled uličkou A320 směrem dozadu: sedačky jsou otočené k nám. */
@@ -2761,6 +2850,8 @@ function placeHTML(place, act, hab, extra){
   if (place === "garage") return garageHTML(act);
   if (place === "jungle") return jungleHTML(act);
   if (place === "garda") return gardaHTML(act);
+  if (place === "bjed") return bjedHTML(act);
+  if (place === "home" && act === "atpl") return cphFlatHTML("study", true);
   if (place === "home" && ["prun","pbike","pswim"].includes(act)) return pragueHTML(act);
   if (place === "home" && GARDEN_ACTS.has(act)) return gardenHTML(act);
   if (place === "home" && act !== "garden") return apartmentHTML(act || "nest");
@@ -2784,10 +2875,9 @@ function mapSVG(){
   <path d="M206 440 Q166 424 178 398 Q190 360 226 334 Q252 316 250 300 Q252 282 238 266" fill="none" style="stroke:var(--map-river)" stroke-width="5" stroke-linecap="round"/>
   <text x="140" y="96" font-size="12" text-anchor="middle" class="mlabel">DÁNSKO</text>
   <text x="70" y="404" font-size="12" class="mlabel">ČESKO</text>
-  <path d="M282 300 Q340 196 228 84" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".7"/>
+  <path d="M292 276 Q342 196 228 84" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".7"/>
 
-  <text x="306" y="198" font-size="18" text-anchor="middle">✈️</text>
-  <path d="M212 336 Q246 316 282 300 M212 336 Q236 350 256 352 Q280 366 300 384 M212 336 Q196 370 178 398 M178 398 Q150 450 196 498" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".55"/>`;
+  <ellipse cx="268" cy="350" rx="88" ry="78" style="fill:var(--card);stroke:var(--accent)" fill-opacity=".35" stroke-width="2" stroke-dasharray="6 5"/><text x="276" y="421" font-size="11" text-anchor="middle" class="mlabel" style="font-weight:800">PRAHA</text><path d="M182 380 Q166 390 150 404 M150 404 Q140 456 196 498" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".55"/>`;
   Object.entries(PLACES).forEach(([k, pl]) => {
     if (k === "flight") {
       out += `<g transform="translate(${pl.x} ${pl.y})" data-act="travelTo" data-v="flight" style="cursor:pointer"><g class="mplane"><g transform="rotate(-100) scale(.9)">
@@ -2796,7 +2886,7 @@ function mapSVG(){
         <path d="M-28 -1 L-34 -10 L-30 -10 L-22 -1 Z M-28 1 L-34 10 L-30 10 L-22 1 Z" fill="#1E2E57"/>
         <path d="M-32 0 Q-30 -4.5 -20 -4.5 L20 -4.5 Q30 -4 32 0 Q30 4 20 4.5 L-20 4.5 Q-30 4.5 -32 0 Z" fill="#FFFFFF" stroke="#C9D0DA" stroke-width=".8"/>
         <path d="M-32 0 L-24 0" stroke="#1E2E57" stroke-width="3" stroke-linecap="round"/><path d="M26 -2 Q30 0 26 2" stroke="#2B3445" stroke-width="1.6" fill="none"/></g></g>
-        <text y="40" text-anchor="middle" class="mname">Let A320</text></g>`;
+        <text y="40" text-anchor="middle" class="mname">Let ✈️</text></g>`;
       return;
     }
     const icon = k === "copenhagen" ? `<g clip-path="url(#dkclip)"><rect x="-15" y="-15" width="30" height="30" fill="#C8102E"/><rect x="-7" y="-15" width="5" height="30" fill="#FFFFFF"/><rect x="-15" y="-2.5" width="30" height="5" fill="#FFFFFF"/></g>` : `<text y="6" text-anchor="middle" font-size="17">${pl.e}</text>`;
@@ -2805,7 +2895,7 @@ function mapSVG(){
   Object.entries(PLACES).forEach(([k, pl]) => {
     const here = locs.filter(l => l.loc.place === k);
     here.forEach((l, i) => {
-      const dx = here.length > 1 ? (i ? 18 : -18) : 0, w = 46, x = pl.x + dx - w/2 + (k === "flight" ? -40 : 0), y = pl.y - (k === "flight" ? 66 : 80);
+      const PRG = ["home","jungle","garage","theatre","bjed"].includes(k), dx = here.length > 1 ? (i ? (PRG ? 14 : 18) : (PRG ? -14 : -18)) : 0, w = PRG ? 36 : 46, x = pl.x + dx - w/2 + (k === "flight" ? -40 : 0), y = pl.y - (k === "flight" ? 66 : PRG ? 64 : 80);
       const aa = l.loc.date ? "" : artAct(l.loc, l.s); let pose = l.loc.date ? (i ? "cuddle-l" : "cuddle-r") : actPose(aa, here.length > 1, i); if (pose.startsWith("eat:")) pose = "eat";
       const flip = i === 1 ? ` transform="translate(${2*x + w} 0) scale(-1 1)"` : "";
       out += `<g${flip}><svg x="${x}" y="${y}" width="${w}" height="${Math.round(w*1.27)}" viewBox="0 -14 200 254" overflow="visible">${syslikInner(l.p.look, pose, "map" + l.s, wearFor(l.p, l.loc.act), ACT_ART_KEYS.has(aa) ? aa : "")}</svg></g>`;
@@ -2818,6 +2908,8 @@ function doTravel(place, act, together, car, play, dist, jet){
   if (together) { const ol = locationOf(other(S.slot)); if (!ol || ol.date || ol.place !== locationOf(S.slot).place) together = false; }
   if (locationOf(S.slot).date) { closeSheet(); toast("Jste spolu na rande 💞 Nejdřív ho ukončete."); return; }
   const cur0 = locationOf(S.slot);
+  if (cur0.place === "flight" && place !== "flight") { closeSheet(); toast("Jsi v letadle ✈️ Počkej na přistání"); return; }
+  if (place === "flight" && cur0.place !== "flight") { closeSheet(); openFlight(cur0.place === "copenhagen" ? "home" : "copenhagen"); return; }
   if (cur0.place === place && cur0.act === act && !together) { closeSheet(); toast("Tohle už právě děláš 🙂"); return; }
   if (SPORT[cur0.act] && cur0.explicit && !sportLogged(cur0) && !(p.gender === "female" && SWIM_ACTS.has(cur0.act))) { openSheet("sportDone", {cur:{act:cur0.act, place:cur0.place, at:cur0.at}, next:[place, act, together, car, play, null, S.sheet && S.sheet.jet || null], dist:""}); return; }
   const from = locationOf(S.slot).place, acts = {}; acts[S.slot] = act;
@@ -2827,7 +2919,7 @@ function doTravel(place, act, together, car, play, dist, jet){
   let tr = transportFor(from, place).includes(car) ? car : null;
   if ((!together && tr === "mx5" && p.gender === "female") || (act === "mx5" && p.gender === "female" && !together)) { toast(MANUAL_MSG); return; }
   if (!together && tr === "both") tr = p.gender === "female" ? "evoque" : "mx5";
-  send("travel", Object.assign({place, together, acts}, takeP.length ? {plush:takeP} : {}, from === place && !together ? {change:true} : {}, tr ? {car:tr} : {}, play ? {play} : {}, dist ? {dist} : {}, jet && together ? {jet} : {}));
+  send("travel", Object.assign({place, together, acts}, place === "flight" && cur0.arrive ? {arrive:cur0.arrive, dest:cur0.dest} : {}, takeP.length ? {plush:takeP} : {}, from === place && !together ? {change:true} : {}, tr ? {car:tr} : {}, play ? {play} : {}, dist ? {dist} : {}, jet && together ? {jet} : {}));
   wakeQuiet(); care(together ? "together" : "habitat");
   const pl = PLACES[place], a = pl.acts[act] || Object.values(pl.acts)[0];
   const arrive = () => {
@@ -2857,9 +2949,10 @@ function travelView(){
     if (e.type === "sportResult") a = pp.act; else if (e.type === "travel" && pp.dist) a = (pp.acts || {})[e.author];
     const kind = sportKind(a); if (!kind || !pp.dist) return; tot[e.author] = tot[e.author] || {}; tot[e.author][kind] = (tot[e.author][kind] || 0) + pp.dist; });
   const sportCard = Object.keys(tot).length ? `<section class="card stack" style="gap:8px"><span class="label">🏅 Sportovní deník</span><div class="sportlog">${[S.slot, other(S.slot)].filter(x => S.players[x] && tot[x]).map(x => `<div><b>${esc(S.players[x].name)}</b><span>${tot[x].swim ? "🏊 " + fmtDist(tot[x].swim, "m") + " " : ""}${tot[x].run ? "🏃 " + fmtDist(tot[x].run, "km") + " " : ""}${tot[x].bike ? "🚴 " + fmtDist(tot[x].bike, "km") : ""}</span></div>`).join("")}</div></section>` : "";
-  if (mine.date) return `<section class="card" style="padding:8px">${mapSVG()}</section>${rows}
+  const mz = S.mapZ || {s:1, x:0, y:0}, mapBox = `<section class="card" style="padding:8px;position:relative"><div class="mapzoom${mz.s > 1.01 ? " zoomed" : ""}" id="mapzoom"><div class="mapinner" style="transform:translate(${mz.x}px,${mz.y}px) scale(${mz.s})">${mapSVG()}</div></div>${mz.s > 1.01 ? `<button class="mapreset" data-act="mapReset" aria-label="Zobrazit celou mapu">⤢</button>` : ""}</section>`;
+  if (mine.date) return `${mapBox}${rows}
     <section class="card stack center" style="gap:8px"><span style="font-size:36px">${DATES[mine.date].e}</span><b style="font-family:var(--font-display);font-size:19px">Jste spolu na rande</b><p class="small muted" style="margin:0">Dokud je rande, nikam jinam nejedete. 💞</p><button class="btn ghost" data-act="dateEnd">🌙 Ukončit rande</button></section>`;
-  return `<section class="card" style="padding:8px">${mapSVG()}</section>${rows}
+  return `${mapBox}${rows}
     ${sportCard}<span class="label">Kam se vydáme?</span><div class="dests">${dests}</div>
     ${mine.place !== "home" ? `<button class="btn ghost" data-act="goHome">🏡 Vrátit se domů do Sklípku</button>` : ""}`;
 }
@@ -3184,7 +3277,7 @@ function onEventAdded(e){
   else if (R) parkPlay(R[0], R[1], R[2], R[3], e.type === "cuddle" ? "Syslííííímeee, Syslííííímeee! 💞" : null, 4000);
 }
 function onChatAdded(m){
-  if (!S.booted || !S.slot || m.author === S.slot || (m.at || 0) < S.startAt - 5000) return;
+  if (!S.booted || !S.slot || m.auto || m.author === S.slot || (m.at || 0) < S.startAt - 5000) return;
   if (S.tab !== "chat") {
     const n = (partner() || {}).name || "Druhý syslík";
     toast(m.sticker ? `${n} ti posílá samolepku 🐿️` : `${n}: ${String(m.text || "").slice(0, 60)}`);
@@ -3469,7 +3562,7 @@ function homeView(){
   const atHome = loc.place === "home";
   const samePlace = !!(oloc && oloc.place === loc.place);
   /* Na stejné obrazovce jen při stejné činnosti; výjimky: nákupy + sport (druhý břeh), divadlo (balet + divák) a dvě auta za sebou. */
-  const withPartner = samePlace && ((loc.act === "guitar" && oloc.act === "listen") || (loc.act === "listen" && oloc.act === "guitar") || loc.act === oloc.act || (loc.act === "shop" && !!SPORT[oloc.act]) || (oloc.act === "shop" && !!SPORT[loc.act]) || (loc.place === "theatre" && (loc.play || "") === (oloc.play || "")) || (CAR_ACTS.has(loc.act) && CAR_ACTS.has(oloc.act)));
+  const withPartner = samePlace && ((loc.act === "guitar" && oloc.act === "listen") || (loc.act === "listen" && oloc.act === "guitar") || loc.act === oloc.act || (loc.act === "shop" && !!SPORT[oloc.act]) || (oloc.act === "shop" && !!SPORT[loc.act]) || (loc.place === "theatre" && (loc.play || "") === (oloc.play || "")) || loc.place === "bjed" || (CAR_ACTS.has(loc.act) && CAR_ACTS.has(oloc.act)));
   const vEv = !withPartner && o ? [...S.events].reverse().find(e => e.type === "visit" && e.author === other(S.slot)) : null;
   const visiting = !!(vEv && now() - vEv.at < 6 * 36e5 && atHome);
   const buddy = withPartner || visiting ? o : null;
@@ -3516,7 +3609,7 @@ function homeView(){
     ${S.home.bubble ? `<div class="bubble">${esc(S.home.bubble)}</div>` : S.guitarOn ? `<div class="bubble">${esc(guitarLine(withPartner && (loc.act === "listen" || oloc.act === "listen")))}</div>` : withPartner && CUDDLE_ACTS.has(loc.act) && CUDDLE_ACTS.has(oloc.act) ? `<div class="bubble">Syslííííímeee, Syslííííímeee! 🐿️💞</div>` : label ? `<div class="chip-float">${esc(label)}</div>` : ""}
     ${buddy ? `<div class="chip-float low">${esc(o.name)} ${far ? "je na druhém břehu 👋" : S.stageDancer ? "tančí na jevišti 🩰" : withPartner ? "je tu s tebou 💞" : "je tu na návštěvě 🏡"}</div>` : ""}
     ${goListen ? `<button class="chip-float low left" data-act="goListen">🎶 Jít poslouchat ${esc(o.name)}</button>` : ""}
-    ${loc.place !== "home" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}
+    ${loc.place !== "home" && loc.place !== "flight" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}
     ${loc.place === "theatre" && p.gender === "male" && o ? `<button class="photo-btn flower-btn" data-act="theatreFlowers" aria-label="Přinést kytici">💐</button>` : ""}
     ${far ? `<div class="slot farbank" style="bottom:${farBottom(myAct, theirAct)}%" data-act="visitor" role="button" aria-label="Pozdravit">${syslikSVG(o.look, actPose(theirAct, false, 0), 92, {key:"far", wear:buddyWear, act:theirAct})}</div>` : ""}
     <div class="cast ${buddy && !far && !duo && loc.act !== "jetski" ? "together" : ""}" style="${castStyle(sceneAct)}">
@@ -4055,6 +4148,13 @@ function sheetHTML(s){
     case "wardrobe": return wardrobeSheet(s);
     case "todo": return todoSheet(s);
     case "atelier": return atelierSheet(s);
+    case "flight": { const fromN = s.dest === "copenhagen" ? "Z Prahy do Kodaně" : "Z Kodaně do Prahy", mine = actsFor("flight", p.gender), cg = o && canGoTogether(locationOf(S.slot).place);
+      return head("Let ✈️") + `<div class="scene" style="height:200px">${cabinHTML(s.act)}<div class="cast">${syslikSVG(p.look, actPose(s.act, false, 0), 110, {key:"fl", wear:wearFor(p, s.act), act:s.act})}</div></div>
+        <p class="center" style="margin:0"><b>${fromN}</b> 🇨🇿 ⇄ 🇩🇰</p>
+        <span class="label">V kolik přistaneš?</span><input type="time" id="fl-time" value="${esc(s.time || "")}" style="font-size:20px;font-weight:700;text-align:center">
+        <span class="label">Co budeš v letadle dělat?</span><div class="chips">${mine.map(k => `<button class="chip" data-act="flAct" data-v="${k}" aria-pressed="${s.act === k}">${PLACES.flight.acts[k].e} ${PLACES.flight.acts[k].n}</button>`).join("")}</div>
+        <p class="small muted" style="margin:0">Po přistání dostane ${o ? esc(o.name) : "druhý syslík"} zprávu, že jsi v pořádku na místě 🛬💛</p>
+        <button class="btn" data-act="flBoard" data-t="0">Nastoupit do letadla ✈️</button>${cg ? `<button class="btn ghost" data-act="flBoard" data-t="1">Letíme spolu 💞</button>` : ""}`; }
     case "bedding": { const b = s.bed, row = (k, t) => `<span class="label">${t}</span><div class="swatches">${BED_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="bedSet" data-k="${k}" data-v="${c}" aria-pressed="${b[k] === c}" aria-label="${t}"></button>`).join("")}</div>`;
       return head("Převléct pelíšek 🛏️") + `<div class="preview" style="padding:14px 0">${bedPreview(b)}</div><p class="small muted center" style="margin:0">${esc((PLACES[s.place] || PLACES.home).name)} · uvidíte to oba</p>
         ${row("duvet", "Peřina")}${row("pillow", "Polštáře")}${row("sheet", "Prostěradlo")}
@@ -4359,6 +4459,7 @@ document.addEventListener("input", ev => {
   if (t.matches && t.matches('input[type=range][data-k]')) { const v = Math.round(Number(t.value)); const l = t.closest(".sl"); if (l) l.style.setProperty("--v", v + "%"); const b = document.getElementById("slv-" + t.dataset.k); if (b) b.textContent = slText(t.dataset.k, v); return; }
   if (t.id === "ob-name" && S.ob) { S.ob.name = t.value; const b = $("#ob-next"); if (b) b.disabled = !t.value.trim(); }
   if (t.id === "lux-text" && S.sheet && S.sheet.d) { S.sheet.d.label = t.value.slice(0, 14); renderSheet(); }
+  if (t.id === "fl-time" && S.sheet) { S.sheet.time = t.value; }
   if (t.id === "todo-text" && S.sheet) { S.sheet.text = t.value.slice(0, 80); const b = $("#todo-add"); if (b) b.disabled = !t.value.trim(); }
   if (t.id === "note-text" && S.sheet) { S.sheet.text = t.value.slice(0, 200); renderSheet(); }
   if ((t.id === "tr-dist" || t.id === "sd-dist") && S.sheet) { S.sheet.dist = t.value.slice(0, 8); }
@@ -4386,6 +4487,25 @@ document.addEventListener("touchmove", e => { if (e.touches && e.touches.length 
 document.addEventListener("wheel", e => { if (e.ctrlKey) e.preventDefault(); }, {passive:false});
 (() => { let m = document.querySelector('meta[name="viewport"]'); if (!m) { m = document.createElement("meta"); m.name = "viewport"; document.head.appendChild(m); }
   m.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"; })();
+/* mapa: přiblížení dvěma prsty a posun */
+(() => { let g = null;
+  const box = () => document.getElementById("mapzoom"), inner = () => document.querySelector("#mapzoom .mapinner");
+  const apply = () => { const b = box(), i = inner(); if (!b || !i) return; const z = S.mapZ, w = b.clientWidth, hh = b.clientHeight;
+    z.s = Math.max(1, Math.min(4, z.s)); z.x = Math.min(0, Math.max(w - w * z.s, z.x)); z.y = Math.min(0, Math.max(hh - hh * z.s, z.y));
+    i.style.transform = `translate(${z.x}px,${z.y}px) scale(${z.s})`; b.classList.toggle("zoomed", z.s > 1.01); };
+  const pt = (t, r) => ({x:t.clientX - r.left, y:t.clientY - r.top});
+  document.addEventListener("touchstart", e => { const b = e.target.closest && e.target.closest("#mapzoom"); if (!b) return; S.mapZ = S.mapZ || {s:1, x:0, y:0}; const r = b.getBoundingClientRect();
+    if (e.touches.length === 2) { const a = pt(e.touches[0], r), c = pt(e.touches[1], r); g = {k:"pinch", d0:Math.hypot(a.x - c.x, a.y - c.y), m0:{x:(a.x + c.x) / 2, y:(a.y + c.y) / 2}, s0:S.mapZ.s, x0:S.mapZ.x, y0:S.mapZ.y}; S.mapMoved = true; }
+    else if (e.touches.length === 1 && S.mapZ.s > 1.01) { const a = pt(e.touches[0], r); g = {k:"pan", p0:a, x0:S.mapZ.x, y0:S.mapZ.y}; } }, {passive:true});
+  document.addEventListener("touchmove", e => { if (!g) return; const b = box(); if (!b) return; const r = b.getBoundingClientRect(), z = S.mapZ;
+    if (g.k === "pinch" && e.touches.length === 2) { e.preventDefault(); const a = pt(e.touches[0], r), c = pt(e.touches[1], r), m = {x:(a.x + c.x) / 2, y:(a.y + c.y) / 2};
+      const s = Math.max(1, Math.min(4, g.s0 * Math.hypot(a.x - c.x, a.y - c.y) / g.d0)); z.s = s; z.x = m.x - (g.m0.x - g.x0) * (s / g.s0); z.y = m.y - (g.m0.y - g.y0) * (s / g.s0); apply(); }
+    else if (g.k === "pan" && e.touches.length === 1) { const a = pt(e.touches[0], r); const dx = a.x - g.p0.x, dy = a.y - g.p0.y; if (Math.abs(dx) + Math.abs(dy) > 6) S.mapMoved = true; e.preventDefault(); z.x = g.x0 + dx; z.y = g.y0 + dy; apply(); } }, {passive:false});
+  document.addEventListener("touchend", e => { if (!g) return; if (e.touches.length === 0) { const was = g.k; g = null; if (was === "pinch" || S.mapMoved) { render(); setTimeout(() => { S.mapMoved = false; }, 350); } }
+    else if (e.touches.length === 1 && g.k === "pinch") { g = null; } }, {passive:true});
+  document.addEventListener("click", e => { if (S.mapMoved && e.target.closest && e.target.closest("#mapzoom")) { e.stopPropagation(); e.preventDefault(); S.mapMoved = false; } }, true);
+  document.addEventListener("dblclick", e => { const b = e.target.closest && e.target.closest("#mapzoom"); if (!b) return; S.mapZ = S.mapZ && S.mapZ.s > 1.01 ? {s:1, x:0, y:0} : {s:2.2, x:-(e.clientX - b.getBoundingClientRect().left) * 1.2, y:-(e.clientY - b.getBoundingClientRect().top) * 1.2}; apply(); render(); });
+})();
 document.addEventListener("focusin", ev => { const t = ev.target; if (t && (t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && !["range","color","checkbox","radio"].includes(t.type)))) document.body.classList.add("typing"); });
 document.addEventListener("focusout", () => setTimeout(() => { const a = document.activeElement; if (!a || !(a.tagName === "TEXTAREA" || a.tagName === "INPUT")) document.body.classList.remove("typing"); }, 50));
 document.addEventListener("keydown", ev => {
@@ -4581,7 +4701,14 @@ function handle(a, v, el){
     }
 
     /* cestování */
-    case "travelTo": openSheet("travel", {place:v}); break;
+    case "travelTo": { const fp = locationOf(S.slot).place;
+      if (fp === "flight") { toast("Jsi v letadle ✈️ Počkej na přistání"); break; }
+      if (v === "flight") { openFlight(fp === "copenhagen" ? "home" : "copenhagen"); break; }
+      if ((v === "copenhagen") !== (fp === "copenhagen")) { openFlight(v === "copenhagen" ? "copenhagen" : "home"); break; }
+      openSheet("travel", {place:v}); break; }
+    case "flAct": S.sheet.act = v; renderSheet(); break;
+    case "mapReset": S.mapZ = {s:1, x:0, y:0}; render(); break;
+    case "flBoard": boardFlight(el.dataset.t === "1"); break;
     case "trAct": if (v === "mx5" && p.gender === "female") toast(MANUAL_MSG); S.sheet.act = v; S.sheet.dist = ""; renderSheet(); break;
     case "trCar": if (v === "mx5" && p.gender === "female") { toast(MANUAL_MSG); if (!canGoTogether(locationOf(S.slot).place)) break; } S.sheet.car = v || null; renderSheet(); break;
     case "trJet": S.sheet.jet = v; renderSheet(); break;

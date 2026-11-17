@@ -833,8 +833,13 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 54;
+const APP_VERSION = 55;
 const CHANGELOG = {
+  55: ["Krejčovství je rozdělené na klučičí a holčičí kousky 🐿️🎀. Nové jsou kalhoty a sukně (džíny, chinos, kraťasy, legíny, sukně, skládaná sukně), plavky pro syslíka i syslici, košile, polokošile, rolák, halenka, letní šaty, šaty s volány, večerní šaty, dvouřadé sako, tvídové sako, kardigan, džínová bunda, nové brýle (kulaté, hranaté, pilotky, kočičí, hvězdičkové), boty (kotníkové, holínky, mokasíny, lodičky, baleríny), fedora, bekovka, slaměný klobouk, čelenka s mašlí, náhrdelník a perly",
+       "V Dárku je teď „Navrhnout oblečení“: ušiješ kousek přímo pro druhého syslíka a pošleš mu ho 🎁",
+       "Místo gumičky teď syslík vyrábí mašli do vlasů 🎀 (dvě barvy)",
+       "Nové vzory: vichy kostka, jemný proužek, velké puntíky, leopard, třešničky, kotvičky, letadýlka, tlapky, kosočtverce, obláčky a duha. Vzor se teď kreslí barvou lemu, takže si ho obarvíš, jak chceš",
+       "Nášivky jsou vždy dobře vidět: už nejsou pod tlapkou a jdou dát i na kabát, sako, vestu, košili a další kousky"],
   54: ["Nové místo Bjed ☕: dánská kavárna kousek od Sklípku. Zajdete si na Tafíčko, vajíško, koláček, dortík, nebo na všechno dohromady",
        "Mapičku v Cestách jde přiblížit dvěma prsty a posouvat 🔍",
        "V garáži se syslík může zašpinit v servisu a pomáhat s pneumatikami 🛞",
@@ -1034,20 +1039,36 @@ const CAT = {
 };
 const CLOTH = {
   cap:{slot:"head", name:"Kšiltovka", e:"🧢", pat:true}, beanie:{slot:"head", name:"Kulich", e:"🧶", pat:true},
-  hat:{slot:"head", name:"Klobouček", e:"👒", pat:false}, crown:{slot:"head", name:"Korunka", e:"👑", pat:false},
-  flowers:{slot:"head", name:"Věneček", e:"🌼", pat:false}, bow:{slot:"head", name:"Mašle", e:"🎀", pat:true},
+  hat:{slot:"head", name:"Klobouček", e:"👒", pat:false, g:"female"}, crown:{slot:"head", name:"Korunka", e:"👑", pat:false},
+  flowers:{slot:"head", name:"Věneček", e:"🌼", pat:false, g:"female"}, bow:{slot:"head", name:"Mašle", e:"🎀", pat:true, g:"female"},
   glasses:{slot:"face", name:"Brýle", e:"👓", pat:false}, sunglasses:{slot:"face", name:"Sluneční brýle", e:"🕶️", pat:false},
   hearts:{slot:"face", name:"Srdíčkové brýle", e:"😍", pat:false}, sportglasses:{slot:"face", name:"Cyklistické brýle", e:"🚴", pat:false},
   pilotcap:{slot:"head", name:"Pilotní čepice", e:"👨‍✈️", pat:false, hidden:true}, headset:{slot:"head", name:"Sluchátka", e:"🎧", pat:false, hidden:true},
   hivis:{slot:"over", name:"Žlutá vesta SAS", e:"🦺", pat:false, hidden:true},
-  beret:{slot:"head", name:"Baret", e:"🎨", pat:true}, clip:{slot:"head", name:"Sponka s kytkou", e:"🌸", pat:false},
-  tie:{slot:"neck", name:"Kravata", e:"👔", pat:true},
-  dress:{slot:"body", name:"Šaty", e:"👗", pat:true}, hoodie:{slot:"body", name:"Mikina", e:"🦘", pat:true},
+  beret:{slot:"head", name:"Baret", e:"🎨", pat:true}, clip:{slot:"head", name:"Sponka s kytkou", e:"🌸", pat:false, g:"female"},
+  tie:{slot:"neck", name:"Kravata", e:"👔", pat:true, g:"male"},
+  dress:{slot:"body", name:"Šaty", e:"👗", pat:true, g:"female"}, hoodie:{slot:"body", name:"Mikina", e:"🦘", pat:true},
   overalls:{slot:"body", name:"Lacláče", e:"👖", pat:true}, apron:{slot:"body", name:"Zástěra", e:"🍳", pat:true},
   neckpillow:{slot:"neck", name:"Cestovní polštářek", e:"💤", pat:false, hidden:true},
   scarf:{slot:"neck", name:"Šála", e:"🧣", pat:true}, bandana:{slot:"neck", name:"Šátek na krk", e:"🔻", pat:true},
-  bowtie:{slot:"neck", name:"Motýlek", e:"🎩", pat:true}, beads:{slot:"neck", name:"Korálky", e:"📿", pat:false}, beadsPaw:{slot:"paw", name:"Korálky na tlapce", e:"📿", pat:false, hidden:true},
-  scrunchie:{slot:"hairtie", name:"Gumička do vlasů", e:"🎀", pat:false, craft:true},
+  bowtie:{slot:"neck", name:"Motýlek", e:"🎩", pat:true, g:"male"}, beads:{slot:"neck", name:"Korálky", e:"📿", pat:false}, beadsPaw:{slot:"paw", name:"Korálky na tlapce", e:"📿", pat:false, hidden:true},
+  scrunchie:{slot:"hairtie", name:"Gumička do vlasů", e:"🎀", pat:false, craft:true}, hairbow:{slot:"hairtie", name:"Mašle do vlasů", e:"🎀", pat:false, craft:true, g:"female"},
+  fedora:{slot:"head", name:"Fedora", e:"🎩", pat:false, g:"male"}, flatcap:{slot:"head", name:"Bekovka", e:"🧢", pat:true, g:"male"},
+  sunhat:{slot:"head", name:"Slaměný klobouk", e:"👒", pat:false, g:"female"}, aliceband:{slot:"head", name:"Čelenka s mašlí", e:"🎀", pat:true, g:"female"},
+  round:{slot:"face", name:"Kulaté brýle", e:"👓", pat:false}, square:{slot:"face", name:"Hranaté brýle", e:"🤓", pat:false, g:"male"},
+  aviator:{slot:"face", name:"Pilotky", e:"🕶️", pat:false}, cateye:{slot:"face", name:"Kočičí brýle", e:"🐱", pat:false, g:"female"}, starglasses:{slot:"face", name:"Hvězdičkové brýle", e:"⭐", pat:false, g:"female"},
+  necklace:{slot:"neck", name:"Náhrdelník s přívěskem", e:"💛", pat:false, g:"female"}, pearls:{slot:"neck", name:"Perly", e:"🦪", pat:false, g:"female"},
+  shirt:{slot:"body", name:"Košile", e:"👔", pat:true, g:"male"}, polo:{slot:"body", name:"Polokošile", e:"👕", pat:true}, turtleneck:{slot:"body", name:"Rolák", e:"🧶", pat:true},
+  blouse:{slot:"body", name:"Halenka", e:"👚", pat:true, g:"female"}, sundress:{slot:"body", name:"Letní šaty", e:"👗", pat:true, g:"female"},
+  ruffle:{slot:"body", name:"Šaty s volány", e:"💃", pat:true, g:"female"}, gown:{slot:"body", name:"Večerní šaty", e:"✨", pat:true, g:"female"},
+  swimsuit:{slot:"body", name:"Plavky", e:"👙", pat:true, g:"female"},
+  jeans:{slot:"legs", name:"Džíny", e:"👖", pat:false}, chinos:{slot:"legs", name:"Chino kalhoty", e:"👖", pat:true, g:"male"}, shorts:{slot:"legs", name:"Kraťasy", e:"🩳", pat:true},
+  trunks:{slot:"legs", name:"Plavky", e:"🩳", pat:true, g:"male"}, leggings:{slot:"legs", name:"Legíny", e:"🧘", pat:true, g:"female"},
+  skirt:{slot:"legs", name:"Sukně", e:"👗", pat:true, g:"female"}, pleated:{slot:"legs", name:"Skládaná sukně", e:"🎀", pat:true, g:"female"},
+  dblazer:{slot:"outer", name:"Dvouřadé sako", e:"🤵", pat:true, g:"male"}, tweed:{slot:"outer", name:"Tvídové sako", e:"🧥", pat:true, g:"female"},
+  cardigan:{slot:"outer", name:"Kardigan", e:"🧶", pat:true, g:"female"}, denim:{slot:"outer", name:"Džínová bunda", e:"🧥", pat:false},
+  boots:{slot:"feet", name:"Kotníkové boty", e:"🥾", pat:false}, rainboots:{slot:"feet", name:"Holínky", e:"🌧️", pat:true}, loafers:{slot:"feet", name:"Mokasíny", e:"👞", pat:false, g:"male"},
+  heels:{slot:"feet", name:"Lodičky", e:"👠", pat:false, g:"female"}, ballet:{slot:"feet", name:"Baleríny", e:"🩰", pat:true, g:"female"},
   pajamas:{slot:"body", name:"Pyžamo na spaní", e:"🌙", pat:true}, socks:{slot:"feet", name:"Ponožky", e:"🧦", pat:true}, sneakers:{slot:"feet", name:"Tenisky", e:"👟", pat:false}, slippers:{slot:"feet", name:"Bačkory", e:"🥿", pat:true},
   coat:{slot:"outer", name:"Kabát", e:"🧥", pat:true}, blazer:{slot:"outer", name:"Sako", e:"🤵", pat:true}, puffer:{slot:"outer", name:"Vesta", e:"🦺", pat:true}, handbag:{slot:"bag", name:"Kabelka", e:"👜", pat:true, lux:true},
   sweater:{slot:"body", name:"Svetr", e:"🧶", pat:true}, tshirt:{slot:"body", name:"Tričko", e:"👕", pat:true},
@@ -1060,9 +1081,9 @@ const CLOTH = {
   chef:{slot:"head", name:"Kuchařská čepice", e:"👨‍🍳", pat:false, hidden:true}, headband:{slot:"head", name:"Čelenka", e:"🎽", pat:false, hidden:true},
   helmet:{slot:"head", name:"Cyklistická helma", e:"⛑️", pat:false, hidden:true}, goggles:{slot:"face", name:"Plavecké brýle", e:"🥽", pat:false, hidden:true}
 };
-const SLOTS = {head:"Na hlavu", face:"Na oči", hairtie:"Do vlasů", neck:"Na krk", body:"Na tělo", outer:"Přes to", bag:"Kabelky", feet:"Na tlapky"};
+const SLOTS = {head:"Na hlavu", face:"Na oči", hairtie:"Do vlasů", neck:"Na krk", body:"Na tělo", outer:"Přes to", legs:"Kalhoty a sukně", bag:"Kabelky", feet:"Na tlapky"};
 const CLOTH_COLORS = ["#EE8E8E","#E8546B","#F4A6C8","#F7B267","#F2D16B","#9ED9A0","#5E9E5A","#7CC6C2","#8EC5E8","#3B6FB6","#8C9EEB","#B79CE8","#FFFFFF","#E9DCC9","#6B5249","#2F3A56","#24222C"];
-const PATTERNS = {none:"Hladké", stripes:"Proužky", dots:"Puntíky", hearts:"Srdíčka", stars:"Hvězdičky", checks:"Kostičky", zigzag:"Cik-cak", flowers:"Kytičky", moons:"Měsíčky"};
+const PATTERNS = {none:"Hladké", stripes:"Proužky", pinstripe:"Jemný proužek", dots:"Puntíky", bigdots:"Velké puntíky", hearts:"Srdíčka", stars:"Hvězdičky", checks:"Kostičky", gingham:"Vichy kostka", argyle:"Kosočtverce", zigzag:"Cik-cak", flowers:"Kytičky", moons:"Měsíčky", clouds:"Obláčky", cherries:"Třešničky", leopard:"Leopard", anchors:"Kotvičky", planes:"Letadýlka", paws:"Tlapky", rainbow:"Duha"};
 const LUX_PATTERNS = {none:"Hladké", tartan:"Károvaný", quilted:"Prošívaný", monogram:"Monogram", oblique:"Šikmé proužky"};
 const PATCHES = {none:"Bez", heart:"❤️ Srdce", star:"⭐ Hvězda", flower:"🌼 Kytka", plane:"✈️ Letadlo", anchor:"⚓ Kotva", letter:"🔤 Iniciála"};
 const PRESETS = [
@@ -1217,23 +1238,37 @@ function wearingOf(p){
 }
 
 /* ============ Kreslený syslík (SVG) ============ */
-function patternDef(pid, color, pattern){
-  const o = lum(color) > 0.55 ? shade(color, 0.72) : "rgba(255,255,255,.7)";
+function patternDef(pid, color, pattern, ink){
+  const o = ink && ink !== color ? ink : lum(color) > 0.55 ? shade(color, 0.72) : "rgba(255,255,255,.7)";
+  const two = (m) => m(5, 5) + m(15, 15);
+  const heart = (x, y, s) => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 3.6 C-4.6 .6 -4 -3.4 -1.8 -3.4 C-.8 -3.4 0 -2.5 0 -1.7 C0 -2.5 .8 -3.4 1.8 -3.4 C4 -3.4 4.6 .6 0 3.6 Z" fill="${o}"/>`;
+  const star = (x, y, s) => `<polygon transform="translate(${x} ${y}) scale(${s})" points="0,-4.2 1.2,-1.4 4.2,-1.2 1.9,.8 2.6,3.8 0,2.2 -2.6,3.8 -1.9,.8 -4.2,-1.2 -1.2,-1.4" fill="${o}"/>`;
   const shapes = {
-    stripes:`<rect y="0" width="12" height="5" fill="${o}"/>`,
-    dots:`<circle cx="6" cy="6" r="2.3" fill="${o}"/>`,
-    hearts:`<path d="M6 9.5 C1.5 6.5 2 2.5 4.2 2.5 C5.2 2.5 6 3.4 6 4.2 C6 3.4 6.8 2.5 7.8 2.5 C10 2.5 10.5 6.5 6 9.5 Z" fill="${o}"/>`,
-    stars:`<polygon points="6,1.8 7.2,4.6 10.2,4.8 7.9,6.8 8.6,9.8 6,8.2 3.4,9.8 4.1,6.8 1.8,4.8 4.8,4.6" fill="${o}"/>`,
-    checks:`<rect width="6" height="6" fill="${o}" opacity=".7"/><rect x="6" y="6" width="6" height="6" fill="${o}" opacity=".7"/>`,
-    zigzag:`<path d="M0 8 L3 4 L6 8 L9 4 L12 8" stroke="${o}" stroke-width="1.8" fill="none"/>`,
-    tartan:`<rect x="0" y="4" width="12" height="3.4" fill="${o}" opacity=".5"/><rect x="4" y="0" width="3.4" height="12" fill="${o}" opacity=".5"/><path d="M0 10 H12 M10 0 V12" stroke="${o}" stroke-width=".7"/>`,
-    quilted:`<path d="M0 0 L12 12 M12 0 L0 12" stroke="${o}" stroke-width=".9"/><circle cx="6" cy="6" r=".8" fill="${o}"/>`,
-    monogram:`<circle cx="3" cy="3" r="1.8" fill="none" stroke="${o}" stroke-width=".8"/><polygon points="9,6 9.9,8.2 12,8.5 10.4,9.9 10.8,12 9,10.9 7.2,12 7.6,9.9 6,8.5 8.1,8.2" fill="${o}"/>`,
-    oblique:`<path d="M-3 12 L12 -3 M3 15 L15 3" stroke="${o}" stroke-width="1.7"/>`,
-    moons:`<path d="M7.4 2.2 A4 4 0 1 0 9.8 8.6 A3.2 3.2 0 1 1 7.4 2.2 Z" fill="${o}"/><circle cx="2.4" cy="10" r=".9" fill="${o}"/>`,
-    flowers:`<g fill="${o}"><circle cx="6" cy="3.8" r="1.7"/><circle cx="8.2" cy="6" r="1.7"/><circle cx="6" cy="8.2" r="1.7"/><circle cx="3.8" cy="6" r="1.7"/></g><circle cx="6" cy="6" r="1.2" fill="#F7CF5A"/>`
+    stripes:`<rect y="0" width="20" height="6" fill="${o}"/><rect y="10" width="20" height="6" fill="${o}"/>`,
+    pinstripe:`<path d="M5 0 V20 M15 0 V20" stroke="${o}" stroke-width=".9"/>`,
+    dots:two((x, y) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${o}"/>`),
+    bigdots:`<circle cx="5" cy="5" r="4" fill="${o}"/><circle cx="15" cy="15" r="4" fill="${o}"/>`,
+    hearts:two((x, y) => heart(x, y, 1.05)),
+    stars:two((x, y) => star(x, y, 1)),
+    checks:`<rect width="10" height="10" fill="${o}" opacity=".75"/><rect x="10" y="10" width="10" height="10" fill="${o}" opacity=".75"/>`,
+    gingham:`<rect x="0" y="0" width="20" height="10" fill="${o}" opacity=".45"/><rect x="0" y="0" width="10" height="20" fill="${o}" opacity=".45"/>`,
+    argyle:`<polygon points="10,0 20,10 10,20 0,10" fill="${o}" opacity=".7"/><path d="M0 0 L20 20 M20 0 L0 20" stroke="${o}" stroke-width=".7" stroke-dasharray="1.6 1.6"/>`,
+    zigzag:`<path d="M0 7 L5 2 L10 7 L15 2 L20 7 M0 17 L5 12 L10 17 L15 12 L20 17" stroke="${o}" stroke-width="2" fill="none"/>`,
+    tartan:`<rect x="0" y="6" width="20" height="5" fill="${o}" opacity=".5"/><rect x="6" y="0" width="5" height="20" fill="${o}" opacity=".5"/><path d="M0 16 H20 M16 0 V20" stroke="${o}" stroke-width=".8"/>`,
+    quilted:`<path d="M0 0 L20 20 M20 0 L0 20" stroke="${o}" stroke-width="1"/><circle cx="10" cy="10" r="1" fill="${o}"/>`,
+    monogram:`<circle cx="5" cy="5" r="2.6" fill="none" stroke="${o}" stroke-width="1"/>${star(15, 15, .9)}`,
+    oblique:`<path d="M-5 20 L20 -5 M5 25 L25 5" stroke="${o}" stroke-width="2.6"/>`,
+    moons:two((x, y) => `<path d="M${x + 1.4} ${y - 3.8} A4 4 0 1 0 ${x + 3.8} ${y + 2.6} A3.2 3.2 0 1 1 ${x + 1.4} ${y - 3.8} Z" fill="${o}"/>`) + `<circle cx="15" cy="4" r=".9" fill="${o}"/><circle cx="4" cy="15" r=".9" fill="${o}"/>`,
+    flowers:two((x, y) => `<g fill="${o}"><circle cx="${x}" cy="${y - 2.2}" r="1.8"/><circle cx="${x + 2.2}" cy="${y}" r="1.8"/><circle cx="${x}" cy="${y + 2.2}" r="1.8"/><circle cx="${x - 2.2}" cy="${y}" r="1.8"/></g><circle cx="${x}" cy="${y}" r="1.3" fill="#F7CF5A"/>`),
+    clouds:two((x, y) => `<path d="M${x - 4} ${y + 1.5} a2 2 0 0 1 1 -3.6 a2.6 2.6 0 0 1 4.8 -.6 a2 2 0 0 1 2.2 4.2 Z" fill="${o}"/>`),
+    cherries:two((x, y) => `<path d="M${x - 1.6} ${y + 1} Q${x} ${y - 4} ${x + 2} ${y - 4.4} M${x + 1.6} ${y + 1.4} Q${x + 1.6} ${y - 3} ${x + 2} ${y - 4.4}" stroke="#5E9E5A" stroke-width=".8" fill="none"/><circle cx="${x - 1.8}" cy="${y + 2}" r="1.9" fill="#E8546B"/><circle cx="${x + 1.8}" cy="${y + 2.4}" r="1.9" fill="#D9364F"/>`),
+    leopard:`${[[4,4],[14,7],[7,14],[17,17],[11,1]].map(([x, y], k) => `<path d="M${x - 2.4} ${y} q0 -2.6 2.6 -2.4 q2.6 .4 2 2.8 q-.6 2.2 -2.8 1.8 q-1.8 -.4 -1.8 -2.2" stroke="${o}" stroke-width="1.2" fill="none" stroke-dasharray="${k % 2 ? "4 1.4" : "6 1.2"}"/><ellipse cx="${x + .2}" cy="${y}" rx="1" ry=".8" fill="${o}" opacity=".55"/>`).join("")}`,
+    anchors:two((x, y) => `<g stroke="${o}" stroke-width=".9" fill="none" stroke-linecap="round"><circle cx="${x}" cy="${y - 3}" r=".9"/><path d="M${x} ${y - 2} V${y + 3.4} M${x - 1.8} ${y - .8} H${x + 1.8} M${x - 3} ${y + 1.2} Q${x - 2.6} ${y + 3.8} ${x} ${y + 3.4} Q${x + 2.6} ${y + 3.8} ${x + 3} ${y + 1.2}"/></g>`),
+    planes:two((x, y) => `<path transform="translate(${x} ${y}) rotate(-30) scale(.42)" d="M-6 1 L6 -3 Q8.5 -3.5 7 -1 L-6 3 Z M-1 -1 L2 -7 L4 -6 L3 -1.6 Z M-1 2 L1 6.5 L3 6 L2.4 1 Z M-6 1 L-8 -2.5 L-6.5 -2.5 L-4.5 .5 Z" fill="${o}"/>`),
+    paws:two((x, y) => `<g fill="${o}"><ellipse cx="${x}" cy="${y + 1}" rx="2" ry="1.6"/><circle cx="${x - 2}" cy="${y - 1.4}" r=".85"/><circle cx="${x - .7}" cy="${y - 2.4}" r=".85"/><circle cx="${x + .7}" cy="${y - 2.4}" r=".85"/><circle cx="${x + 2}" cy="${y - 1.4}" r=".85"/></g>`),
+    rainbow:["#E8546B","#F7B267","#F2D16B","#9ED9A0","#8EC5E8","#B79CE8"].map((c, k) => `<rect y="${k * 20 / 6}" width="20" height="${20 / 6 + .2}" fill="${c}" opacity=".75"/>`).join("")
   };
-  return `<pattern id="${pid}" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="${color}"/>${shapes[pattern] || ""}</pattern>`;
+  return `<pattern id="${pid}" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="${color}"/>${shapes[pattern] || ""}</pattern>`;
 }
 function patchSVG(it, x, y, sc = 1){
   if (!it || !it.patch || it.patch === "none") return "";
@@ -1249,6 +1284,12 @@ function patchSVG(it, x, y, sc = 1){
   return body ? `<g transform="translate(${x} ${y}) scale(${sc})">${body}</g>` : "";
 }
 
+function hairBowSVG(x, y, r, c, c2){
+  const d = shade(c, .78), k = c2 || shade(c, .7);
+  return `<g transform="translate(${x} ${y}) scale(${(r / 8 * 1.45).toFixed(2)})"><path d="M-2 3 L-8 17 L-4 15 L-2 19 Z M2 3 L8 17 L4 15 L2 19 Z" fill="${c}" stroke="${d}" stroke-width="1"/>
+    <path d="M0 0 Q-18 -16 -19 -3 Q-19 10 0 0 Z" fill="${c}" stroke="${d}" stroke-width="1.3"/><path d="M0 0 Q18 -16 19 -3 Q19 10 0 0 Z" fill="${c}" stroke="${d}" stroke-width="1.3"/>
+    <path d="M-4 -1 Q-12 -7 -14 -3 M4 -1 Q12 -7 14 -3" stroke="${d}" stroke-width="1" fill="none" opacity=".7"/><ellipse rx="5" ry="5.6" fill="${k}"/><ellipse cx="-1.4" cy="-1.8" rx="1.6" ry="1.2" fill="#FFFFFF" opacity=".5"/></g>`;
+}
 /* Holčičí vlásky: back = za hlavou, front = přes temeno. view: front | side | back */
 function hairParts(L, view){
   const h = ({long:"ponytail", pigtails:"ponytail", curls:"bangs"})[L.hair] || L.hair; if (!h || h === "none" || !CAT.hair[h]) return {back:"", front:""};
@@ -1274,13 +1315,13 @@ function hairParts(L, view){
   }
   const sheen = (d, w = 4) => `<path d="${d}" stroke="#FFFFFF" stroke-opacity=".38" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;
   const hl = shade(hc, 1.18), sh2 = shade(hc, .62);
-  const scrunch = (x, y, r) => `<g>${Array.from({length:8}, (_, i) => { const a = i * Math.PI / 4; return `<circle cx="${(x + r * Math.cos(a)).toFixed(1)}" cy="${(y + r * .75 * Math.sin(a)).toFixed(1)}" r="${(r * .48).toFixed(1)}" fill="${bow}"/>`; }).join("")}<ellipse cx="${x}" cy="${y}" rx="${r * .7}" ry="${r * .5}" fill="${shade(bow, .82)}"/><circle cx="${x - r * .4}" cy="${y - r * .4}" r="${r * .22}" fill="#FFFFFF" opacity=".5"/></g>`;
+  const scrunch = (x, y, r) => L.tieKind === "hairbow" ? hairBowSVG(x, y, r, bow, L.tie2) : `<g>${Array.from({length:8}, (_, i) => { const a = i * Math.PI / 4; return `<circle cx="${(x + r * Math.cos(a)).toFixed(1)}" cy="${(y + r * .75 * Math.sin(a)).toFixed(1)}" r="${(r * .48).toFixed(1)}" fill="${bow}"/>`; }).join("")}<ellipse cx="${x}" cy="${y}" rx="${r * .7}" ry="${r * .5}" fill="${shade(bow, .82)}"/><circle cx="${x - r * .4}" cy="${y - r * .4}" r="${r * .22}" fill="#FFFFFF" opacity=".5"/></g>`;
   if (h === "bangs") return {
     back:`<path d="M38 60 Q34 10 100 9 Q166 10 162 60 Q170 94 166 118 Q160 130 146 126 L54 126 Q40 130 34 118 Q30 94 38 60 Z" fill="${hc}"/><path d="M40 92 Q38 110 44 122 M160 92 Q162 110 156 122" stroke="${sh2}" stroke-width="2" fill="none" opacity=".5"/>`,
     front:`<path d="M40 70 Q36 12 100 11 Q164 12 160 70 Q156 66 152 70 Q150 58 144 56 Q140 62 134 56 Q128 62 122 55 Q116 62 110 55 Q104 62 98 55 Q92 62 86 55 Q80 62 74 56 Q68 62 62 56 Q56 58 52 68 Q46 64 40 70 Z" fill="${hc}"/>
       <path d="M44 66 Q36 92 42 118 Q48 108 50 92 Z M156 66 Q164 92 158 118 Q152 108 150 92 Z" fill="${hc}"/>
       <path d="M62 56 Q66 36 76 24 M86 55 Q88 36 92 18 M110 55 Q110 36 108 18 M134 56 Q132 36 124 24" stroke="${sh2}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".55"/>
-      ${sheen("M60 30 Q84 16 112 17")}${sheen("M126 22 Q138 26 146 34", 3)}`};
+      ${sheen("M60 30 Q84 16 112 17")}${sheen("M126 22 Q138 26 146 34", 3)}${L.tieKind === "hairbow" ? hairBowSVG(138, 24, 8, bow, L.tie2) : ""}`};
   if (h === "ponytail") return {
     back:`<g transform="translate(200 0) scale(-1 1)"><path d="M60 28 Q32 16 18 40 Q8 62 16 86 Q8 100 14 116 Q20 132 36 138 Q28 126 32 116 Q40 126 52 122 Q42 110 46 96 Q52 104 60 100 Q50 86 54 70 Q58 54 70 46 Z" fill="${hc}"/>
       <path d="M50 34 Q26 46 24 76 Q22 96 30 112 M58 46 Q40 62 40 86 Q40 100 46 110" stroke="${sh2}" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
@@ -1298,6 +1339,7 @@ function hairParts(L, view){
       <path d="M50 60 Q44 74 48 88" stroke="${hc}" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M150 60 Q156 74 152 88" stroke="${hc}" stroke-width="4" fill="none" stroke-linecap="round"/>`};
   return {back:"", front:""};
 }
+const ALT_ALIAS = {fedora:"hat", sunhat:"hat", flatcap:"cap", aliceband:"headband", round:"glasses", square:"glasses", cateye:"glasses", starglasses:"hearts", aviator:"sunglasses", necklace:"beads", pearls:"beads", shirt:"sweater", polo:"tshirt", turtleneck:"sweater", blouse:"tshirt", sundress:"dress", ruffle:"dress", gown:"dress", swimsuit:"tshirt"};
 const VIEW_OF = {mow:"side", carP:"side", trail:"side", prun:"side", pbike:"side", drive:"side", mx5:"side", evoque:"side", jetY:"side", jetG:"side", jetP:"side", bike:"side", run:"side", shop:"side", window:"side", fish:"back", garden:"side", relax:"back", gsunset:"back", jetski:"side", waiter:"side", chalet:"side", audience:"back", stroll:"side"};
 const FACE_LEFT = new Set(["window"]);
 function syslikInner(lookIn, pose, key, wear, act){
@@ -1311,7 +1353,7 @@ function syslikInner(lookIn, pose, key, wear, act){
   (wear || []).forEach((it, i) => { const t = it && CLOTH[it.type]; if (t) W[t.slot] = Object.assign({i}, it); });
   const fillOf = it => {
     if (!it.pattern || it.pattern === "none" || !CLOTH[it.type].pat) return it.color;
-    const pid = id + "pt" + it.i; defs.push(patternDef(pid, it.color, it.pattern)); return `url(#${pid})`;
+    const pid = id + "pt" + it.i; defs.push(patternDef(pid, it.color, it.pattern, it.color2)); return `url(#${pid})`;
   };
   const sleepEyes = pose === "sleep" || pose === "yawn";
   const happyEyes = ["happy","petted","cuddle-l","cuddle-r","love","ballet","clap","relax","mug","snug"].includes(pose);
@@ -1342,7 +1384,7 @@ function syslikInner(lookIn, pose, key, wear, act){
     if (L.ears === "big") return `<circle cx="${cx + (left?-3:3)}" cy="28" r="23" fill="${fur}"/><circle cx="${cx + (left?-3:3)}" cy="30" r="13" fill="${inner}"/>`;
     return `<circle cx="${cx}" cy="33" r="17" fill="${fur}"/><circle cx="${cx}" cy="35" r="9" fill="${inner}"/>`;
   };
-  L.tie = W.hairtie ? W.hairtie.color : null;
+  L.tie = W.hairtie ? W.hairtie.color : null; L.tieKind = W.hairtie ? W.hairtie.type : null; L.tie2 = W.hairtie ? W.hairtie.color2 : null;
   const HP = hairParts(L, "front");
   let pattern = "";
   if (L.pattern === "dots") pattern = `<g clip-path="url(#${id}b)" fill="${dk}" opacity=".55">${[[-42,-22],[-48,8],[-36,32],[40,-20],[47,10],[36,34]].map(([x,y]) => `<circle cx="${100+x}" cy="${161+y}" r="5"/>`).join("")}</g>`;
@@ -1354,9 +1396,9 @@ function syslikInner(lookIn, pose, key, wear, act){
   else mouth = `<path d="${big ? "M89 94 Q100 105 111 94" : "M92 95 Q100 101 108 95"}" stroke="${ink}" stroke-width="2.4" stroke-linecap="round" fill="none"/><rect x="95.5" y="${big?99:98}" width="9" height="8" rx="2.2" fill="#fff"/><line x1="100" y1="${big?99:98}" x2="100" y2="${big?107:106}" stroke="${ink}" stroke-opacity=".22"/>`;
 
   /* --- oblečení --- */
-  const H = W.head, F = W.face, N = W.neck, Bd = W.body; L.tie = W.hairtie ? W.hairtie.color : null;
+  const H = W.head, F = W.face, N = W.neck, Bd = W.body; L.tie = W.hairtie ? W.hairtie.color : null; L.tieKind = W.hairtie ? W.hairtie.type : null; L.tie2 = W.hairtie ? W.hairtie.color2 : null;
   const outerWear = W.outer ? outerSVG(W.outer, fillOf(W.outer), id, "front") : "", bagWear = W.bag ? bagSVG(W.bag, fillOf(W.bag)) : "";
-  let headWear = "", faceWear = "", neckWear = "", bodyWear = "";
+  let headWear = "", faceWear = "", neckWear = "", bodyWear = "", legWear = legsSVG(W.legs, fillOf, id, dk);
   let tails = "";
   if (Bd) {
     const f = fillOf(Bd), d = Bd.color2 || shade(Bd.color, .8);
@@ -1400,18 +1442,34 @@ function syslikInner(lookIn, pose, key, wear, act){
     else if (Bd.type === "jersey") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="98" fill="${bc}"/><path d="M38 150 L162 126 L162 140 L38 164 Z" fill="#FFFFFF" opacity=".9"/><path d="M38 164 L162 140 L162 147 L38 171 Z" fill="${shade(bc,.72)}"/><rect x="98.6" y="112" width="2.8" height="84" fill="${shade(bc,.68)}"/><rect x="38" y="190" width="124" height="12" fill="${shade(bc,.78)}"/></g><path d="M84 106 Q100 118 116 106" stroke="${shade(bc,.68)}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
     else if (Bd.type === "dress") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="66" fill="${f}"/><path d="M80 104 Q100 126 120 104 Z" fill="${belly}"/></g>
       <path d="M58 160 Q100 150 142 160 L172 212 Q100 230 28 212 Z" fill="${f}"/><path d="M28 212 Q100 230 172 212" stroke="${d}" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <path d="M70 166 L56 210 M100 160 V222 M130 166 L144 210" stroke="${shade(bc,.85)}" stroke-width="1.5" opacity=".6"/><rect x="58" y="156" width="84" height="9" rx="4.5" fill="${d}"/>${patchSVG(Bd, 120, 186)}`;
+      <path d="M70 166 L56 210 M100 160 V222 M130 166 L144 210" stroke="${shade(bc,.85)}" stroke-width="1.5" opacity=".6"/><rect x="58" y="156" width="84" height="9" rx="4.5" fill="${d}"/>${patchSVG(Bd, 100, 141, .85)}`;
     else if (Bd.type === "hoodie") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="92" fill="${f}"/><rect x="38" y="186" width="124" height="10" fill="${d}"/><rect x="70" y="158" width="60" height="26" rx="10" fill="${d}" opacity=".85"/><path d="M76 162 h48" stroke="${shade(bc,.7)}" stroke-width="1.5" opacity=".5"/></g>
-      <path d="M48 118 Q100 92 152 118 Q100 136 48 118 Z" fill="${d}"/><path d="M92 124 L90 150 M108 124 L110 150" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/><circle cx="90" cy="152" r="3" fill="#FFFFFF"/><circle cx="110" cy="152" r="3" fill="#FFFFFF"/>${patchSVG(Bd, 124, 142)}`;
+      <path d="M48 118 Q100 92 152 118 Q100 136 48 118 Z" fill="${d}"/><path d="M92 124 L90 150 M108 124 L110 150" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/><circle cx="90" cy="152" r="3" fill="#FFFFFF"/><circle cx="110" cy="152" r="3" fill="#FFFFFF"/>${patchSVG(Bd, 100, 173)}`;
     else if (Bd.type === "overalls") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="174" width="124" height="50" fill="${f}"/><rect x="70" y="128" width="60" height="52" rx="7" fill="${f}"/><rect x="84" y="140" width="32" height="20" rx="4" fill="${shade(bc,.86)}"/><path d="M74 128 L58 104 M126 128 L142 104" stroke="${f}" stroke-width="10" stroke-linecap="round"/><path d="M100 176 V222" stroke="${shade(bc,.78)}" stroke-width="2"/><path d="M42 182 h116" stroke="${shade(bc,.78)}" stroke-width="2" stroke-dasharray="4 3"/></g>
       <circle cx="76" cy="134" r="4" fill="${d}" stroke="#fff" stroke-width="1.2"/><circle cx="124" cy="134" r="4" fill="${d}" stroke="#fff" stroke-width="1.2"/>${patchSVG(Bd, 100, 151)}`;
     else if (Bd.type === "apron") bodyWear = `<g clip-path="url(#${id}b)"><rect x="74" y="122" width="52" height="40" rx="6" fill="${f}"/><rect x="56" y="156" width="88" height="62" rx="10" fill="${f}"/><rect x="80" y="178" width="40" height="20" rx="5" fill="${d}"/><path d="M42 160 h116" stroke="${d}" stroke-width="4"/></g>
       <path d="M76 124 Q100 100 124 124" stroke="${d}" stroke-width="3.5" fill="none"/><path d="M58 160 l-12 10 M142 160 l12 10" stroke="${d}" stroke-width="3.5" stroke-linecap="round"/>${patchSVG(Bd, 100, 140)}`;
+    else if (Bd.type === "shirt") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="94" fill="${f}"/><rect x="38" y="190" width="124" height="8" fill="${shade(bc,.86)}"/><path d="M101 122 V198" stroke="${shade(bc,.72)}" stroke-width="1.6"/>${[134,150,166,182].map(y => `<circle cx="105" cy="${y}" r="2.1" fill="${d}" stroke="${shade(bc,.7)}" stroke-width=".6"/>`).join("")}<path d="M70 124 h22 v17 q-11 6 -22 0 Z" fill="${f}" stroke="${shade(bc,.7)}" stroke-width="1.4"/><path d="M70 124 h22" stroke="${shade(bc,.7)}" stroke-width="2.4"/></g>
+      <path d="M80 105 L101 122 L91 134 L72 113 Z M122 105 L101 122 L111 134 L130 113 Z" fill="${d}" stroke="${shade(bc,.75)}" stroke-width="1"/>${patchSVG(Bd, 81, 134, .8)}`;
+    else if (Bd.type === "polo") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="68" fill="${f}"/><rect x="38" y="164" width="124" height="8" fill="${d}"/><rect x="95" y="112" width="10" height="26" rx="2" fill="${shade(bc,.9)}"/><circle cx="100" cy="121" r="2" fill="${d}"/><circle cx="100" cy="131" r="2" fill="${d}"/></g>
+      <path d="M80 105 L100 113 L91 127 Z M120 105 L100 113 L109 127 Z" fill="${d}"/>${patchSVG(Bd, 80, 138, .85)}`;
+    else if (Bd.type === "turtleneck") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="88" fill="${f}"/>${[52,64,76,88,100,112,124,136,148].map(x => `<path d="M${x} 126 V184" stroke="${shade(bc,.82)}" stroke-width="1.4" opacity=".55"/>`).join("")}<rect x="38" y="182" width="124" height="10" fill="${d}"/></g>
+      <rect x="66" y="106" width="68" height="18" rx="9" fill="${f}"/>${[74,82,90,98,106,114,122].map(x => `<path d="M${x + 2} 108 V122" stroke="${shade(bc,.78)}" stroke-width="1.6"/>`).join("")}${patchSVG(Bd, 80, 140, .85)}`;
+    else if (Bd.type === "blouse") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="74" fill="${f}"/><rect x="38" y="172" width="124" height="6" fill="${d}"/><ellipse cx="44" cy="124" rx="18" ry="20" fill="${f}" stroke="${shade(bc,.82)}" stroke-width="1.4"/><ellipse cx="156" cy="124" rx="18" ry="20" fill="${f}" stroke="${shade(bc,.82)}" stroke-width="1.4"/>${[140,152,164].map(y => `<circle cx="100" cy="${y}" r="1.8" fill="${d}"/>`).join("")}</g>
+      ${[[74,110],[80,118],[88,124],[96,128],[104,128],[112,124],[120,118],[126,110]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5.2" fill="${d}"/>`).join("")}<path d="M100 128 l-9 -5 v10 Z M100 128 l9 -5 v10 Z" fill="${shade(d,.85)}"/><circle cx="100" cy="128" r="2.6" fill="${shade(d,.7)}"/>${patchSVG(Bd, 80, 146, .8)}`;
+    else if (Bd.type === "sundress") bodyWear = `<path d="M80 104 L82 132 M120 104 L118 132" stroke="${d}" stroke-width="4" stroke-linecap="round"/><g clip-path="url(#${id}b)"><path d="M38 132 Q60 124 80 130 Q100 140 120 130 Q140 124 162 132 V164 H38 Z" fill="${f}"/></g>
+      <path d="M60 158 Q100 150 140 158 L174 214 Q100 232 26 214 Z" fill="${f}"/><path d="M26 214 Q100 232 174 214" stroke="${d}" stroke-width="5" fill="none" stroke-dasharray="1 9" stroke-linecap="round"/><path d="M70 164 L50 212 M100 160 V224 M130 164 L150 212" stroke="${shade(bc,.85)}" stroke-width="1.4" opacity=".6"/><rect x="60" y="154" width="80" height="8" rx="4" fill="${d}"/><path d="M128 158 l10 -6 v12 Z M128 158 l10 6" fill="${d}"/>${patchSVG(Bd, 100, 142, .8)}`;
+    else if (Bd.type === "ruffle") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="60" fill="${f}"/><path d="M80 104 Q100 124 120 104 Z" fill="${belly}"/></g><rect x="58" y="154" width="84" height="8" rx="4" fill="${d}"/>
+      ${[[160,46,184],[178,38,202],[196,30,220]].map(([y, w, y2], k) => { const n = 9 + k * 2, x0 = 100 - (w + 30), x1 = 100 + (w + 30), step = (x1 - x0) / n; return `<path d="M${100 - w - 8} ${y} L${100 + w + 8} ${y} L${x1} ${y2} ${Array.from({length:n}, (_, q) => `Q${(x1 - step * (q + .5)).toFixed(1)} ${y2 + 7} ${(x1 - step * (q + 1)).toFixed(1)} ${y2}`).join(" ")} Z" fill="${f}" stroke="${d}" stroke-width="1.6"/>`; }).join("")}${patchSVG(Bd, 100, 140, .8)}`;
+    else if (Bd.type === "gown") bodyWear = `<g clip-path="url(#${id}b)"><path d="M38 124 Q70 112 100 124 Q130 112 162 124 V164 H38 Z" fill="${f}"/></g>
+      <path d="M60 158 Q100 148 140 158 Q150 196 180 234 Q100 248 20 234 Q50 196 60 158 Z" fill="${f}"/><path d="M84 162 Q74 200 66 236 M116 162 Q126 200 134 238" stroke="#FFFFFF" stroke-opacity=".22" stroke-width="5" fill="none"/><path d="M20 234 Q100 248 180 234" stroke="${d}" stroke-width="3" fill="none"/>
+      <rect x="62" y="152" width="76" height="8" rx="4" fill="${d}"/><circle cx="118" cy="156" r="5" fill="${d}" stroke="#FFFFFF" stroke-opacity=".6"/>${[[58,200],[90,214],[124,194],[146,222],[76,182],[110,232]].map(([x, y]) => `<path d="M${x} ${y - 3} l1 2 l2 1 l-2 1 l-1 2 l-1 -2 l-2 -1 l2 -1 Z" fill="#FFFFFF" opacity=".85"/>`).join("")}`;
+    else if (Bd.type === "swimsuit") bodyWear = `<g clip-path="url(#${id}b)"><path d="M70 116 Q100 132 130 116 L148 148 L152 194 Q130 186 116 214 Q100 220 84 214 Q70 186 48 194 L52 148 Z" fill="${f}"/><path d="M48 194 Q70 186 84 214 M152 194 Q130 186 116 214" stroke="${d}" stroke-width="3" fill="none"/></g><path d="M74 104 L70 118 M126 104 L130 118" stroke="${d}" stroke-width="4" stroke-linecap="round"/><path d="M70 116 Q100 132 130 116" stroke="${d}" stroke-width="3" fill="none"/>`;
     else if (Bd.type === "pajamas") bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="104" width="124" height="124" fill="${f}"/><rect x="38" y="172" width="124" height="7" fill="${d}"/><path d="M100 179 V228" stroke="${d}" stroke-width="2.4"/></g>
-      <path d="M76 118 L100 142 L124 118 L113 114 L100 130 L87 114 Z" fill="${d}"/><path d="M100 142 V170" stroke="${d}" stroke-width="1.6"/>${[150,160,169].map(y => `<circle cx="100" cy="${y}" r="2.6" fill="#FFFFFF" stroke="${d}" stroke-width="1"/>`).join("")}${patchSVG(Bd, 124, 150)}`;
+      <path d="M76 118 L100 142 L124 118 L113 114 L100 130 L87 114 Z" fill="${d}"/><path d="M100 142 V170" stroke="${d}" stroke-width="1.6"/>${[150,160,169].map(y => `<circle cx="100" cy="${y}" r="2.6" fill="#FFFFFF" stroke="${d}" stroke-width="1"/>`).join("")}${patchSVG(Bd, 81, 134, .85)}`;
     else {
       const h = Bd.type === "tshirt" ? 62 : 82;
-      bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="106" width="124" height="${h}" fill="${f}"/><rect x="38" y="${106+h-9}" width="124" height="9" fill="${d}"/></g><ellipse cx="100" cy="112" rx="30" ry="7" fill="${d}"/>${patchSVG(Bd, 122, Bd.type === "tshirt" ? 146 : 158)}`;
+      bodyWear = `<g clip-path="url(#${id}b)"><rect x="38" y="106" width="124" height="${h}" fill="${f}"/><rect x="38" y="${106+h-9}" width="124" height="9" fill="${d}"/></g><ellipse cx="100" cy="112" rx="30" ry="7" fill="${d}"/>${patchSVG(Bd, 81, 136, .9)}`;
     }
   }
   if (N) {
@@ -1422,6 +1480,8 @@ function syslikInner(lookIn, pose, key, wear, act){
     if (N.type === "bandana") neckWear = `<polygon points="62,121 138,121 100,158" fill="${f}" stroke="${d}" stroke-width="2" stroke-linejoin="round"/><rect x="60" y="116" width="80" height="8" rx="4" fill="${d}"/>`;
     if (N.type === "bowtie") neckWear = `<polygon points="100,127 80,116 80,138" fill="${f}" stroke="${d}" stroke-width="1.5" stroke-linejoin="round"/><polygon points="100,127 120,116 120,138" fill="${f}" stroke="${d}" stroke-width="1.5" stroke-linejoin="round"/><circle cx="100" cy="127" r="5.5" fill="${d}"/>`;
     if (N.type === "beads") neckWear = beadsNeck(N, d);
+    if (N.type === "necklace") neckWear = `<path d="M68 116 Q100 144 132 116" stroke="#E3B74A" stroke-width="1.6" fill="none"/><path d="M100 134 C93 129 94 123 97.5 123 C99 123 100 124.4 100 125.4 C100 124.4 101 123 102.5 123 C106 123 107 129 100 134 Z" transform="translate(-50 -67) scale(1.5)" fill="${c}" stroke="#C99A2E" stroke-width=".8"/>`;
+    if (N.type === "pearls") neckWear = Array.from({length:15}, (_, k) => { const x = 66 + k * 4.9, y = 117 + Math.pow(x - 100, 2) / -60 + 18; return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.1" fill="#FBF6EE" stroke="${shade(c === "#FFFFFF" ? "#E9DCC9" : c, .85)}" stroke-width=".7"/><circle cx="${(x - .9).toFixed(1)}" cy="${(y - .9).toFixed(1)}" r=".9" fill="#FFFFFF"/>`; }).join("");
     if (N.type === "flowers2") neckWear = ""; else if (false) neckWear = [66,75,84,93,102,111,120,129].map((x, i) => `<circle cx="${x+2}" cy="${(121 + Math.pow(x+2-100, 2)/170).toFixed(1)}" r="4.4" fill="${i % 2 ? c : "#FFFFFF"}" stroke="${d}" stroke-width="1"/>`).join("");
   }
   if (F) {
@@ -1430,6 +1490,11 @@ function syslikInner(lookIn, pose, key, wear, act){
     if (F.type === "sportglasses") faceWear = `<defs><linearGradient id="${id}sgf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4FC3F7"/><stop offset=".5" stop-color="#7B5BB0"/><stop offset="1" stop-color="#E8546B"/></linearGradient></defs><path d="M50 59 Q100 51 150 59 Q151 71 142 78 Q124 82 108 75 Q100 71 92 75 Q76 82 58 78 Q49 71 50 59 Z" fill="url(#${id}sgf)" opacity=".92"/><path d="M50 59 Q100 51 150 59" stroke="${c}" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M48 60 L38 57 M152 60 L162 57" stroke="${c}" stroke-width="3.2" stroke-linecap="round"/><path d="M60 64 Q72 59 86 61 M114 61 Q128 59 140 64" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
     if (F.type === "sunglasses") faceWear = `<g><rect x="52" y="51" width="45" height="32" rx="14" fill="#26232C" stroke="${c}" stroke-width="3.4"/><rect x="103" y="51" width="45" height="32" rx="14" fill="#26232C" stroke="${c}" stroke-width="3.4"/><path d="M97 61 Q100 57 103 61" stroke="${c}" stroke-width="3.4" fill="none"/><path d="M52 60 L40 56 M148 60 L160 56" stroke="${c}" stroke-width="3.4"/><path d="M60 58 L70 58" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/><path d="M111 58 L121 58" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/></g>`;
     if (F.type === "goggles") faceWear = `<path d="M44 66 H62 M138 66 H156" stroke="${c}" stroke-width="5" stroke-linecap="round"/><ellipse cx="77" cy="67" rx="20" ry="16" fill="#7FD3F0" fill-opacity=".5" stroke="${c}" stroke-width="4"/><ellipse cx="123" cy="67" rx="20" ry="16" fill="#7FD3F0" fill-opacity=".5" stroke="${c}" stroke-width="4"/><path d="M97 66 H103" stroke="${c}" stroke-width="4"/><path d="M70 61 l6 -3 M115 61 l6 -3" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>`;
+    if (F.type === "round") faceWear = `<g stroke="${c}" stroke-width="2.6" fill="rgba(255,255,255,.14)"><circle cx="77" cy="68" r="15.5"/><circle cx="123" cy="68" r="15.5"/><path d="M92.5 66 Q100 60 107.5 66" fill="none"/><path d="M61.5 64 L42 58 M138.5 64 L158 58" fill="none"/></g><path d="M69 62 l5 -3 M115 62 l5 -3" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".6"/>`;
+    if (F.type === "square") faceWear = `<g stroke="${c}" stroke-width="5" fill="rgba(255,255,255,.12)" stroke-linejoin="round"><rect x="56" y="53" width="42" height="30" rx="5"/><rect x="102" y="53" width="42" height="30" rx="5"/><path d="M98 62 H102 M56 60 L42 56 M144 60 L158 56" fill="none"/></g><path d="M62 60 l8 0 M108 60 l8 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>`;
+    if (F.type === "aviator") faceWear = `<g stroke="${c}" stroke-width="2.4"><path d="M56 56 H96 Q99 74 88 84 Q72 90 62 78 Q54 68 56 56 Z" fill="#5B4636" fill-opacity=".72"/><path d="M144 56 H104 Q101 74 112 84 Q128 90 138 78 Q146 68 144 56 Z" fill="#5B4636" fill-opacity=".72"/><path d="M96 58 H104 M94 54 Q100 50 106 54 M56 58 L42 55 M144 58 L158 55" fill="none"/></g><path d="M64 62 L74 60 M112 62 L122 60" stroke="#fff" stroke-opacity=".55" stroke-width="2.6" stroke-linecap="round"/>`;
+    if (F.type === "cateye") faceWear = `<g stroke="${c}" stroke-width="3.6" fill="rgba(255,255,255,.14)" stroke-linejoin="round"><path d="M50 52 Q74 54 96 60 Q96 82 78 83 Q60 82 56 66 Z"/><path d="M150 52 Q126 54 104 60 Q104 82 122 83 Q140 82 144 66 Z"/><path d="M96 62 Q100 58 104 62" fill="none"/></g><circle cx="52" cy="54" r="2.2" fill="#FFFFFF"/><circle cx="148" cy="54" r="2.2" fill="#FFFFFF"/>`;
+    if (F.type === "starglasses") faceWear = [77,123].map(cx => `<polygon points="${[0,1,2,3,4,5,6,7,8,9].map(k => { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 9.5 : 21; return `${(cx + r * Math.cos(a)).toFixed(1)},${(69 + r * Math.sin(a)).toFixed(1)}`; }).join(" ")}" fill="${c}" fill-opacity=".85" stroke="${d}" stroke-width="2.4" stroke-linejoin="round"/>`).join("") + `<path d="M95 64 Q100 60 105 64" stroke="${d}" stroke-width="2.6" fill="none"/>`;
     if (F.type === "hearts") faceWear = [77,123].map(cx => `<path d="M${cx} 86 C${cx-26} 70 ${cx-20} 46 ${cx} 57 C${cx+20} 46 ${cx+26} 70 ${cx} 86 Z" fill="${c}" fill-opacity=".85" stroke="${d}" stroke-width="2.8"/>`).join("") + `<path d="M95 62 Q100 58 105 62" stroke="${d}" stroke-width="2.8" fill="none"/>`;
   }
   if (H) {
@@ -1451,9 +1516,13 @@ function syslikInner(lookIn, pose, key, wear, act){
     if (H.type === "chef") headWear = `<rect x="70" y="14" width="60" height="26" rx="5" fill="#FFFFFF" stroke="#E4E4EC" stroke-width="1.5"/><circle cx="76" cy="8" r="14" fill="#FFFFFF"/><circle cx="100" cy="-2" r="17" fill="#FFFFFF"/><circle cx="124" cy="8" r="14" fill="#FFFFFF"/><path d="M80 30 V38 M90 28 V38 M100 28 V38 M110 28 V38 M120 30 V38" stroke="#ECECF2" stroke-width="2"/>`;
     if (H.type === "headband") headWear = `<path d="M38 54 Q100 18 162 54" stroke="${c}" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M40 54 Q100 21 160 54" stroke="#FFFFFF" stroke-width="2.4" fill="none" opacity=".85"/>`;
     if (H.type === "helmet") headWear = `<path d="M40 58 Q42 2 104 2 Q166 4 168 50 Q150 36 100 34 Q62 34 40 58 Z" fill="${c}" stroke="${shade(c,.72)}" stroke-width="2.5"/><path d="M62 20 Q100 6 140 18 M54 34 Q100 18 152 30" stroke="${vent}" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M150 42 Q168 40 172 52" stroke="${vent}" stroke-width="3" fill="none"/><path d="M46 56 L64 104 M156 52 L138 104" stroke="#2B2A33" stroke-width="2.2" fill="none"/><path d="M64 104 Q100 116 138 104" stroke="#2B2A33" stroke-width="2.2" fill="none"/>`;
+    if (H.type === "fedora") headWear = `<ellipse cx="100" cy="36" rx="64" ry="11" fill="${c}"/><path d="M68 36 Q64 4 88 6 Q100 12 112 6 Q136 4 132 36 Z" fill="${c}"/><path d="M88 7 Q100 18 112 7" stroke="${shade(c,.72)}" stroke-width="2" fill="none"/><rect x="68" y="25" width="64" height="9" fill="${d}"/><path d="M40 38 Q100 50 160 38" stroke="${shade(c,.8)}" stroke-width="2" fill="none"/>`;
+    if (H.type === "flatcap") headWear = `<path d="M58 42 Q58 10 100 10 Q140 10 146 34 Q164 38 164 46 Q120 48 58 44 Z" fill="${f}"/><path d="M60 40 Q100 36 146 34" stroke="${shade(c,.75)}" stroke-width="2" fill="none"/><circle cx="102" cy="12" r="3.4" fill="${d}"/>${patchSVG(H, 82, 26, .7)}`;
+    if (H.type === "sunhat") headWear = `<ellipse cx="100" cy="36" rx="80" ry="15" fill="${c}"/><path d="M68 36 Q66 2 100 2 Q134 2 132 36 Z" fill="${c}"/>${[12,20,28].map(y => `<path d="M${70 - (y - 10) * .1} ${y} Q100 ${y - 4} ${130 + (y - 10) * .1} ${y}" stroke="${shade(c,.82)}" stroke-width="1.2" fill="none"/>`).join("")}<path d="M28 38 Q100 58 172 38" stroke="${shade(c,.82)}" stroke-width="1.6" fill="none"/><rect x="67" y="24" width="66" height="9" fill="${d}"/><path d="M128 28 l12 -8 v14 Z M128 28 l12 8 l-2 12" fill="${d}"/>`;
+    if (H.type === "aliceband") headWear = `<path d="M40 60 Q42 10 100 10 Q158 10 160 60" stroke="${f}" stroke-width="9" fill="none" stroke-linecap="round"/><g transform="translate(130 18) rotate(20)"><path d="M0 0 Q-16 -14 -17 -2 Q-17 10 0 0 Z M0 0 Q16 -14 17 -2 Q17 10 0 0 Z" fill="${f}" stroke="${d}" stroke-width="1.4"/><circle r="4.6" fill="${d}"/></g>`;
     if (H.type === "bow") headWear = `<g transform="rotate(15 141 31)"><path d="M141 31 Q124 14 122 26 Q120 40 141 31 Z" fill="${f}" stroke="${d}" stroke-width="1.5"/><path d="M141 31 Q158 14 160 26 Q162 40 141 31 Z" fill="${f}" stroke="${d}" stroke-width="1.5"/><circle cx="141" cy="31" r="5.5" fill="${d}"/></g>`;
   }
-  const covered = H && ["cap","beanie","hat","crown","earmuffs","swimcap","bucket","chef","helmet","beret","pilotcap"].includes(H.type);
+  const covered = H && ["cap","beanie","hat","crown","earmuffs","swimcap","bucket","chef","helmet","beret","pilotcap","fedora","flatcap","sunhat"].includes(H.type);
   const tuft = covered || (L.hair && L.hair !== "none") ? "" : `<path d="M93 25 Q96 13 100 22 Q103 11 107 24" stroke="${fur}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M93 25 Q96 13 100 22 Q103 11 107 24" stroke="${dk}" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".5"/>`;
 
   const wave = pose === "wave";
@@ -1484,7 +1553,7 @@ function syslikInner(lookIn, pose, key, wear, act){
   <path d="M60 220 l3 -5 M68 221 l0 -6 M76 220 l-3 -5 M124 220 l3 -5 M132 221 l0 -6 M140 220 l-3 -5" stroke="${shade(dk,.8)}" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>`}
   <ellipse cx="100" cy="161" rx="58" ry="61" fill="${fur}"/>${pattern}
   <ellipse cx="100" cy="171" rx="37" ry="42" fill="${belly}"/>
-  ${bodyWear}${Bd && Bd.label ? labelTag(66, 150, Bd.label, shade(Bd.color, .6)) : ""}${outerWear}${bagWear}${W.over && W.over.type === "hivis" ? `<g clip-path="url(#${id}b)"><clipPath id="${id}hv"><path d="M52 112 Q60 105 84 104 Q78 140 84 180 Q66 184 50 178 Z M148 112 Q140 105 116 104 Q122 140 116 180 Q134 184 150 178 Z"/></clipPath>
+  ${legWear}${bodyWear}${Bd && Bd.label ? labelTag(66, 150, Bd.label, shade(Bd.color, .6)) : ""}${outerWear}${bagWear}${W.over && W.over.type === "hivis" ? `<g clip-path="url(#${id}b)"><clipPath id="${id}hv"><path d="M52 112 Q60 105 84 104 Q78 140 84 180 Q66 184 50 178 Z M148 112 Q140 105 116 104 Q122 140 116 180 Q134 184 150 178 Z"/></clipPath>
       <path d="M52 112 Q60 105 84 104 Q78 140 84 180 Q66 184 50 178 Z M148 112 Q140 105 116 104 Q122 140 116 180 Q134 184 150 178 Z" fill="#F5D93B"/>
       <g clip-path="url(#${id}hv)"><rect x="40" y="150" width="120" height="8" fill="#E3E8EF"/><rect x="40" y="150" width="120" height="2.2" fill="#FFFFFF"/><rect x="40" y="164" width="120" height="8" fill="#E3E8EF"/></g>
       <path d="M52 112 Q60 105 84 104 Q78 140 84 180 Q66 184 50 178 Z M148 112 Q140 105 116 104 Q122 140 116 180 Q134 184 150 178 Z" fill="none" stroke="#D9BC2A" stroke-width="1.8"/>
@@ -1518,12 +1587,12 @@ function syslikAlt(view, lookIn, pose, key, wear, act){
   const belly = (CAT.belly[L.belly] || CAT.belly.cream)[1];
   const ink = "#3A2E2A", inner = "#F4B6AE", id = "a" + key, defs = [];
   const W = {};
-  (wear || []).forEach((it, i) => { const t = it && CLOTH[it.type]; if (t) W[t.slot] = Object.assign({i}, it); });
+  (wear || []).forEach((it, i) => { const t = it && CLOTH[it.type]; if (t) W[t.slot] = Object.assign({i}, it, ALT_ALIAS[it.type] ? {type:ALT_ALIAS[it.type], pattern:CLOTH[ALT_ALIAS[it.type]].pat ? it.pattern : "none"} : {}); });
   const fillOf = it => {
     if (!it.pattern || it.pattern === "none" || !CLOTH[it.type].pat) return it.color;
-    const pid = id + "pt" + it.i; defs.push(patternDef(pid, it.color, it.pattern)); return `url(#${pid})`;
+    const pid = id + "pt" + it.i; defs.push(patternDef(pid, it.color, it.pattern, it.color2)); return `url(#${pid})`;
   };
-  const H = W.head, F = W.face, N = W.neck, Bd = W.body; L.tie = W.hairtie ? W.hairtie.color : null;
+  const H = W.head, F = W.face, N = W.neck, Bd = W.body; L.tie = W.hairtie ? W.hairtie.color : null; L.tieKind = W.hairtie ? W.hairtie.type : null; L.tie2 = W.hairtie ? W.hairtie.color2 : null;
   const outerWear = W.outer ? outerSVG(W.outer, fillOf(W.outer), id, view) : "", bagWear = "";
   const tailTip = L.tail === "tip" ? belly : dk;
   const paw = (x, y, r = 0, c = dk, cls = "") => `${cls ? `<g class="${cls}">` : ""}${view === "back" ? `<ellipse cx="${x}" cy="${y}" rx="8.5" ry="10.5" fill="${c}" transform="rotate(${r} ${x} ${y})"/>` : pawG(x, y, 8.5, 10.5, r, c)}${cls ? "</g>" : ""}`;
@@ -1548,6 +1617,7 @@ function syslikAlt(view, lookIn, pose, key, wear, act){
 
       if (t === "apron") bw += `<path d="M70 160 Q100 168 130 160" stroke="${d}" stroke-width="4" fill="none"/><path d="M98 160 l-10 14 M102 160 l10 14" stroke="${d}" stroke-width="4" stroke-linecap="round"/>`;
     }
+    bw = legsSVG(W.legs, fillOf, id, dk, "back") + bw;
     let hw = "";
     if (H) {
       const f = fillOf(H), c = H.color, d = H.color2 || shade(c, .78), t = H.type;
@@ -1624,6 +1694,7 @@ function syslikAlt(view, lookIn, pose, key, wear, act){
     if (t === "tutu") bw += `<ellipse cx="100" cy="182" rx="80" ry="14" fill="${shade(bc,.9)}"/><ellipse cx="100" cy="176" rx="70" ry="10" fill="${bc}"/>`;
 
   }
+  bw = legsSVG(W.legs, fillOf, id, dk, "side") + bw;
   let hw = "";
   if (H) {
     const f = fillOf(H), c = H.color, d = H.color2 || shade(c, .78), t = H.type;
@@ -1782,7 +1853,7 @@ function syslikSVG(look, pose = "idle", size = 200, opts = {}){
 function clothSwatch(it, key){
   const pid = "sw" + key;
   const pat = it.pattern && it.pattern !== "none" && CLOTH[it.type].pat;
-  return `<svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><defs>${pat ? patternDef(pid, it.color, it.pattern) : ""}</defs><circle cx="23" cy="23" r="21" fill="${it.color2 || "rgba(0,0,0,.06)"}"/><circle cx="23" cy="23" r="${it.color2 ? 17.5 : 21}" fill="${pat ? `url(#${pid})` : it.color}" stroke="rgba(0,0,0,.08)"/><text x="23" y="25" font-size="20" text-anchor="middle" dominant-baseline="middle">${CLOTH[it.type].e}</text></svg>`;
+  return `<svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><defs>${pat ? patternDef(pid, it.color, it.pattern, it.color2) : ""}</defs><circle cx="23" cy="23" r="21" fill="${it.color2 || "rgba(0,0,0,.06)"}"/><circle cx="23" cy="23" r="${it.color2 ? 17.5 : 21}" fill="${pat ? `url(#${pid})` : it.color}" stroke="rgba(0,0,0,.08)"/><text x="23" y="25" font-size="20" text-anchor="middle" dominant-baseline="middle">${CLOTH[it.type].e}</text></svg>`;
 }
 
 /* ============ Prostředí ============ */
@@ -2295,18 +2366,42 @@ function wearFor(p, act, cat){
   const used = new Set(o.map(it => CLOTH[it.type].slot));
   return o.concat(costumeWear([], act).filter(c => !used.has(CLOTH[c.type].slot)));
 }
+/* Kalhoty, kraťasy, sukně a plavky */
+function legsSVG(Lg, fillOf, id, dk, view){
+  if (!Lg) return "";
+  const f = fillOf(Lg), c = Lg.color, d = Lg.color2 || shade(c, .76), t = Lg.type, sd = shade(c, .7);
+  if (t === "skirt" || t === "pleated") { const w = t === "pleated" ? 64 : 58;
+    return `<path d="M56 170 Q100 162 144 170 L${100 + w} 214 Q100 226 ${100 - w} 214 Z" fill="${f}"/>${t === "pleated" ? [-48,-32,-16,0,16,32,48].map(k => `<path d="M${100 + k * .8} 176 L${100 + k * 1.25} 220" stroke="${sd}" stroke-width="1.4" opacity=".7"/>`).join("") : `<path d="M${100 - w} 214 Q100 226 ${100 + w} 214" stroke="${d}" stroke-width="3" fill="none"/>`}<rect x="56" y="166" width="88" height="8" rx="4" fill="${d}"/>`; }
+  const bot = t === "trunks" ? 198 : t === "shorts" ? 206 : 228, gap = view === "side" || bot < 220 ? "" : `<path d="M96.5 223 Q100 206 103.5 223 Z" fill="${dk}" opacity=".7"/>`;
+  const jeans = t === "jeans" ? `<path d="M48 186 Q62 194 74 180 M152 186 Q138 194 126 180" stroke="#E3A04A" stroke-width="1.2" fill="none" stroke-dasharray="2.4 1.8"/><circle cx="74" cy="181" r="1.6" fill="#D9B45A"/><circle cx="126" cy="181" r="1.6" fill="#D9B45A"/><path d="M100 178 V200" stroke="#E3A04A" stroke-width="1" stroke-dasharray="2.4 1.8"/>` : "";
+  const crease = t === "chinos" ? `<path d="M70 184 V224 M130 184 V224" stroke="${sd}" stroke-width="1.1" opacity=".6"/><path d="M50 184 Q60 190 70 180 M150 184 Q140 190 130 180" stroke="${sd}" stroke-width="1.3" fill="none"/>` : "";
+  const shine = t === "leggings" ? `<path d="M58 186 Q62 206 68 220 M142 186 Q138 206 132 220" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="4" fill="none" stroke-linecap="round"/>` : "";
+  const waist = t === "trunks" ? `<rect x="38" y="172" width="124" height="6" fill="${d}"/><path d="M97 178 q-3 8 -6 10 M103 178 q3 8 6 10" stroke="#FFFFFF" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M40 190 L56 198 M160 190 L144 198" stroke="#FFFFFF" stroke-width="3" opacity=".8"/>`
+    : t === "leggings" ? `<rect x="38" y="172" width="124" height="8" fill="${shade(c, .85)}"/>` : `<rect x="38" y="172" width="124" height="8" fill="${d}"/>${[64,84,116,136].map(x => `<rect x="${x}" y="171" width="3" height="10" rx="1" fill="${shade(d, .8)}"/>`).join("")}`;
+  return `<g clip-path="url(#${id}b)"><rect x="38" y="174" width="124" height="${bot - 174}" fill="${f}"/>${waist}<path d="M100 180 V${bot}" stroke="${sd}" stroke-width="1.5"/>${bot < 220 ? `<rect x="38" y="${bot - 6}" width="124" height="6" fill="${t === "trunks" ? f : d}"/>` : ""}${jeans}${crease}${shine}</g>${gap}`;
+}
 /* Vrstva přes oblečení (kabát, sako, vesta) a kabelka */
 const labelTag = (x, y, t, c) => t ? `<rect x="${x - 20}" y="${y - 6}" width="40" height="11" rx="2.5" fill="#FFFFFF" opacity=".92"/><text x="${x}" y="${y + 2.2}" font-size="${t.length > 9 ? 5.4 : 6.6}" font-weight="800" letter-spacing=".6" fill="${c}" text-anchor="middle" font-family="Baloo 2,sans-serif">${esc(t.slice(0, 14).toUpperCase())}</text>` : "";
 function outerSVG(O, f, id, view){
   const d = O.color2 || shade(O.color, .72), t = O.type;
-  if (view !== "front") { const hh = t === "coat" ? 128 : t === "blazer" ? 100 : 92;
+  const pt = patchSVG(O, 64, 130, .8);
+  if (view !== "front") { const hh = t === "coat" ? 128 : t === "blazer" || t === "dblazer" || t === "cardigan" ? 100 : t === "tweed" ? 96 : 92;
     return `<g clip-path="url(#${id}b)"><rect x="34" y="102" width="132" height="${hh}" fill="${f}"/><rect x="34" y="${102 + hh - 6}" width="132" height="6" fill="${d}"/>${t === "puffer" ? [126,148,170].map(y => `<path d="M34 ${y} H166" stroke="${d}" stroke-width="1.6" opacity=".7"/>`).join("") : ""}</g>`; }
   if (t === "coat") return `<g clip-path="url(#${id}b)"><path d="M36 104 L90 104 L97 230 L36 230 Z" fill="${f}"/><path d="M164 104 L110 104 L103 230 L164 230 Z" fill="${f}"/><path d="M36 182 H97 M103 182 H164" stroke="${d}" stroke-width="6"/><path d="M90 104 L97 230 M110 104 L103 230" stroke="${d}" stroke-width="1.6"/></g>
-    <path d="M84 105 L70 140 L92 132 Z M116 105 L130 140 L108 132 Z" fill="${d}"/>${[150,166,198].map(y => `<circle cx="89" cy="${y}" r="2.6" fill="${d}"/><circle cx="111" cy="${y}" r="2.6" fill="${d}"/>`).join("")}${labelTag(62, 160, O.label, d)}`;
+    <path d="M84 105 L70 140 L92 132 Z M116 105 L130 140 L108 132 Z" fill="${d}"/>${[150,166,198].map(y => `<circle cx="89" cy="${y}" r="2.6" fill="${d}"/><circle cx="111" cy="${y}" r="2.6" fill="${d}"/>`).join("")}${labelTag(62, 160, O.label, d)}${pt}`;
   if (t === "blazer") return `<g clip-path="url(#${id}b)"><path d="M36 104 L86 104 L100 170 L96 206 L36 206 Z" fill="${f}"/><path d="M164 104 L114 104 L100 170 L104 206 L164 206 Z" fill="${f}"/><path d="M100 170 L96 206 M100 170 L104 206" stroke="${d}" stroke-width="1.4"/></g>
-    <path d="M86 105 L76 134 L94 146 L100 170 Z M114 105 L124 134 L106 146 L100 170 Z" fill="${d}"/><circle cx="100" cy="182" r="3" fill="${d}"/><path d="M126 146 l14 0 l-2 6 l-10 0 Z" fill="#FFFFFF" opacity=".9"/><path d="M128 146 l4 -6 l3 6" fill="#F48FA6"/>${labelTag(62, 172, O.label, d)}`;
+    <path d="M86 105 L76 134 L94 146 L100 170 Z M114 105 L124 134 L106 146 L100 170 Z" fill="${d}"/><circle cx="100" cy="182" r="3" fill="${d}"/><path d="M126 146 l14 0 l-2 6 l-10 0 Z" fill="#FFFFFF" opacity=".9"/><path d="M128 146 l4 -6 l3 6" fill="#F48FA6"/>${labelTag(62, 172, O.label, d)}${pt}`;
+  if (t === "dblazer") return `<g clip-path="url(#${id}b)"><path d="M36 104 L86 104 L108 164 L104 208 L36 208 Z" fill="${f}"/><path d="M164 104 L114 104 L108 164 L114 208 L164 208 Z" fill="${f}"/><path d="M108 164 L104 208" stroke="${d}" stroke-width="1.6"/></g>
+    <path d="M86 105 L74 132 L92 144 L108 164 Z M114 105 L126 132 L112 142 L108 164 Z" fill="${d}"/>${[[94,170],[118,170],[94,186],[118,186],[94,202],[118,202]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.8" fill="${d}" stroke="#FFFFFF" stroke-opacity=".35"/>`).join("")}<path d="M128 146 l14 0 l-2 6 l-10 0 Z" fill="#FFFFFF" opacity=".9"/>${pt}`;
+  if (t === "tweed") { const tr = `stroke="${d}" stroke-width="3.4" stroke-dasharray="1.6 1.4"`;
+    return `<g clip-path="url(#${id}b)"><path d="M36 104 L90 104 L92 198 L36 198 Z M164 104 L110 104 L108 198 L164 198 Z" fill="${f}"/><path d="M90 104 L92 198 L36 198 M110 104 L108 198 L164 198" fill="none" ${tr}/><path d="M48 170 h26 M126 170 h26" ${tr}/></g>
+      <path d="M68 106 Q100 126 132 106" fill="none" ${tr}/>${[134,152,170,188].map(y => `<circle cx="84" cy="${y}" r="2.8" fill="#E3B74A" stroke="#B88A2E" stroke-width=".8"/><circle cx="116" cy="${y}" r="2.8" fill="#E3B74A" stroke="#B88A2E" stroke-width=".8"/>`).join("")}${pt}`; }
+  if (t === "cardigan") return `<g clip-path="url(#${id}b)"><path d="M36 104 L82 104 L98 198 L36 198 Z M164 104 L118 104 L102 198 L164 198 Z" fill="${f}"/><rect x="36" y="188" width="128" height="10" fill="${d}"/>${[44,52,60,140,148,156].map(x => `<path d="M${x} 189 V197" stroke="${shade(O.color,.7)}" stroke-width="1.2"/>`).join("")}</g>
+    <path d="M82 104 L98 198 M118 104 L102 198" stroke="${d}" stroke-width="5"/>${[138,156,174].map(y => `<circle cx="${(84 + (y - 104) * .15).toFixed(1)}" cy="${y}" r="2.6" fill="#FFFFFF" stroke="${d}"/>`).join("")}${pt}`;
+  if (t === "denim") return `<g clip-path="url(#${id}b)"><path d="M36 104 L94 104 L96 194 L36 194 Z M164 104 L106 104 L104 194 L164 194 Z" fill="${f}"/><rect x="36" y="184" width="128" height="10" fill="${shade(O.color,.85)}"/><path d="M60 126 V184 M140 126 V184" stroke="#E3A04A" stroke-width="1.1" stroke-dasharray="2.4 1.8"/></g>
+    <path d="M78 104 L66 124 L92 120 Z M122 104 L134 124 L108 120 Z" fill="${shade(O.color,.85)}" stroke="#E3A04A" stroke-width="1" stroke-dasharray="2 1.6"/><rect x="110" y="130" width="22" height="14" rx="2" fill="${shade(O.color,.9)}" stroke="#E3A04A" stroke-width="1" stroke-dasharray="2 1.6"/>${[130,150,170].map(y => `<circle cx="92" cy="${y}" r="2.2" fill="#C9CFD8"/>`).join("")}${pt}`;
   return `<g clip-path="url(#${id}b)"><clipPath id="${id}pf"><path d="M44 112 Q56 104 86 104 L94 202 L42 198 Z M156 112 Q144 104 114 104 L106 202 L158 198 Z"/></clipPath><path d="M44 112 Q56 104 86 104 L94 202 L42 198 Z M156 112 Q144 104 114 104 L106 202 L158 198 Z" fill="${f}"/>
-    <g clip-path="url(#${id}pf)">${[126,146,166,186].map(y => `<path d="M38 ${y} Q66 ${y + 5} 96 ${y} M104 ${y} Q134 ${y + 5} 162 ${y}" stroke="${d}" stroke-width="1.6" fill="none"/>`).join("")}</g></g><path d="M94 106 L94 202 M106 106 L106 202" stroke="${d}" stroke-width="2"/>${labelTag(66, 156, O.label, d)}`;
+    <g clip-path="url(#${id}pf)">${[126,146,166,186].map(y => `<path d="M38 ${y} Q66 ${y + 5} 96 ${y} M104 ${y} Q134 ${y + 5} 162 ${y}" stroke="${d}" stroke-width="1.6" fill="none"/>`).join("")}</g></g><path d="M94 106 L94 202 M106 106 L106 202" stroke="${d}" stroke-width="2"/>${labelTag(66, 156, O.label, d)}${pt}`;
 }
 function bagSVG(G, f){
   const d = G.color2 || shade(G.color, .7);
@@ -2317,8 +2412,13 @@ function bagSVG(G, f){
 /* Oblečení na tlapky: ponožky, tenisky, bačkory */
 function footWear(F, x, y, rx, ry, key){
   const c = F.color || "#FFFFFF", d = F.color2 || shade(c, .78), pat = F.pattern && F.pattern !== "none" && CLOTH[F.type] && CLOTH[F.type].pat;
-  const pid = "fw" + key, fill = pat ? `url(#${pid})` : c, defs = pat ? `<defs>${patternDef(pid, c, F.pattern)}</defs>` : "";
+  const pid = "fw" + key, fill = pat ? `url(#${pid})` : c, defs = pat ? `<defs>${patternDef(pid, c, F.pattern, F.color2)}</defs>` : "";
   if (F.type === "sneakers") return `${defs}<ellipse cx="${x}" cy="${y + 2}" rx="${rx + 1}" ry="${ry * .75}" fill="#FFFFFF" stroke="#D6DBE2" stroke-width="1"/><ellipse cx="${x}" cy="${y - 1.5}" rx="${rx - 1}" ry="${ry * .78}" fill="${fill}"/><path d="M${x - 5} ${y - 4} h10 M${x - 5} ${y - 1} h10" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/><path d="M${x - rx + 2} ${y + 1} h${rx * .5}" stroke="${d}" stroke-width="1.5" stroke-linecap="round"/>`;
+  if (F.type === "boots" || F.type === "rainboots") { const rb = F.type === "rainboots";
+    return `${defs}<rect x="${x - rx * .62}" y="${y - ry - 12}" width="${rx * 1.24}" height="${ry + 12}" rx="4" fill="${fill}"/><ellipse cx="${x}" cy="${y}" rx="${rx + 1}" ry="${ry}" fill="${fill}"/><ellipse cx="${x}" cy="${y + ry * .55}" rx="${rx + 1.5}" ry="${ry * .45}" fill="${rb ? d : "#3A2E2A"}"/>${rb ? `<path d="M${x - rx * .5} ${y - ry - 6} V${y - 2}" stroke="#FFFFFF" stroke-opacity=".45" stroke-width="2.6" stroke-linecap="round"/>` : `<path d="M${x - 3} ${y - ry - 8} l6 3 M${x - 3} ${y - ry - 3} l6 3" stroke="${d}" stroke-width="1.4"/>`}`; }
+  if (F.type === "heels") return `${defs}<path d="M${x + rx * .55} ${y} L${x + rx * .62} ${y + ry + 4}" stroke="${d}" stroke-width="2.6" stroke-linecap="round"/><ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry * .9}" fill="${fill}"/><ellipse cx="${x - rx * .3}" cy="${y - ry * .3}" rx="${rx * .3}" ry="${ry * .22}" fill="#FFFFFF" opacity=".45"/><path d="M${x - rx * .7} ${y - ry * .5} Q${x} ${y - ry * 1.1} ${x + rx * .7} ${y - ry * .5}" stroke="${d}" stroke-width="1.6" fill="none"/>`;
+  if (F.type === "ballet") return `${defs}<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry * .9}" fill="${fill}"/><path d="M${x - rx * .7} ${y - ry * .45} Q${x} ${y - ry * 1.05} ${x + rx * .7} ${y - ry * .45}" stroke="${d}" stroke-width="2" fill="none"/><path d="M${x} ${y - ry * .7} l-4 -3 v6 Z M${x} ${y - ry * .7} l4 -3 v6 Z" fill="${d}"/>`;
+  if (F.type === "loafers") return `${defs}<ellipse cx="${x}" cy="${y + 2}" rx="${rx + 1}" ry="${ry * .7}" fill="#3A2E2A"/><ellipse cx="${x}" cy="${y - 1}" rx="${rx}" ry="${ry * .85}" fill="${fill}"/><rect x="${x - 6}" y="${y - ry * .5 - 2}" width="12" height="4.4" rx="2" fill="${d}"/><rect x="${x - 2.4}" y="${y - ry * .5 - 1}" width="4.8" height="2.2" rx="1" fill="#E3B74A"/>`;
   if (F.type === "slippers") return `${defs}<ellipse cx="${x}" cy="${y}" rx="${rx + 1.5}" ry="${ry + 1}" fill="${fill}"/><path d="M${x - rx} ${y - 1} Q${x} ${y - ry - 4} ${x + rx} ${y - 1}" stroke="${d}" stroke-width="3" fill="none"/><circle cx="${x}" cy="${y - ry * .7}" r="4.6" fill="${d}"/><circle cx="${x - 1.4}" cy="${y - ry * .7 - 1.4}" r="1.4" fill="#FFFFFF" opacity=".6"/>`;
   return `${defs}<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}"/><path d="M${x - rx * .8} ${y - ry * .45} Q${x} ${y - ry * 1.15} ${x + rx * .8} ${y - ry * .45}" stroke="${d}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
 }
@@ -2329,7 +2429,7 @@ function pawG(x, y, rx, ry, r, fill, pad = "#F4B6AE"){
 }
 function costumeWear(wear, act){
   const A = ACT_LOOK[act]; if (!A || !A.costume) return wear || [];
-  const slots = new Set(A.costume.map(c => CLOTH[c.type].slot)); if (slots.has("body")) { slots.add("outer"); slots.add("bag"); }
+  const slots = new Set(A.costume.map(c => CLOTH[c.type].slot)); if (slots.has("body")) { slots.add("outer"); slots.add("bag"); if (A.costume.some(c => !["overalls","apron","vest","hivis"].includes(c.type))) slots.add("legs"); }
   return (wear || []).filter(w => CLOTH[w.type] && !slots.has(CLOTH[w.type].slot)).concat(A.costume.map((c, i) => Object.assign({id:"cos" + i, pattern:"none", name:CLOTH[c.type].name}, c)));
 }
 function locationOf(s){
@@ -3187,7 +3287,7 @@ function wardrobe(){
     .map(e => Object.assign({}, e.payload.item, {id:"ev-" + e.id, kind:"gift", from:e.payload.name}));
   return PRESETS.map(x => Object.assign({kind:"preset"}, x)).concat(own, got).filter(it => !removed.has(it.id));
 }
-const plainItem = it => Object.assign({id:it.id, type:it.type, color:it.color, pattern:it.pattern || "none", name:it.name || CLOTH[it.type].name}, it.beads ? {beads:it.beads} : {}, it.color2 ? {color2:it.color2} : {}, it.label ? {label:it.label} : {});
+const plainItem = it => Object.assign({id:it.id, type:it.type, color:it.color, pattern:it.pattern || "none", name:it.name || CLOTH[it.type].name}, it.beads ? {beads:it.beads} : {}, it.color2 ? {color2:it.color2} : {}, it.label ? {label:it.label} : {}, it.patch && it.patch !== "none" ? {patch:it.patch, letter:it.letter || ""} : {});
 function isWorn(id){ return wearingOf(me()).some(x => x.id === id); }
 function toggleWear(it){
   const slot = CLOTH[it.type].slot, worn = isWorn(it.id);
@@ -4111,7 +4211,7 @@ function sheetHTML(s){
     case "play": return head("Hrát si") + picks(CAT.game, "doPlay");
     case "giftSelf": return head("Dárek pro " + esc(p.name)) + craftButtons(p) + `<p class="muted small" style="margin:0">Hotové dárky jsou zdarma a nikdy nedojdou. 🎁</p>` + picks(CAT.gift, "doGiftSelf");
     case "habitat": return head("Prostředí") + picks(CAT.habitat, "doHabitat");
-    case "giftPartner": return head("Poslat dárek") + craftButtons(p) + `<p class="muted small" style="margin:0">Nebo hotový dáreček. Dorazí, i když ${esc(o.name)} zrovna spinká.</p>` + picks(CAT.gift, "doGiftPartner");
+    case "giftPartner": return head("Poslat dárek") + craftButtons(p, true) + `<p class="muted small" style="margin:0">Nebo hotový dáreček. Dorazí, i když ${esc(o.name)} zrovna spinká.</p>` + picks(CAT.gift, "doGiftPartner");
     case "mug": { const d = s.d; return head(s.date ? "Hrneček na rande ☕" : "Vyrobit hrneček ☕") + `<div class="preview" style="padding:14px 0">${mugSVG(d, 170, "ed")}</div>
         <span class="label">Barva hrnečku</span><div class="swatches">${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="mugSet" data-k="color" data-v="${c}" aria-pressed="${d.color === c}" aria-label="Barva"></button>`).join("")}</div>
         <span class="label">Ouško a ozdoby kolem hrdla</span><div class="swatches">${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="mugSet" data-k="color2" data-v="${c}" aria-pressed="${d.color2 === c}" aria-label="Barva"></button>`).join("")}</div>
@@ -4160,9 +4260,10 @@ function sheetHTML(s){
         ${row("duvet", "Peřina")}${row("pillow", "Polštáře")}${row("sheet", "Prostěradlo")}
         <button class="btn" data-act="bedSave">Převléct 🛏️✨</button><button class="btn ghost" data-act="bedReset">Původní povlečení</button>`; }
     case "tie": { const o2 = partner(); const prevLook = o2 && o2.look && (o2.look.hair === "ponytail" || o2.look.hair === "bun") ? o2.look : {fur:"peach", belly:"blush", hair:"ponytail", hairc:"ginger"};
-      return head("Vyrobit gumičku 🎀") + `<div class="preview tailor-prev">${syslikSVG(prevLook, "happy", 160, {key:"tie", wear:[{id:"tp", type:"scrunchie", color:s.color, pattern:"none"}]})}</div>
-        <p class="small muted center" style="margin:0">Nařasená gumička do culíku nebo drdůlku pro ${esc(o2 ? o2.name : "syslici")}.</p>
-        <span class="label">Barva</span><div class="swatches">${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="tieColor" data-v="${c}" aria-pressed="${s.color === c}" aria-label="Barva"></button>`).join("")}</div>
+      return head("Vyrobit mašli 🎀") + `<div class="preview tailor-prev">${syslikSVG(prevLook, "happy", 160, {key:"tie", wear:[{id:"tp", type:"hairbow", color:s.color, color2:s.color2 || null, pattern:"none"}]})}</div>
+        <p class="small muted center" style="margin:0">Mašle do vlasů pro syslici. Sedí na culíku, drdůlku i na ofince.</p>
+        <span class="label">Barva mašle</span><div class="swatches">${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="tieColor" data-v="${c}" aria-pressed="${s.color === c}" aria-label="Barva"></button>`).join("")}</div>
+        <span class="label">Uzlík uprostřed</span><div class="swatches"><button class="swatch auto" data-act="tieColor2" data-v="" aria-pressed="${!s.color2}" aria-label="Automaticky">A</button>${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="tieColor2" data-v="${c}" aria-pressed="${s.color2 === c}" aria-label="Barva uzlíku"></button>`).join("")}</div>
         <button class="btn" data-act="tieSend" ${o2 ? "" : "disabled"}>Darovat ${esc(o2 ? o2.name : "")} 🎁</button>`; }
     case "cloth": return clothSheet(s);
     case "tailor": return tailorSheet(s);
@@ -4270,7 +4371,7 @@ function wardrobeSheet(s){
   const chips = `<div class="chips" style="justify-content:center">${[["", "👕", "Běžně"]].concat(Object.entries(OUTFIT_CATS).map(([k, a]) => [k, a[0], a[1]])).map(([k, e, t]) => `<button class="chip" data-act="outfitCat" data-v="${k}" aria-pressed="${cat === k}">${e} ${t}${k && outfitOf(p, k).length ? " ✓" : ""}</button>`).join("")}</div>`;
   const rails = Object.entries(SLOTS).filter(([slot]) => slot !== "hairtie" || p.gender === "female").map(([slot, title]) => {
     const list = items.filter(it => CLOTH[it.type].slot === slot);
-    if (slot === "hairtie" && !list.length) return `<div class="stack" style="gap:6px"><span class="label">${title}</span><p class="small muted" style="margin:0">Gumičku do culíku nebo drdůlku ti může vyrobit syslík 🎀</p></div>`;
+    if (slot === "hairtie" && !list.length) return `<div class="stack" style="gap:6px"><span class="label">${title}</span><p class="small muted" style="margin:0">Mašli do vlasů ti může vyrobit syslík 🎀</p></div>`;
     return `<div class="stack" style="gap:6px"><span class="label">${title}</span><div class="rail">
       ${list.map((it, i) => `<button class="cloth" data-act="wear" data-id="${esc(it.id)}" aria-pressed="${worn.some(w => w.id === it.id)}">
         ${clothSwatch(it, slot + i)}<small>${esc(it.name || CLOTH[it.type].name)}</small>
@@ -4309,24 +4410,26 @@ function clothSheet(s){
     ${it.kind === "own" ? `<button class="btn ghost" data-act="editCloth" data-id="${esc(it.id)}">Upravit</button>` : ""}
     ${it.kind !== "preset" ? (s.confirm ? `<button class="btn danger" data-act="delCloth" data-id="${esc(it.id)}">Opravdu smazat? Klepni znovu</button>` : `<button class="btn danger" data-act="askDelCloth" data-id="${esc(it.id)}">Smazat ze šatníku</button>`) : ""}`;
 }
-const PATCHABLE = new Set(["sweater","tshirt","dress","hoodie","overalls","apron","cap","beanie","beret"]);
-function craftButtons(p){
-  return `<div class="craftrow"><button class="card craftb" data-act="openMug"><span>☕</span><b>Vyrobit hrneček</b></button>${p.gender === "male" && partner() ? `<button class="card craftb" data-act="openBouquet"><span>💐</span><b>Uvázat kytici</b></button><button class="card craftb" data-act="openTie"><span>🎀</span><b>Vyrobit gumičku</b></button>` : ""}${p.gender === "female" ? `<button class="card craftb" data-act="openBeads"><span>📿</span><b>Navlékat korálky</b></button>` : ""}</div>`;
+const PATCHABLE = new Set(["sweater","tshirt","dress","hoodie","overalls","apron","cap","beanie","beret","pajamas","shirt","polo","turtleneck","blouse","sundress","ruffle","flatcap","coat","blazer","puffer","dblazer","tweed","cardigan","denim"]);
+function craftButtons(p, forPartner){
+  return `<div class="craftrow">${forPartner && partner() ? `<button class="card craftb" data-act="tailorGift"><span>✂️</span><b>Navrhnout oblečení</b></button>` : ""}<button class="card craftb" data-act="openMug"><span>☕</span><b>Vyrobit hrneček</b></button>${p.gender === "male" && partner() ? `<button class="card craftb" data-act="openBouquet"><span>💐</span><b>Uvázat kytici</b></button><button class="card craftb" data-act="openTie"><span>🎀</span><b>Vyrobit mašli</b></button>` : ""}${p.gender === "female" ? `<button class="card craftb" data-act="openBeads"><span>📿</span><b>Navlékat korálky</b></button>` : ""}</div>`;
 }
+function tailorFor(s){ return s && s.gift && partner() ? partner() : me(); }
+const tailorOK = (c, g) => !c.hidden && !c.lux && !c.craft && (!c.g || c.g === g);
 function tailorSheet(s){
-  const p = me(), d = s.draft, t = CLOTH[d.type];
-  const preview = wearingOf(p).filter(x => CLOTH[x.type].slot !== t.slot).concat([Object.assign({id:"draft"}, d, {letter:(p.name || "")[0]})]);
-  const types = Object.entries(SLOTS).map(([slot, title]) => `<div class="stack" style="gap:6px"><small class="muted" style="font-weight:700">${title}</small><div class="chips">${Object.entries(CLOTH).filter(([, c]) => c.slot === slot && !c.hidden && !c.lux && !c.craft).map(([k, c]) => `<button class="chip" data-act="tlType" data-v="${k}" aria-pressed="${d.type === k}">${c.e} ${c.name}</button>`).join("")}</div></div>`).join("");
+  const p = me(), tp = tailorFor(s), d = s.draft, t = CLOTH[d.type], tg = tp.gender === "female" ? "female" : "male";
+  const preview = wearingOf(tp).filter(x => CLOTH[x.type].slot !== t.slot && !(t.slot === "body" && ["gown","swimsuit"].includes(d.type) && CLOTH[x.type].slot === "legs")).concat([Object.assign({id:"draft"}, d, {letter:(tp.name || "")[0]})]);
+  const types = `<p class="small muted" style="margin:0">${tg === "female" ? "🎀 Holčičí kousky pro syslici" : "🐿️ Klučičí kousky pro syslíka"} (a k tomu ty, co sluší oběma)</p>` + Object.entries(SLOTS).map(([slot, title]) => { const list = Object.entries(CLOTH).filter(([, c]) => c.slot === slot && tailorOK(c, tg)); return list.length ? `<div class="stack" style="gap:6px"><small class="muted" style="font-weight:700">${title}</small><div class="chips">${list.map(([k, c]) => `<button class="chip" data-act="tlType" data-v="${k}" aria-pressed="${d.type === k}">${c.e} ${c.name}${c.g ? "" : " ✦"}</button>`).join("")}</div></div>` : ""; }).join("");
   const sw = (act, cur) => CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="${act}" data-v="${c}" aria-pressed="${cur === c}" aria-label="Barva ${c}"></button>`).join("");
   const own1 = !CLOTH_COLORS.includes(d.color), own2 = d.color2 && !CLOTH_COLORS.includes(d.color2);
-  return head(s.editId ? "Upravit kousek" : "Krejčovství ✂️") + `<div class="preview tailor-prev">${syslikSVG(p.look, "happy", 170, {key:"tl", wear:preview})}<button class="dice" data-act="tlRandom" aria-label="Překvap mě">🎲</button></div>
+  return head(s.editId ? "Upravit kousek" : s.gift ? "Ušít dárek 🎁" : "Krejčovství ✂️") + `<div class="preview tailor-prev">${syslikSVG(tp.look, "happy", 170, {key:"tl", wear:preview})}<button class="dice" data-act="tlRandom" aria-label="Překvap mě">🎲</button></div>
     <span class="label">1 · Co ušijeme?</span>${types}
     <span class="label">2 · Látka</span><div class="swatches">${sw("tlColor", d.color)}<label class="swatch custom" aria-pressed="${own1}" style="${own1 ? `background:${d.color}` : ""}" aria-label="Vlastní barva"><input type="color" id="tl-color" value="${esc(d.color)}"></label></div>
     <span class="label">3 · Lem, knoflíky a nášivka</span><div class="swatches"><button class="swatch auto" data-act="tlColor2" data-v="" aria-pressed="${!d.color2}" aria-label="Automaticky">A</button>${sw("tlColor2", d.color2)}<label class="swatch custom" aria-pressed="${!!own2}" style="${own2 ? `background:${d.color2}` : ""}" aria-label="Vlastní barva lemu"><input type="color" id="tl-color2" value="${esc(d.color2 || "#ffffff")}"></label></div>
     ${t.pat ? `<span class="label">4 · Vzor</span><div class="chips">${Object.entries(PATTERNS).map(([k, n]) => `<button class="chip" data-act="tlPattern" data-v="${k}" aria-pressed="${(d.pattern || "none") === k}">${n}</button>`).join("")}</div>` : ""}
     ${PATCHABLE.has(d.type) ? `<span class="label">5 · Nášivka</span><div class="chips">${Object.entries(PATCHES).map(([k, n]) => `<button class="chip" data-act="tlPatch" data-v="${k}" aria-pressed="${(d.patch || "none") === k}">${n}</button>`).join("")}</div>` : ""}
     <span class="label">Jméno kousku</span><input type="text" id="tl-name" maxlength="30" placeholder="${esc(t.name)}" value="${esc(d.name || "")}" autocomplete="off">
-    <button class="btn" data-act="tlSave">${s.editId ? "Uložit změny" : "Ušít a obléct ✂️"}</button>`;
+    <button class="btn" data-act="tlSave">${s.editId ? "Uložit změny" : s.gift ? "Ušít a darovat 🎁" : "Ušít a obléct ✂️"}</button>`;
 }
 function memorySheet(s){
   const m = buildMemories().find(x => x.id === s.id); if (!m) return head("Vzpomínka");
@@ -4628,7 +4731,7 @@ function handle(a, v, el){
     case "tailor": {
       const slot = v || "neck";
       if (slot === "bag") { handle("atelier"); break; }
-      const type = Object.keys(CLOTH).find(k => CLOTH[k].slot === slot && !CLOTH[k].hidden && !CLOTH[k].lux) || "scarf";
+      const type = Object.keys(CLOTH).find(k => CLOTH[k].slot === slot && tailorOK(CLOTH[k], p.gender === "female" ? "female" : "male")) || "scarf";
       openSheet("tailor", {draft:{type, color:pick(CLOTH_COLORS.slice(0, 9)), pattern:"none", name:""}});
       break;
     }
@@ -4663,8 +4766,10 @@ function handle(a, v, el){
     case "tlColor": S.sheet.draft.color = v; renderSheet(); break;
     case "tlColor2": S.sheet.draft.color2 = v || null; renderSheet(); break;
     case "tlPatch": S.sheet.draft.patch = v; renderSheet(); break;
+    case "tailorGift": { const o = partner(); if (!o) break; const g = o.gender === "female" ? "female" : "male";
+      openSheet("tailor", {gift:true, draft:{type:g === "female" ? "sundress" : "shirt", color:pick(CLOTH_COLORS.slice(0, 12)), pattern:"none", name:""}}); break; }
     case "tlRandom": {
-      const d = S.sheet.draft, keys = Object.keys(CLOTH).filter(k => !CLOTH[k].hidden), type = pick(keys);
+      const tg = tailorFor(S.sheet).gender === "female" ? "female" : "male", d = S.sheet.draft, keys = Object.keys(CLOTH).filter(k => tailorOK(CLOTH[k], tg)), type = pick(keys);
       Object.assign(d, {type, color:pick(CLOTH_COLORS), color2:Math.random() < .6 ? pick(CLOTH_COLORS) : null, pattern:CLOTH[type].pat ? pick(Object.keys(PATTERNS)) : "none", patch:PATCHABLE.has(type) ? pick(Object.keys(PATCHES)) : "none"});
       renderSheet(); break;
     }
@@ -4672,7 +4777,9 @@ function handle(a, v, el){
     case "tlSave": {
       const d = S.sheet.draft, editId = S.sheet.editId;
       const item = {id:editId || ("c-" + uid()), type:d.type, color:d.color, pattern:CLOTH[d.type].pat ? (d.pattern || "none") : "none", name:(d.name || "").trim() || CLOTH[d.type].name,
-        color2:d.color2 || null, patch:PATCHABLE.has(d.type) ? (d.patch || "none") : "none", letter:(me().name || "")[0] || ""};
+        color2:d.color2 || null, patch:PATCHABLE.has(d.type) ? (d.patch || "none") : "none", letter:(tailorFor(S.sheet).name || "")[0] || ""};
+      if (S.sheet.gift && partner()) { const o = partner(); send("clothGift", {item:plainItem(Object.assign({}, item, {id:"g-" + uid()}))}); care("together"); closeSheet(); burst("🎁"); homePose("happy", 1800);
+        toast(`Ušito a posláno! ${o.name} najde ${item.name} ${CLOTH[item.type].e} ve svém šatníku 🎁`); break; }
       updateMe(pp => {
         pp.wardrobe = (pp.wardrobe || []).filter(x => x.id !== item.id).concat([item]).slice(-80);
         const slot = CLOTH[item.type].slot;
@@ -4726,7 +4833,8 @@ function handle(a, v, el){
     case "openBouquet": openSheet("bouquet", {d:{flowers:{rose:3, tulip:0, sunflower:0, peony:2, daisy:2, lavender:0}, wrap:"#F7E3B5", ribbon:"#E8546B", card:""}}); break;
     case "openTie": openSheet("tie", {color:"#F48FA6"}); break;
     case "tieColor": S.sheet.color = v; renderSheet(); break;
-    case "tieSend": { const item = {id:"c-" + uid(), type:"scrunchie", color:S.sheet.color, pattern:"none", name:"Gumička do vlasů"}; send("clothGift", {item}); closeSheet(); toast("Gumička je na cestě 🎀"); homePose("happy", 1500); break; }
+    case "tieColor2": S.sheet.color2 = v || null; renderSheet(); break;
+    case "tieSend": { const item = {id:"c-" + uid(), type:"hairbow", color:S.sheet.color, color2:S.sheet.color2 || null, pattern:"none", name:"Mašle do vlasů"}; send("clothGift", {item}); closeSheet(); toast("Mašle je na cestě 🎀"); homePose("happy", 1500); break; }
     case "openBeads": openSheet("beads", {d:{beads:[], shape:"round"}}); break;
     case "mugSet": S.sheet.d[el.dataset.k] = v; renderSheet(); break;
     case "bqSet": S.sheet.d[el.dataset.k] = v; renderSheet(); break;

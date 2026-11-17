@@ -833,8 +833,9 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 55;
+const APP_VERSION = 56;
 const CHANGELOG = {
+  56: ["Let jde urychlit ⏩: v letadle klepni na „Urychlit let“ a zkrať ho o 15 minut, 30 minut, hodinu, nebo rovnou přistaň. Druhému pak přijde zpráva o přistání dřív"],
   55: ["Krejčovství je rozdělené na klučičí a holčičí kousky 🐿️🎀. Nové jsou kalhoty a sukně (džíny, chinos, kraťasy, legíny, sukně, skládaná sukně), plavky pro syslíka i syslici, košile, polokošile, rolák, halenka, letní šaty, šaty s volány, večerní šaty, dvouřadé sako, tvídové sako, kardigan, džínová bunda, nové brýle (kulaté, hranaté, pilotky, kočičí, hvězdičkové), boty (kotníkové, holínky, mokasíny, lodičky, baleríny), fedora, bekovka, slaměný klobouk, čelenka s mašlí, náhrdelník a perly",
        "V Dárku je teď „Navrhnout oblečení“: ušiješ kousek přímo pro druhého syslíka a pošleš mu ho 🎁",
        "Místo gumičky teď syslík vyrábí mašli do vlasů 🎀 (dvě barvy)",
@@ -2443,7 +2444,7 @@ function locationOf(s){
     if (e.author === s || (e.payload.together && acts[s])) {
       const act = PLACES[e.payload.place].acts[acts[s]] ? acts[s] : Object.keys(PLACES[e.payload.place].acts)[0];
       if (e.payload.place === "flight") {
-        const dest = PLACES[e.payload.dest] ? e.payload.dest : "home", arrive = e.payload.arrive || 0;
+        const dest = PLACES[e.payload.dest] ? e.payload.dest : "home", sp = S.events.slice(i).reverse().find(x => x.type === "flightSpeed" && x.payload && x.payload.id === e.id), arrive = sp ? sp.payload.arrive : (e.payload.arrive || 0);
         if (now() >= arrive) { const la = dest === "copenhagen" ? (p.gender === "female" ? "cou" : "cphread") : dest === "home" ? "nest" : Object.keys(PLACES[dest].acts)[0];
           return {place:dest, act:la, at:arrive, together:!!e.payload.together, explicit:true, landed:true, flightId:e.id, flyer:s}; }
         return {place:"flight", act, at:e.at, together:!!e.payload.together, explicit:true, arrive, dest, flightId:e.id};
@@ -3709,7 +3710,7 @@ function homeView(){
     ${S.home.bubble ? `<div class="bubble">${esc(S.home.bubble)}</div>` : S.guitarOn ? `<div class="bubble">${esc(guitarLine(withPartner && (loc.act === "listen" || oloc.act === "listen")))}</div>` : withPartner && CUDDLE_ACTS.has(loc.act) && CUDDLE_ACTS.has(oloc.act) ? `<div class="bubble">Syslííííímeee, Syslííííímeee! 🐿️💞</div>` : label ? `<div class="chip-float">${esc(label)}</div>` : ""}
     ${buddy ? `<div class="chip-float low">${esc(o.name)} ${far ? "je na druhém břehu 👋" : S.stageDancer ? "tančí na jevišti 🩰" : withPartner ? "je tu s tebou 💞" : "je tu na návštěvě 🏡"}</div>` : ""}
     ${goListen ? `<button class="chip-float low left" data-act="goListen">🎶 Jít poslouchat ${esc(o.name)}</button>` : ""}
-    ${loc.place !== "home" && loc.place !== "flight" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}
+    ${loc.place !== "home" && loc.place !== "flight" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}${loc.place === "flight" ? `<button class="chip-float low left" data-act="flSpeed">⏩ Urychlit let</button>` : ""}
     ${loc.place === "theatre" && p.gender === "male" && o ? `<button class="photo-btn flower-btn" data-act="theatreFlowers" aria-label="Přinést kytici">💐</button>` : ""}
     ${far ? `<div class="slot farbank" style="bottom:${farBottom(myAct, theirAct)}%" data-act="visitor" role="button" aria-label="Pozdravit">${syslikSVG(o.look, actPose(theirAct, false, 0), 92, {key:"far", wear:buddyWear, act:theirAct})}</div>` : ""}
     <div class="cast ${buddy && !far && !duo && loc.act !== "jetski" ? "together" : ""}" style="${castStyle(sceneAct)}">
@@ -4248,6 +4249,11 @@ function sheetHTML(s){
     case "wardrobe": return wardrobeSheet(s);
     case "todo": return todoSheet(s);
     case "atelier": return atelierSheet(s);
+    case "flSpeed": { const l = locationOf(S.slot); if (l.place !== "flight") return head("Let ✈️");
+      const left = Math.max(0, Math.round((l.arrive - now()) / 60000)), t = new Date(l.arrive).toLocaleTimeString("cs-CZ", {hour:"2-digit", minute:"2-digit"});
+      return head("Urychlit let ⏩") + `<p class="center" style="margin:0">Přistání ${PLACES[l.dest].loc} v <b>${t}</b><br><span class="muted small">zbývá ${left >= 60 ? `${Math.floor(left / 60)} h ${left % 60} min` : `${left} min`}</span></p>
+        <div class="stack" style="gap:8px">${[[15,"O 15 minut"],[30,"O 30 minut"],[60,"O hodinu"]].filter(([m]) => left > m).map(([m, n]) => `<button class="btn ghost" data-act="flSpeedGo" data-v="${m}">⏩ ${n}</button>`).join("")}
+        <button class="btn" data-act="flSpeedGo" data-v="0">🛬 Přistát hned</button></div>`; }
     case "flight": { const fromN = s.dest === "copenhagen" ? "Z Prahy do Kodaně" : "Z Kodaně do Prahy", mine = actsFor("flight", p.gender), cg = o && canGoTogether(locationOf(S.slot).place);
       return head("Let ✈️") + `<div class="scene" style="height:200px">${cabinHTML(s.act)}<div class="cast">${syslikSVG(p.look, actPose(s.act, false, 0), 110, {key:"fl", wear:wearFor(p, s.act), act:s.act})}</div></div>
         <p class="center" style="margin:0"><b>${fromN}</b> 🇨🇿 ⇄ 🇩🇰</p>
@@ -4816,6 +4822,13 @@ function handle(a, v, el){
     case "flAct": S.sheet.act = v; renderSheet(); break;
     case "mapReset": S.mapZ = {s:1, x:0, y:0}; render(); break;
     case "flBoard": boardFlight(el.dataset.t === "1"); break;
+    case "flSpeed": { const l = locationOf(S.slot); if (l.place !== "flight") break; openSheet("flSpeed"); break; }
+    case "flSpeedGo": { const l = locationOf(S.slot); if (l.place !== "flight") { closeSheet(); break; }
+      const mins = +v, arrive = mins ? Math.max(now() + 5000, l.arrive - mins * 60000) : now() - 1000;
+      send("flightSpeed", {id:l.flightId, arrive}); closeSheet();
+      if (arrive <= now()) { setTimeout(checkLandings, 300); toast(`Přistáváme ${PLACES[l.dest].loc} 🛬`); }
+      else toast(`Kapitán přidal plyn ⏩ Přistání v ${new Date(arrive).toLocaleTimeString("cs-CZ", {hour:"2-digit", minute:"2-digit"})}`);
+      render(); break; }
     case "trAct": if (v === "mx5" && p.gender === "female") toast(MANUAL_MSG); S.sheet.act = v; S.sheet.dist = ""; renderSheet(); break;
     case "trCar": if (v === "mx5" && p.gender === "female") { toast(MANUAL_MSG); if (!canGoTogether(locationOf(S.slot).place)) break; } S.sheet.car = v || null; renderSheet(); break;
     case "trJet": S.sheet.jet = v; renderSheet(); break;

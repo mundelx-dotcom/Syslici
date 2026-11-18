@@ -524,6 +524,15 @@ textarea:focus,input[type=text]:focus{border-color:var(--accent);outline:none}
 
 /* v4: nová místa */
 .pl-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pl-lkbe .overfly{animation:overfly 12s linear infinite}
+@keyframes overfly{from{transform:translateX(0)}to{transform:translateX(-560px)}}
+.pl-lkbe .sock{transform-origin:0 13px;animation:sock 3s ease-in-out infinite}
+@keyframes sock{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(6deg)}}
+.pl-cockpit .ckland{animation:ckbank 8s ease-in-out infinite;transform-origin:200px 200px}
+@keyframes ckbank{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(6px)}}
+.pl-cockpit .ckcloud{animation:ckcloud 7s linear infinite}
+@keyframes ckcloud{from{transform:translate(0,0)}to{transform:translate(-60px,30px) scale(1.2);opacity:0}}
+.sy .heartfloat{transform-origin:50% 100%;animation:floaty 1.4s ease-in-out infinite}
 .pl-hangar{background:#22324F}
 .pl-hangar .beam{animation:beam 4s ease-in-out infinite}
 @keyframes beam{0%,100%{opacity:.05}50%{opacity:.12}}
@@ -833,8 +842,12 @@ svg.sy[style*="scaleX(-1)"] .nf{transform:scaleX(-1);transform-origin:center}
 <script>
 "use strict";
 /* ============ Verze a novinky ============ */
-const APP_VERSION = 56;
+const APP_VERSION = 57;
 const CHANGELOG = {
+  57: ["Kodaň je rozdělená na dvě místa: SAS Hangár (práce na hangáru, Troubleshooting, návštěva) a Sommerstedgade, Slunečná ulice, kde bydlíš ☀️. Mezi nimi se jezdí metrem nebo se chodí pěšky",
+       "Mašle od syslíka je teď na ouško, ne do vlasů 🎀",
+       "Nové místo Letiště Benešov 🛩️: syslík létá s Tecnamem P2010 nebo se učí na ATPL, syslice si dává čupík a pozoruje letadla",
+       "Syslík může vzít syslici prolétnout. Syslici přijde pozvánka a musí slíbit, že se nebude bát 💪💞"],
   56: ["Let jde urychlit ⏩: v letadle klepni na „Urychlit let“ a zkrať ho o 15 minut, 30 minut, hodinu, nebo rovnou přistaň. Druhému pak přijde zpráva o přistání dřív"],
   55: ["Krejčovství je rozdělené na klučičí a holčičí kousky 🐿️🎀. Nové jsou kalhoty a sukně (džíny, chinos, kraťasy, legíny, sukně, skládaná sukně), plavky pro syslíka i syslici, košile, polokošile, rolák, halenka, letní šaty, šaty s volány, večerní šaty, dvouřadé sako, tvídové sako, kardigan, džínová bunda, nové brýle (kulaté, hranaté, pilotky, kočičí, hvězdičkové), boty (kotníkové, holínky, mokasíny, lodičky, baleríny), fedora, bekovka, slaměný klobouk, čelenka s mašlí, náhrdelník a perly",
        "V Dárku je teď „Navrhnout oblečení“: ušiješ kousek přímo pro druhého syslíka a pošleš mu ho 🎁",
@@ -1053,7 +1066,7 @@ const CLOTH = {
   neckpillow:{slot:"neck", name:"Cestovní polštářek", e:"💤", pat:false, hidden:true},
   scarf:{slot:"neck", name:"Šála", e:"🧣", pat:true}, bandana:{slot:"neck", name:"Šátek na krk", e:"🔻", pat:true},
   bowtie:{slot:"neck", name:"Motýlek", e:"🎩", pat:true, g:"male"}, beads:{slot:"neck", name:"Korálky", e:"📿", pat:false}, beadsPaw:{slot:"paw", name:"Korálky na tlapce", e:"📿", pat:false, hidden:true},
-  scrunchie:{slot:"hairtie", name:"Gumička do vlasů", e:"🎀", pat:false, craft:true}, hairbow:{slot:"hairtie", name:"Mašle do vlasů", e:"🎀", pat:false, craft:true, g:"female"},
+  scrunchie:{slot:"hairtie", name:"Gumička do vlasů", e:"🎀", pat:false, craft:true}, hairbow:{slot:"ear", name:"Mašle na ouško", e:"🎀", pat:false, craft:true, g:"female"},
   fedora:{slot:"head", name:"Fedora", e:"🎩", pat:false, g:"male"}, flatcap:{slot:"head", name:"Bekovka", e:"🧢", pat:true, g:"male"},
   sunhat:{slot:"head", name:"Slaměný klobouk", e:"👒", pat:false, g:"female"}, aliceband:{slot:"head", name:"Čelenka s mašlí", e:"🎀", pat:true, g:"female"},
   round:{slot:"face", name:"Kulaté brýle", e:"👓", pat:false}, square:{slot:"face", name:"Hranaté brýle", e:"🤓", pat:false, g:"male"},
@@ -1082,7 +1095,7 @@ const CLOTH = {
   chef:{slot:"head", name:"Kuchařská čepice", e:"👨‍🍳", pat:false, hidden:true}, headband:{slot:"head", name:"Čelenka", e:"🎽", pat:false, hidden:true},
   helmet:{slot:"head", name:"Cyklistická helma", e:"⛑️", pat:false, hidden:true}, goggles:{slot:"face", name:"Plavecké brýle", e:"🥽", pat:false, hidden:true}
 };
-const SLOTS = {head:"Na hlavu", face:"Na oči", hairtie:"Do vlasů", neck:"Na krk", body:"Na tělo", outer:"Přes to", legs:"Kalhoty a sukně", bag:"Kabelky", feet:"Na tlapky"};
+const SLOTS = {head:"Na hlavu", ear:"Na ouško", face:"Na oči", hairtie:"Do vlasů", neck:"Na krk", body:"Na tělo", outer:"Přes to", legs:"Kalhoty a sukně", bag:"Kabelky", feet:"Na tlapky"};
 const CLOTH_COLORS = ["#EE8E8E","#E8546B","#F4A6C8","#F7B267","#F2D16B","#9ED9A0","#5E9E5A","#7CC6C2","#8EC5E8","#3B6FB6","#8C9EEB","#B79CE8","#FFFFFF","#E9DCC9","#6B5249","#2F3A56","#24222C"];
 const PATTERNS = {none:"Hladké", stripes:"Proužky", pinstripe:"Jemný proužek", dots:"Puntíky", bigdots:"Velké puntíky", hearts:"Srdíčka", stars:"Hvězdičky", checks:"Kostičky", gingham:"Vichy kostka", argyle:"Kosočtverce", zigzag:"Cik-cak", flowers:"Kytičky", moons:"Měsíčky", clouds:"Obláčky", cherries:"Třešničky", leopard:"Leopard", anchors:"Kotvičky", planes:"Letadýlka", paws:"Tlapky", rainbow:"Duha"};
 const LUX_PATTERNS = {none:"Hladké", tartan:"Károvaný", quilted:"Prošívaný", monogram:"Monogram", oblique:"Šikmé proužky"};
@@ -1192,7 +1205,7 @@ function P(gender){
 /* ============ Nálady bez trestů ============ */
 const FLOOR = 40, GENTLE = 55;
 const clamp = (v, lo = FLOOR) => Math.min(100, Math.max(lo, v));
-const TIRING = new Set(["tyre","gferrata","ballet","practice","ramp","hangar","engineering","cphswim","gswim","pswim","swim","run","bike","trail","prun","pbike","jetski"]);
+const TIRING = new Set(["tecnam","tyre","gferrata","ballet","practice","ramp","hangar","engineering","cphswim","gswim","pswim","swim","run","bike","trail","prun","pbike","jetski"]);
 /* Náročná činnost postupně vezme až 75 % energie (za ~30 minut). */
 function tiredDrain(p, t){
   const s = ["a","b"].find(x => S.players[x] === p); if (!s) return 0;
@@ -1573,7 +1586,7 @@ function syslikInner(lookIn, pose, key, wear, act){
   <g stroke="${dk}" stroke-width="1.6" stroke-linecap="round" opacity=".55"><path d="M72 95 L56 92"/><path d="M72 100 L57 101"/><path d="M128 95 L144 92"/><path d="M128 100 L143 101"/></g>
   ${eye(77.5,1)}${eye(122.5,2)}
   <ellipse cx="100" cy="87" rx="7.5" ry="5" fill="#C9746A"/><ellipse cx="98" cy="85.5" rx="2.4" ry="1.3" fill="#fff" opacity=".55"/>
-  ${mouth}${faceWear}${headWear}
+  ${mouth}${faceWear}${headWear}${W.ear ? hairBowSVG(139, 22, 7, W.ear.color, W.ear.color2) : ""}
  </g></g>
  ${neckWear}${blanket}
  </g>
@@ -1638,6 +1651,7 @@ function syslikAlt(view, lookIn, pose, key, wear, act){
       else if (t === "flowers") hw = [[56,46],[68,32],[84,24],[100,22],[116,24],[132,32],[144,46]].map(([x,y], i) => `<circle cx="${x}" cy="${y}" r="6" fill="${i%2 ? "#FFFFFF" : c}"/>`).join("");
       else if (t === "clip") hw = `<circle cx="138" cy="40" r="8" fill="${c}"/><circle cx="138" cy="40" r="3.5" fill="${H.color2 || "#F7CF5A"}"/>`;
     }
+    if (W.ear) hw += hairBowSVG(view === "back" ? 61 : 89, 24, 7, W.ear.color, W.ear.color2);
     const covered = H && ["cap","beanie","hat","helmet","swimcap","bucket","chef","beret"].includes(H.type);
     const strap = F && ["goggles","sunglasses","sportglasses","glasses","hearts"].includes(F.type) ? `<path d="M40 66 Q100 ${F.type === "goggles" ? 80 : 76} 160 66" stroke="${F.color}" stroke-width="${F.type === "goggles" ? 6 : 2.5}" fill="none"/>` : "";
     const nw = N ? (N.type === "scarf" ? `<path d="M54 120 Q100 136 146 120" stroke="${fillOf(N)}" stroke-width="18" fill="none" stroke-linecap="round"/><rect x="62" y="124" width="16" height="34" rx="5" fill="${fillOf(N)}" transform="rotate(10 70 140)"/>`
@@ -1719,6 +1733,7 @@ function syslikAlt(view, lookIn, pose, key, wear, act){
     else if (t === "flowers") hw = [[72,40],[86,28],[102,22],[118,22],[134,26],[150,34]].map(([x,y], i) => `<circle cx="${x}" cy="${y}" r="5.5" fill="${i%2 ? "#FFFFFF" : c}"/>`).join("");
     else if (t === "clip") hw = `<circle cx="80" cy="44" r="8" fill="${c}"/><circle cx="80" cy="44" r="3.5" fill="${H.color2 || "#F7CF5A"}"/>`;
   }
+  if (W.ear) hw += hairBowSVG(89, 24, 7, W.ear.color, W.ear.color2);
   const covered = H && ["cap","beanie","hat","helmet","swimcap","bucket","chef","beret"].includes(H.type);
   let fw = "";
   if (F) {
@@ -1883,6 +1898,15 @@ function guitarLine(together){
   return `🎶 ${w(0)}, ${w(1)}… ${w(2)} a ${w(3)}! la la 🎸`;
 }
 setInterval(() => { if (S.tab === "home" && !S.sheet && S.guitarOn && !document.hidden) render(); }, 8000);
+/* ============ Prolétnout se v Tecnamu ============ */
+function pendingFly(){
+  const p = me(), o = partner(); if (!p || !o || p.gender !== "female") return null;
+  const inv = [...S.events].reverse().find(e => e.type === "flyInvite" && e.author === other(S.slot)); if (!inv || now() - inv.at > 3 * 36e5) return null;
+  if (S.events.some(e => e.type === "flyAnswer" && e.payload && e.payload.id === inv.id)) return null;
+  const ol = locationOf(other(S.slot)); if (!ol || ol.place !== "benesov" || ol.act !== "tecnam" || ol.at > inv.at) return null;
+  const ml = locationOf(S.slot); if (ml && ml.place === "benesov" && ml.act === "tpax") return null;
+  return inv;
+}
 /* ============ Let Praha ⇄ Kodaň ============ */
 function openFlight(dest){
   const t = new Date(now() + 90 * 60000); t.setMinutes(Math.round(t.getMinutes() / 5) * 5, 0, 0);
@@ -1932,6 +1956,7 @@ const PLUSH = {
   tukys:{n:"Tukys", e:"🐦", d:"tukánek"},
   pezicko:{n:"Pežíčko", e:"🦜", d:"papoušek"}
 };
+const CPH = new Set(["copenhagen","sashangar"]);
 const PLUSH_PLACES = new Set(["home","copenhagen","mill","jungle","garda"]);
 const BED_PLACE = {bed:"home", cphbed:"copenhagen", millbed:"mill", ballnap:"jungle", gtent:"garda"};
 const VEP_JOKES = ["Víš, co dělá prasátko v posilovně? Vepřové kolínko! 🐷","Kvík! To byl vtip. Kvík kvík! 🐷","Proč prasátko nehraje schovávanou? Protože ho vždycky prozradí ocásek! 🐷",
@@ -2098,7 +2123,7 @@ function rideHTML(k, riders){
   return `<div class="ride ridecar"><div class="carbox ${k}"><svg class="cb" viewBox="0 0 220 100" aria-hidden="true">${carSVG(k, "back", true, true)}</svg><div class="riders">${riders.join("")}</div><svg class="cf" viewBox="0 0 220 100" aria-hidden="true">${carSVG(k, "front", true, true)}</svg></div></div>`;
 }
 /* ============ Rekvizity a animace činností ============ */
-const ACT_ART_KEYS = new Set(["tyre","btafi","bvajicko","bkolacek","bdort","bvse","fread","fcupik","fmusic","fcou","gtent","gferrata","millbed","guitar","mow","tafi","deka","wipe","practice","coubeads","cupik","coucupik","vacuum","carP","shop","hangar","ballet","watch","swim","cphswim","fish","relax","garden","fireplace","cook","atpl","run","bike","cou","snack","bed","nap","window","gswim","wash","jetski","bar","waiter","chalet","audience","gsunset","stroll","visit","engineering","ramp","trail","prun","pbike","pswim","drive","mx5","evoque","jetY","jetG","jetP","cou2","ballnap","cats","cphread","cphcook","flightsim","cphbed"]);
+const ACT_ART_KEYS = new Set(["tecnam","tpax","spot","batpl","bcupik","tyre","btafi","bvajicko","bkolacek","bdort","bvse","fread","fcupik","fmusic","fcou","gtent","gferrata","millbed","guitar","mow","tafi","deka","wipe","practice","coubeads","cupik","coucupik","vacuum","carP","shop","hangar","ballet","watch","swim","cphswim","fish","relax","garden","fireplace","cook","atpl","run","bike","cou","snack","bed","nap","window","gswim","wash","jetski","bar","waiter","chalet","audience","gsunset","stroll","visit","engineering","ramp","trail","prun","pbike","pswim","drive","mx5","evoque","jetY","jetG","jetP","cou2","ballnap","cats","cphread","cphcook","flightsim","cphbed"]);
 function actArt(act, c){
   const paw = (x, y, r = 0) => pawG(x, y, 8.5, 10.5, r, c.dk);
   const star = (x, y, r, col, d) => `<path class="twinkle" style="animation-delay:${d}s" d="M${x} ${y-r} Q${x} ${y} ${x+r} ${y} Q${x} ${y} ${x} ${y+r} Q${x} ${y} ${x-r} ${y} Q${x} ${y} ${x} ${y-r} Z" fill="${col}"/>`;
@@ -2191,6 +2216,11 @@ function actArt(act, c){
       <g transform="translate(150 158)"><rect x="0" y="12" width="30" height="12" rx="3" fill="#2B2A33"/><path d="M8 12 L6 -2 M20 12 L22 0" stroke="#5C6577" stroke-width="4" stroke-linecap="round"/><circle cx="6" cy="-4" r="4" fill="#2B2A33"/><circle cx="22" cy="-2" r="4" fill="#2B2A33"/></g><rect x="30" y="172" width="40" height="8" rx="2" fill="#E3E7EC"/>`};
     case "cphbed": case "millbed": case "gtent": return {noBlanket:true};
     case "fread": return actArt("cphread", c);
+    case "batpl": return actArt("atpl", c);
+    case "bcupik": return actArt("cupik", c);
+    case "tecnam": return {hide:"both", front:`<rect x="95" y="190" width="10" height="44" rx="4" fill="#3A3A44"/><rect x="89" y="172" width="22" height="24" rx="9" fill="#2B2A33"/><circle cx="100" cy="176" r="2.6" fill="#E8546B"/>${paw(100,184,0)}<rect x="142" y="186" width="10" height="34" rx="3" fill="#2B2A33"/><circle cx="147" cy="184" r="6" fill="#F2F2F2"/>${paw(147,190,-20)}`};
+    case "tpax": return {hide:"both", front:`<g class="heartfloat"><path d="M100 172 C84 160 88 146 97 148 C99 148.5 100 150 100 151.5 C100 150 101 148.5 103 148 C112 146 116 160 100 172 Z" fill="#E8546B"/></g>${paw(80,170,20)}${paw(120,170,-20)}<text class="twinkle" x="150" y="70" font-size="18">💞</text>`};
+    case "spot": return {hide:"both", front:`<g><rect x="62" y="56" width="30" height="24" rx="9" fill="#2B2A33"/><rect x="108" y="56" width="30" height="24" rx="9" fill="#2B2A33"/><rect x="90" y="62" width="20" height="10" rx="3" fill="#3A3A44"/><circle cx="77" cy="68" r="8" fill="#7FB3D9"/><circle cx="123" cy="68" r="8" fill="#7FB3D9"/><circle cx="74" cy="65" r="2.4" fill="#FFFFFF" opacity=".8"/><circle cx="120" cy="65" r="2.4" fill="#FFFFFF" opacity=".8"/></g>${paw(60,84,30)}${paw(140,84,-30)}<path d="M62 92 Q56 120 66 140 M138 92 Q144 120 134 140" stroke="${c.fur}" stroke-width="15" fill="none" stroke-linecap="round"/>`};
     case "fcupik": return actArt("cupik", c);
     case "fmusic": return {hide:"both", front:`<rect x="88" y="152" width="24" height="40" rx="5" fill="#2B2A33"/><rect x="91" y="156" width="18" height="30" rx="3" fill="#7FC6E8"/><circle cx="100" cy="171" r="5" fill="#FFFFFF" opacity=".8"/><path d="M98 168 l4 3 l-4 3 Z" fill="#7FC6E8"/>${paw(84,176,24)}${paw(116,176,-24)}
       <text class="twinkle" x="150" y="80" font-size="22" fill="#B79CE8">♪</text><text class="twinkle" style="animation-delay:.5s" x="30" y="96" font-size="20" fill="#F48FA6">♫</text><text class="twinkle" style="animation-delay:1s" x="164" y="120" font-size="16" fill="#8EC5E8">♪</text>`};
@@ -2252,10 +2282,16 @@ function actArt(act, c){
 
 /* ============ Cestování ============ */
 const PLACES = {
-  copenhagen:{name:"Kodaň", sub:"Dánsko", loc:"v Kodani", to:"do Kodaně", e:"🇩🇰", ride:"✈️", x:228, y:84,
-    acts:{shop:{n:"Nakupovat", e:"🛍️", v:["nakupuje","nakupuje"]}, visit:{n:"Návštěva na hangáru", e:"🦺", g:"female", v:["je na návštěvě v hangáru SAS","je na návštěvě v hangáru SAS"]},
+  sashangar:{name:"SAS Hangár", sub:"Kastrup · Kodaň", loc:"v hangáru SAS", to:"do hangáru SAS", e:"🛠️", ride:"🚇", x:250, y:122,
+    acts:{ramp:{n:"Práce na hangáru", e:"🦺", g:"male", v:["pracuje na hangáru","pracuje na hangáru"]},
           engineering:{n:"Troubleshooting", e:"💻", g:"male", v:["řeší troubleshooting letadel","řeší troubleshooting letadel"]},
-          ramp:{n:"Na hangáru", e:"🦺", g:"male", v:["je na hangáru","je na hangáru"]},
+          visit:{n:"Návštěva na hangáru", e:"🦺", g:"female", v:["je na návštěvě v hangáru SAS","je na návštěvě v hangáru SAS"]}}},
+  benesov:{name:"Letiště Benešov", sub:"LKBE · aeroklub", loc:"na letišti v Benešově", to:"na letiště Benešov", e:"🛩️", ride:"🚗", x:300, y:446,
+    acts:{tecnam:{n:"Létat s Tecnamem", e:"🛩️", g:"male", v:["létá s Tecnamem P2010","létá s Tecnamem P2010"]}, batpl:{n:"Učit se na ATPL", e:"📚", g:"male", v:["se v aeroklubu učí na ATPL","se v aeroklubu učí na ATPL"]},
+          bcupik:{n:"Dát si čupík", e:"🌽", g:"female", v:["si u letiště dává čupík","si u letiště dává čupík"]}, spot:{n:"Pozorovat letadla", e:"🔭", g:"female", v:["pozoruje letadla","pozoruje letadla"]},
+          tpax:{n:"Prolétnout se se syslíkem", e:"💞", g:"female", hidden:true, v:["letí se syslíkem v Tecnamu","letí se syslíkem v Tecnamu"]}}},
+  copenhagen:{name:"Sommerstedgade", sub:"Slunečná ulice · Kodaň", loc:"na Sommerstedgade", to:"na Sommerstedgade", e:"🇩🇰", ride:"✈️", x:212, y:70,
+    acts:{shop:{n:"Nakupovat", e:"🛍️", v:["nakupuje","nakupuje"]},
           cphread:{n:"Číst v bytě", e:"📖", g:"male", v:["si v bytě čte","si v bytě čte"]}, cphcook:{n:"Vařit v bytě", e:"🍳", g:"male", v:["vaří v bytě","vaří v bytě"]},
           flightsim:{n:"Flight simulator na PC", e:"🕹️", g:"male", v:["létá ve flight simulatoru","létá ve flight simulatoru"]},
           cphbed:{n:"Zasyslit se v postýlce", e:"🛏️", v:["se zasyslil v postýlce","se zasyslila v postýlce"]},
@@ -2305,6 +2341,8 @@ const ACT_LOOK = {
   fish:{pose:"fish", costume:[{type:"bucket", color:"#8E9B6A"}]}, relax:{pose:"relax", costume:[{type:"sunglasses", color:"#2F3A56"}]},
   garden:{pose:"garden"}, mow:{pose:"walk"}, tyre:{pose:"work", costume:[{type:"overalls", color:"#3B4E78"}]},
   btafi:{pose:"happy"}, bvajicko:{pose:"munch"}, bkolacek:{pose:"munch"}, bdort:{pose:"munch"}, bvse:{pose:"munch"},
+  tecnam:{pose:"study", costume:[{type:"headset", color:"#2B2A33"},{type:"aviator", color:"#E3B74A"}]}, tpax:{pose:"love", costume:[{type:"headset", color:"#2B2A33"}]},
+  spot:{pose:"idle"}, bcupik:{pose:"munch"}, batpl:{pose:"study", costume:[{type:"pilot", color:"#FFFFFF"},{type:"pilotcap", color:"#16264A"}]},
   fread:{pose:"study", costume:[{type:"headset", color:"#2B2A33"}]}, fcupik:{pose:"munch", costume:[{type:"headset", color:"#2B2A33"}]}, fmusic:{pose:"relax", costume:[{type:"headset", color:"#2B2A33"}]}, fcou:{pose:"tv", costume:[{type:"headset", color:"#2B2A33"}]}, guitar:{pose:"happy"}, listen:{pose:"love"}, tafi:{pose:"mug"}, deka:{pose:"tv"}, fireplace:{pose:"mug"}, cook:{pose:"stir", costume:[{type:"chef", color:"#FFFFFF"}]}, sofa:{pose:"happy"},
   atpl:{pose:"study", costume:[{type:"pilot", color:"#FFFFFF"},{type:"pilotcap", color:"#16264A"}]},
   cphswim:{pose:"swim", costume:[{type:"swimcap", color:"#3B6FB6"},{type:"goggles", color:"#F2D16B"}]},
@@ -2348,7 +2386,7 @@ function jetDuoSVG(drv, pas, size, key){
   const da = drv.gender === "female" ? "jetG" : "jetY";
   return `<svg class="sy pose-jet act-${da}" viewBox="-104 -14 304 254" width="${Math.round(size*1.52)}" height="${Math.round(size*1.27)}" aria-hidden="true"><g transform="translate(-86 4)">${syslikAlt("side", pas.look, "jet", key + "p", pw, "jetP")}</g>${syslikAlt("side", drv.look, "jet", key + "d", dw, da)}</svg>`;
 }
-function actsFor(place, gender){ const A = PLACES[place].acts; return Object.keys(A).filter(k => !A[k].g || A[k].g === gender); }
+function actsFor(place, gender){ const A = PLACES[place].acts; return Object.keys(A).filter(k => !A[k].hidden && (!A[k].g || A[k].g === gender)); }
 function actPose(act, together, idx){ if (CUDDLE_ACTS.has(act) && together) return idx ? "cuddle-l" : "cuddle-r"; return (ACT_LOOK[act] || {}).pose || "idle"; }
 const BED_ACTS = new Set(["bed","ballnap","cphbed","millbed","gtent"]), CUDDLE_ACTS = new Set(["sofa","cphbed","bed","millbed","gtent"]);
 function frontFX(act){ if (act === "mx5" || act === "evoque") return "";
@@ -2356,8 +2394,8 @@ function frontFX(act){ if (act === "mx5" || act === "evoque") return "";
 function actInfo(place, act){ const pl = PLACES[place] || PLACES.home; return pl.acts[act] || Object.values(pl.acts)[0]; }
 const OUTFIT_CATS = {kolo:["🚴","Kolo"], beh:["🏃","Běh"], plavani:["🏊","Plavání"], rande:["💞","Rande"], prace:["🛠️","Práce"], divadlo:["🎭","Divadlo"], doma:["🏡","Doma"], spani:["😴","Spaní"], vylet:["🧳","Výlet"]};
 const ACT_CAT = {};
-[["kolo","bike pbike"],["beh","run trail prun"],["plavani","cphswim gswim pswim swim"],["vylet","jetski"],["rande","date"],["prace","visit ramp engineering atpl flightsim bar waiter chalet wash vacuum tyre"],
- ["divadlo","ballet practice watch audience"],["doma","nest sofa cou cou2 coucupik cupik fireplace cook cphread cphcook garden cats wipe mow tafi deka guitar listen"],["spani","bed cphbed ballnap millbed gtent"],["vylet","gferrata"],["vylet","shop gelato gboat gsunset relax fish window mx5 evoque btafi bvajicko bkolacek bdort bvse fread fcupik fmusic fcou"]]
+[["kolo","bike pbike"],["beh","run trail prun"],["plavani","cphswim gswim pswim swim"],["vylet","jetski"],["rande","date"],["prace","visit ramp engineering atpl batpl flightsim bar waiter chalet wash vacuum tyre"],
+ ["divadlo","ballet practice watch audience"],["doma","nest sofa cou cou2 coucupik cupik fireplace cook cphread cphcook garden cats wipe mow tafi deka guitar listen"],["spani","bed cphbed ballnap millbed gtent"],["vylet","gferrata"],["vylet","shop gelato gboat gsunset relax fish window mx5 evoque tecnam tpax spot bcupik btafi bvajicko bkolacek bdort bvse fread fcupik fmusic fcou"]]
  .forEach(([c, l]) => l.split(" ").forEach(a => { ACT_CAT[a] = c; }));
 function outfitOf(p, cat){ const o = p && p.outfits && p.outfits[cat]; return Array.isArray(o) ? o.filter(it => it && CLOTH[it.type]) : []; }
 function wearFor(p, act, cat){
@@ -2442,14 +2480,15 @@ function locationOf(s){
     if (e.type !== "travel" || !e.payload || !PLACES[e.payload.place]) continue;
     const acts = e.payload.acts || {};
     if (e.author === s || (e.payload.together && acts[s])) {
-      const act = PLACES[e.payload.place].acts[acts[s]] ? acts[s] : Object.keys(PLACES[e.payload.place].acts)[0];
+      const pl0 = e.payload.place === "copenhagen" && ["ramp","engineering","visit","hangar"].includes(acts[s]) ? "sashangar" : e.payload.place;
+      const act = PLACES[pl0].acts[acts[s]] ? acts[s] : pl0 === "sashangar" ? "ramp" : Object.keys(PLACES[pl0].acts)[0];
       if (e.payload.place === "flight") {
         const dest = PLACES[e.payload.dest] ? e.payload.dest : "home", sp = S.events.slice(i).reverse().find(x => x.type === "flightSpeed" && x.payload && x.payload.id === e.id), arrive = sp ? sp.payload.arrive : (e.payload.arrive || 0);
-        if (now() >= arrive) { const la = dest === "copenhagen" ? (p.gender === "female" ? "cou" : "cphread") : dest === "home" ? "nest" : Object.keys(PLACES[dest].acts)[0];
+        if (now() >= arrive) { const la = dest === "copenhagen" ? (p.gender === "female" ? "cou" : "cphread") : dest === "home" ? "nest" : actsFor(dest, p.gender)[0] || Object.keys(PLACES[dest].acts)[0];
           return {place:dest, act:la, at:arrive, together:!!e.payload.together, explicit:true, landed:true, flightId:e.id, flyer:s}; }
         return {place:"flight", act, at:e.at, together:!!e.payload.together, explicit:true, arrive, dest, flightId:e.id};
       }
-      return {place:e.payload.place, act, at:e.at, together:!!e.payload.together, explicit:true, play:e.payload.play || null, dist:e.author === s ? e.payload.dist || null : null, jet:e.payload.jet || null, driver:e.author};
+      return {place:pl0, act, at:e.at, together:!!e.payload.together, explicit:true, play:e.payload.play || null, dist:e.author === s ? e.payload.dist || null : null, jet:e.payload.jet || null, driver:e.author};
     }
   }
   return {place:"home", act:"nest", at:p.createdAt, together:false};
@@ -2461,7 +2500,7 @@ function whereText(s){ const p = S.players[s], l = locationOf(s), pl = PLACES[l.
   if (l.play && (l.act === "ballet" || l.act === "watch" || l.act === "audience")) t += ` ${l.act === "ballet" ? "v představení" : "na"} ${l.play}`;
   if (l.dist && SPORT[l.act]) t += ` · ${SPORT[l.act].v[p.gender === "female" ? 1 : 0]} ${fmtDist(l.dist, SPORT[l.act].u)}`;
   return t + ` ${a.e}`; }
-function rideFor(from, to){ return ["copenhagen"].includes(from) || ["copenhagen"].includes(to) ? "✈️" : PLACES[to] ? PLACES[to].ride : "🚗"; }
+function rideFor(from, to){ return CPH.has(from) && CPH.has(to) ? "🚇" : CPH.has(from) || CPH.has(to) ? "✈️" : PLACES[to] ? PLACES[to].ride : "🚗"; }
 
 const SPORT = {cphswim:{u:"m", v:["uplaval","uplavala"], e:"🏊"}, gswim:{u:"m", v:["uplaval","uplavala"], e:"🏊"}, pswim:{u:"m", v:["uplaval","uplavala"], e:"🏊"},
   run:{u:"km", v:["uběhl","uběhla"], e:"🏃"}, trail:{u:"km", v:["uběhl","uběhla"], e:"⛰️"}, prun:{u:"km", v:["uběhl","uběhla"], e:"🏃"},
@@ -2471,7 +2510,7 @@ const SPORT_DONE = new Set();
 function sportLogged(l){ return SPORT_DONE.has(l.at) || S.events.some(e => e.type === "sportResult" && e.author === S.slot && e.payload && e.payload.at === l.at); }
 const fmtDist = (d, u) => `${String(Math.round(d * 10) / 10).replace(".", ",")} ${u}`;
 const PLAYS = ["Labutí jezero","Louskáček","Giselle","Romeo a Julie","Šípková Růženka","Popelka","Don Quijote","Bajadéra"];
-const YARD = new Set(["home","garage","jungle"]), CAR_TO = new Set(["theatre","mill","garda","garage"]);
+const YARD = new Set(["home","garage","jungle"]), CAR_TO = new Set(["theatre","mill","garda","garage","benesov"]);
 /* Autem jen mezi Čílenym, Gardicí, Garáží a Národním divadlem; mezi Sklípkem, Garáží a Džunglí se přebíhá zahradou. */
 const NEAR_BJED = new Set(["home","jungle","garage"]);
 function carPlace(k){
@@ -2479,7 +2518,9 @@ function carPlace(k){
   return "garage";
 }
 function transportFor(from, to){
-  if (!to || from === to || from === "copenhagen" || to === "copenhagen") return [];
+  if (!to || from === to) return [];
+  if (CPH.has(from) && CPH.has(to)) return ["walk","mhd"];
+  if (CPH.has(from) || CPH.has(to)) return [];
   const here = from === "garage" ? [] : ["mx5","evoque"].filter(k => carPlace(k) === from);
   if (here.length) { const own = me() && me().gender === "female" ? "evoque" : "mx5"; return here.concat(here.length === 2 ? ["both"] : []).concat(here.includes(own) ? [] : ["walk","mhd"]); }
   if (from === "flight" || to === "flight") return [];
@@ -2762,6 +2803,40 @@ function apartmentHTML(act){
     ${inner}${act === "cou" || act === "coucupik" ? "" : room === "living" ? `<text x="96" y="252" font-size="22">🧶</text>` : ""}</svg>
     ${act === "cou" || act === "coucupik" ? tvHTML() : ""}<div class="night"></div></div>`;
 }
+function tecnamSVG(x, y, s, flip){
+  return `<g transform="translate(${x} ${y}) scale(${flip ? -s : s} ${s})"><ellipse cx="74" cy="48" rx="70" ry="4" fill="#000" opacity=".12"/>
+    <path d="M30 26 L24 44 M80 26 L82 44 M10 28 L10 44" stroke="#5C6577" stroke-width="2.4"/><ellipse cx="24" cy="44" rx="6" ry="5" fill="#2B2A33"/><ellipse cx="82" cy="44" rx="6" ry="5" fill="#2B2A33"/><ellipse cx="10" cy="44" rx="5" ry="4.5" fill="#2B2A33"/><path d="M18 40 Q24 34 30 40 Z M76 40 Q82 34 88 40 Z" fill="#FFFFFF"/>
+    <path d="M128 14 L142 -16 L154 -16 L150 16 Z" fill="#FFFFFF" stroke="#C9D0DA"/><path d="M144 -12 L152 -12 L151 -2 L141 -2 Z" fill="#C8102E"/><rect x="132" y="8" width="34" height="5" rx="2.5" fill="#E8ECF2"/>
+    <path d="M2 22 Q4 10 22 8 L68 6 Q92 6 112 10 L152 15 L152 20 L112 24 Q82 32 42 32 Q10 32 2 22 Z" fill="#FFFFFF" stroke="#C9D0DA" stroke-width="1"/>
+    <path d="M10 26 Q70 30 152 18" stroke="#C8102E" stroke-width="2.6" fill="none"/><path d="M12 29 Q70 32 140 22" stroke="#1E3A78" stroke-width="2" fill="none"/>
+    <path d="M30 10 L62 8 L66 20 L34 22 Z M68 8 L88 8 L92 19 L70 20 Z" fill="#7FB3D9" stroke="#5C7FA8" stroke-width=".8"/>
+    <rect x="22" y="2" width="84" height="6" rx="3" fill="#F4F6FA" stroke="#C9D0DA"/><text x="112" y="24" font-size="5.5" font-weight="800" fill="#1E3A78" font-family="Baloo 2,sans-serif">OK-SYS</text>
+    <ellipse cx="0" cy="20" rx="5" ry="6" fill="#C8102E"/><rect x="-3" y="2" width="3" height="36" rx="1.5" fill="#2B2A33" opacity=".55"/></g>`;
+}
+function lkbeHTML(act){
+  return svgPlace("pl-lkbe", `<defs><linearGradient id="lkS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8EC9F0"/><stop offset="1" stop-color="#E6F3FB"/></linearGradient></defs>
+    <rect width="400" height="350" fill="url(#lkS)"/><circle cx="330" cy="54" r="22" fill="#FFF3C4"/>
+    <g fill="#FFFFFF" opacity=".9"><ellipse cx="80" cy="52" rx="34" ry="10"/><ellipse cx="100" cy="44" rx="20" ry="12"/><ellipse cx="250" cy="34" rx="28" ry="8"/></g>
+    ${act === "spot" || act === "bcupik" ? `<g class="overfly">${tecnamSVG(420, 70, .55, false)}</g>` : ""}
+    <path d="M0 176 Q60 160 120 172 Q200 156 280 170 Q340 160 400 172 V200 H0 Z" fill="#6E9F5E"/>${Array.from({length:14}, (_, i) => `<circle cx="${i * 30 + 10}" cy="${172 - (i % 3) * 4}" r="${12 + (i % 2) * 5}" fill="#5B8A4E"/>`).join("")}
+    <rect y="186" width="400" height="164" fill="#9CCB7A"/><path d="M0 226 L400 214 L400 252 L0 268 Z" fill="#B7DD8F"/>${[30,110,190,270,350].map(x => `<rect x="${x}" y="${238 - x * .03}" width="26" height="4" rx="2" fill="#FFFFFF" opacity=".85"/>`).join("")}
+    <g transform="translate(14 112)"><path d="M0 76 V30 Q64 -6 128 30 V76 Z" fill="#B9C2CE"/>${Array.from({length:8}, (_, i) => `<path d="M${16 * i + 8} 22 V76" stroke="#A3ADBA" stroke-width="2"/>`).join("")}<rect x="22" y="40" width="84" height="36" fill="#5C6577"/><rect x="34" y="8" width="60" height="14" rx="3" fill="#1E3A78"/><text x="64" y="19" font-size="10" font-weight="800" fill="#FFFFFF" text-anchor="middle" font-family="Baloo 2,sans-serif">LKBE</text></g>
+    <g transform="translate(150 150)"><rect x="0" y="0" width="70" height="40" fill="#F6ECD6"/><path d="M-6 0 L35 -18 L76 0 Z" fill="#B5553C"/><rect x="8" y="12" width="16" height="14" fill="#9ED0F0"/><rect x="46" y="12" width="16" height="28" fill="#8A5A3C"/><text x="35" y="-4" font-size="6.5" font-weight="800" fill="#FFFFFF" text-anchor="middle" font-family="Baloo 2,sans-serif">AEROKLUB</text></g>
+    <g transform="translate(236 140)"><path d="M0 0 V60" stroke="#8E949E" stroke-width="3"/><g class="sock"><path d="M0 4 L34 8 L34 18 L0 22 Z" fill="#F28C28"/><path d="M11 5 V21 M22 6.5 V19.5" stroke="#FFFFFF" stroke-width="5"/></g></g>
+    ${tecnamSVG(394, 196, .85, true)}
+    ${act === "bcupik" || act === "spot" ? `<g transform="translate(36 268)"><rect x="0" y="0" width="80" height="8" rx="3" fill="#B08A5C"/><rect x="6" y="8" width="6" height="22" fill="#8A6A44"/><rect x="68" y="8" width="6" height="22" fill="#8A6A44"/><rect x="-4" y="16" width="88" height="6" rx="3" fill="#C9A274"/></g>` : ""}`);
+}
+function cockpitHTML(){
+  return svgPlace("pl-cockpit", `<defs><linearGradient id="ckS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5FA8E0"/><stop offset="1" stop-color="#CDE7F8"/></linearGradient></defs>
+    <rect width="400" height="350" fill="url(#ckS)"/>
+    <g class="ckland"><path d="M-40 168 L440 150 L440 350 L-40 350 Z" fill="#8DBA6E"/>${[[-40,168,60,"#A9CC7C"],[40,166,90,"#D9CC74"],[150,162,70,"#7DAA5E"],[240,158,100,"#C6D987"],[360,154,80,"#9CC27A"]].map(([x, y, w, c]) => `<path d="M${x} ${y} L${x + w} ${y - 3} L${x + w + 40} 240 L${x - 30} 246 Z" fill="${c}"/>`).join("")}<path d="M120 164 Q170 200 140 260" stroke="#7FC3E6" stroke-width="6" fill="none"/><g fill="#5B8A4E">${[60,90,260,300,330].map((x, i) => `<circle cx="${x}" cy="${178 + i * 6}" r="${5 + i % 2 * 2}"/>`).join("")}</g><g fill="#E9DCC9">${[[210,190],[220,194],[230,188]].map(([x, y]) => `<rect x="${x}" y="${y}" width="7" height="5"/>`).join("")}<path d="M206 192 l6 -5 l6 5 M216 196 l6 -5 l6 5" fill="#B5553C"/></g></g>
+    <g fill="#FFFFFF" opacity=".85" class="ckcloud"><ellipse cx="90" cy="70" rx="40" ry="11"/><ellipse cx="110" cy="62" rx="22" ry="12"/><ellipse cx="300" cy="96" rx="30" ry="8"/></g>
+    <path d="M0 0 H400 V30 Q200 6 0 30 Z" fill="#E8ECF2"/><path d="M200 18 V170" stroke="#E8ECF2" stroke-width="7"/><path d="M0 30 L0 200 L22 196 L30 30 Z M400 30 L400 200 L378 196 L370 30 Z" fill="#E8ECF2"/>
+    <path d="M0 236 Q200 214 400 236 V350 H0 Z" fill="#2B2F38"/><path d="M0 236 Q200 214 400 236" stroke="#40454F" stroke-width="5" fill="none"/>
+    <g transform="translate(36 250)"><rect width="128" height="70" rx="5" fill="#111"/><rect x="6" y="6" width="116" height="58" rx="2" fill="#4A8FD8"/><rect x="6" y="38" width="116" height="26" fill="#8A5A3C"/><path d="M6 38 H122" stroke="#FFFFFF" stroke-width="1.6"/><path d="M48 36 h12 l4 5 l4 -5 h12" stroke="#F2D16B" stroke-width="2.4" fill="none"/></g>
+    <g transform="translate(236 250)"><rect width="128" height="70" rx="5" fill="#111"/><rect x="6" y="6" width="116" height="58" rx="2" fill="#1C2A3A"/><path d="M20 50 Q50 20 80 30 T112 16" stroke="#E91E9C" stroke-width="2" fill="none"/><path d="M58 30 l6 -4 v8 Z" fill="#FFFFFF"/><text x="12" y="16" font-size="7" fill="#7CF0A8" font-family="monospace">LKBE → LKBE</text></g>
+    ${[176,224].map(x => `<circle cx="${x}" cy="262" r="10" fill="#111" stroke="#5C6577" stroke-width="2"/><path d="M${x} 262 l5 -6" stroke="#FFFFFF" stroke-width="1.6"/>`).join("")}<rect x="188" y="286" width="24" height="10" rx="2" fill="#E8546B"/>`);
+}
 function bjedHTML(act){
   const lamp = (x, y) => `<path d="M${x} 0 V${y}" stroke="#2B2A33" stroke-width="1.5"/><path d="M${x - 22} ${y + 14} Q${x} ${y - 6} ${x + 22} ${y + 14} Z" fill="#F7F3E6"/><path d="M${x - 16} ${y + 22} Q${x} ${y + 6} ${x + 16} ${y + 22} Z" fill="#EDE5D3"/><path d="M${x - 10} ${y + 28} Q${x} ${y + 18} ${x + 10} ${y + 28} Z" fill="#E3D8C0"/><ellipse cx="${x}" cy="${y + 34}" rx="30" ry="10" fill="#FFF3C4" opacity=".35"/>`;
   const chair = (x) => `<g transform="translate(${x} 0)"><path d="M-16 222 Q-18 196 -14 186 L14 186 Q18 196 16 222" stroke="#B08A5C" stroke-width="4" fill="none"/><rect x="-18" y="220" width="36" height="6" rx="3" fill="#C9A274"/><path d="M-14 226 L-16 260 M14 226 L16 260" stroke="#B08A5C" stroke-width="4"/></g>`;
@@ -2943,6 +3018,8 @@ function jungleHTML(act){
     ${catSVG("miu", 346, 226, 1.15)}${catSVG("chanel", 96, 290, 1.15)}`);
 }
 function placeHTML(place, act, hab, extra){
+  if (place === "sashangar") return act === "engineering" ? engHTML() : hangarHTML();
+  if (place === "benesov") return act === "tecnam" || act === "tpax" ? cockpitHTML() : lkbeHTML(act);
   if (place === "copenhagen") return ({hangar:hangarHTML, visit:hangarHTML, ramp:hangarHTML, engineering:engHTML, cphswim:poolHTML, run:lakesHTML, bike:roadHTML,
     atpl:() => cphFlatHTML("study"), flightsim:() => cphFlatHTML("study"), cou:() => cphFlatHTML("living"), coucupik:() => cphFlatHTML("living"), cupik:() => cphFlatHTML("living"), cphread:() => cphFlatHTML("read"), cphcook:() => cphFlatHTML("kitchen"), cphbed:() => cphFlatHTML("bed")})[act]?.() || cphHTML();
   if (place === "theatre") return act === "audience" ? theatreAudHTML(extra) : act === "practice" ? theatreHTML(null).replace('<div class="place pl-theatre">', '<div class="place pl-theatre"><div class="playbill">Trénink 🎀</div>') : theatreHTML(extra);
@@ -2974,11 +3051,11 @@ function mapSVG(){
   <text x="70" y="548" font-size="12" class="mlabel">ITÁLIE</text><text x="28" y="446" font-size="9" class="mlabel">ALPY</text>
   <path d="M58 300 Q110 262 172 280 Q236 262 296 296 Q318 340 286 372 Q254 414 190 410 Q126 420 86 388 Q46 352 58 300Z" style="fill:var(--map-cz)"/>
   <path d="M206 440 Q166 424 178 398 Q190 360 226 334 Q252 316 250 300 Q252 282 238 266" fill="none" style="stroke:var(--map-river)" stroke-width="5" stroke-linecap="round"/>
-  <text x="140" y="96" font-size="12" text-anchor="middle" class="mlabel">DÁNSKO</text>
+  <text x="98" y="96" font-size="12" text-anchor="middle" class="mlabel">DÁNSKO</text>
   <text x="70" y="404" font-size="12" class="mlabel">ČESKO</text>
-  <path d="M292 276 Q342 196 228 84" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".7"/>
+  <ellipse cx="231" cy="102" rx="46" ry="56" style="fill:var(--card);stroke:var(--accent)" fill-opacity=".35" stroke-width="2" stroke-dasharray="6 5"/><text x="254" y="66" font-size="11" text-anchor="middle" class="mlabel" style="font-weight:800">KODAŇ</text><path d="M292 276 Q342 196 252 150" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".7"/>
 
-  <ellipse cx="268" cy="350" rx="88" ry="78" style="fill:var(--card);stroke:var(--accent)" fill-opacity=".35" stroke-width="2" stroke-dasharray="6 5"/><text x="276" y="421" font-size="11" text-anchor="middle" class="mlabel" style="font-weight:800">PRAHA</text><path d="M182 380 Q166 390 150 404 M150 404 Q140 456 196 498" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".55"/>`;
+  <ellipse cx="268" cy="350" rx="88" ry="78" style="fill:var(--card);stroke:var(--accent)" fill-opacity=".35" stroke-width="2" stroke-dasharray="6 5"/><text x="276" y="421" font-size="11" text-anchor="middle" class="mlabel" style="font-weight:800">PRAHA</text><path d="M182 380 Q166 390 150 404 M150 404 Q140 456 196 498 M314 384 Q322 414 300 446" fill="none" style="stroke:var(--map-ink)" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round" opacity=".55"/>`;
   Object.entries(PLACES).forEach(([k, pl]) => {
     if (k === "flight") {
       out += `<g transform="translate(${pl.x} ${pl.y})" data-act="travelTo" data-v="flight" style="cursor:pointer"><g class="mplane"><g transform="rotate(-100) scale(.9)">
@@ -3010,7 +3087,7 @@ function doTravel(place, act, together, car, play, dist, jet){
   if (locationOf(S.slot).date) { closeSheet(); toast("Jste spolu na rande 💞 Nejdřív ho ukončete."); return; }
   const cur0 = locationOf(S.slot);
   if (cur0.place === "flight" && place !== "flight") { closeSheet(); toast("Jsi v letadle ✈️ Počkej na přistání"); return; }
-  if (place === "flight" && cur0.place !== "flight") { closeSheet(); openFlight(cur0.place === "copenhagen" ? "home" : "copenhagen"); return; }
+  if (place === "flight" && cur0.place !== "flight") { closeSheet(); openFlight(CPH.has(cur0.place) ? "home" : "copenhagen"); return; }
   if (cur0.place === place && cur0.act === act && !together) { closeSheet(); toast("Tohle už právě děláš 🙂"); return; }
   if (SPORT[cur0.act] && cur0.explicit && !sportLogged(cur0) && !(p.gender === "female" && SWIM_ACTS.has(cur0.act))) { openSheet("sportDone", {cur:{act:cur0.act, place:cur0.place, at:cur0.at}, next:[place, act, together, car, play, null, S.sheet && S.sheet.jet || null], dist:""}); return; }
   const from = locationOf(S.slot).place, acts = {}; acts[S.slot] = act;
@@ -3334,6 +3411,8 @@ function todoAdd(force){
 function incomingText(e){
   const p = e.payload || {}, n = p.name || "Druhý syslík", g = P(p.gender).g;
   switch (e.type) {
+    case "flyInvite": return `${n} tě bere prolétnout v Tecnamu 🛩️`;
+    case "flyAnswer": return p.yes ? `${n} slíbila, že se nebude bát, a nasedla do Tecnamu 💞` : `${n} radši nepoletí 🙈`;
     case "visit": return `${n} k tobě ${g("přišel","přišla")} na návštěvu! 🏡`;
     case "dateInvite": return DATES[p.kind] ? `${n} tě zve na rande: ${DATES[p.kind].n} ${DATES[p.kind].e}` : null;
     case "dateEnd": return `${n} ${g("ukončil","ukončila")} rande. Bylo to krásné 💞`;
@@ -3373,6 +3452,8 @@ function onEventAdded(e){
   if (e.type === "reaction" && p.text) { const dl = applyReactions(); if (dl) setTimeout(() => floatText(dl > 0 ? `+${dl} % nálady 😊` : `${dl} % nálady 😒`), 400); }
   if (e.type === "reaction" && p.text) { if (S.tab === "park") parkPlay("happy", p.pose || "happy", false, p.e || "💬", `${p.name}: „${p.text}“`, 4000); else if (S.tab === "home") { S.home.bubble = `${p.name}: „${p.text}“ ${p.e || ""}`; render(); setTimeout(() => { S.home.bubble = null; render(); }, 4000); burst(p.e || "💬", "#home-scene"); } }
   if (e.type === "dateInvite" && DATES[p.kind]) { ls.set("syslik.invSeen", e.id); setTimeout(() => { if (!S.sheet || S.sheet.kind !== "trip") openSheet("dateInvited", {id:e.id}); render(); }, 600); }
+  if (e.type === "flyInvite" && pendingFly() && pendingFly().id === e.id) { ls.set("syslik.flySeen", e.id); setTimeout(() => { if (!S.sheet || S.sheet.kind !== "trip") openSheet("flyInvited", {id:e.id}); render(); }, 600); }
+  if (e.type === "flyAnswer" && p.yes) setTimeout(() => burst("💞", "#home-scene"), 300);
   if (e.type === "dateAnswer" && p.yes) setTimeout(() => burst("💞", S.tab === "park" ? "#park-scene" : "#home-scene"), 300);
   if (e.type === "picnic") startPicnic(p.habitat || "meadow", p.foods || ["strawberry"]);
   else if (R) parkPlay(R[0], R[1], R[2], R[3], e.type === "cuddle" ? "Syslííííímeee, Syslííííímeee! 💞" : null, 4000);
@@ -3557,7 +3638,7 @@ function buildMemories(){
 const SOUV = {
   "copenhagen:shop":["🍪","Plechovka dánských sušenek"], "copenhagen:hangar":["🔧","Klíč z hangáru"], "copenhagen:atpl":["📇","Kartičky na ATPL"],
   "copenhagen:cphswim":["🥇","Plavecká medaile"], "copenhagen:run":["🏅","Startovní číslo 26"], "copenhagen:bike":["🚴","Cyklistická čepička"],
-  "copenhagen:cou":["🍿","Kyblík od popcornu"], "copenhagen":["🧜‍♀️","Malá mořská víla z Kodaně"],
+  "copenhagen:cou":["🍿","Kyblík od popcornu"], "copenhagen":["🧜‍♀️","Malá mořská víla z Kodaně"], "sashangar":["🔧","Klíč z hangáru SAS"], "benesov":["🪁","Větrný rukáv z Benešova"], "benesov:tecnam":["🛩️","Model Tecnamu P2010"], "benesov:spot":["📸","Fotka letadla z Benešova"],
   "theatre:ballet":["🩰","Baletní špičky"], "theatre:watch":["🎟️","Lístek do Národního divadla (v smokingu jako Bond)"], "theatre":["🎭","Divadelní program"],
   "mill:swim":["🐚","Mušle z Hubenovské zátoky"], "mill:fish":["🐟","Dřevěná rybka"], "mill:relax":["🪨","Hladký kamínek z Čílenýho"], "mill":["⚙️","Kolečko z Čílenýho"], "mill:jetski":["🚤","Klíček od vodního skútru"], "mill:bar":["🍹","Brčko z baru na Čílenym"], "mill:waiter":["🍽️","Účtenka z Čílenýho"], "mill:chalet":["🗝️","Klíč od chatky"], "mill:trail":["⛰️","Kamínek z trailu"], "copenhagen:cphread":["📖","Záložka z kodaňského bytu"], "copenhagen:cphcook":["🥘","Recept na smørrebrød"], "copenhagen:flightsim":["🕹️","Letenka z flight simulatoru"], "copenhagen:cphbed":["🛏️","Polštářek z postýlky"], "copenhagen:visit":["🦺","Žlutá vesta z návštěvy"], "copenhagen:engineering":["💻","Fixa z engineeringu"], "copenhagen:ramp":["🔧","Klíč ze stojánky"],
   "jungle:cou2":["📺","Ovladač od televize"], "jungle:ballnap":["🩰","Mašle z baletního pokojíčku"], "jungle:cats":["🐾","Chlupy od Miu a Chanel"], "jungle":["🐈","Fotka Miu a Chanel"], "garage:wash":["🧽","Houbička na autíčko"], "garage:mx5":["🔑","Klíčky od MX-5"], "garage:evoque":["🗝️","Klíčky od Evoque"], "garage":["🚗","Autíčko na klíčence"],
@@ -3628,6 +3709,7 @@ function render(){
     const n = unreadChat(), badge = $("#chat-badge");
     badge.hidden = !n || S.tab === "chat"; badge.textContent = n > 9 ? "9+" : String(n);
     const dB = $("#date-badge"), pin = partner() ? dateState().pendingIn : null; if (dB) { dB.hidden = !pin; dB.textContent = "1"; }
+    const fin = pendingFly(); if (fin && ls.get("syslik.flySeen") !== fin.id && !S.sheet) { ls.set("syslik.flySeen", fin.id); setTimeout(() => { if (!S.sheet) openSheet("flyInvited", {id:fin.id}); }, 500); }
     if (pin && ls.get("syslik.invSeen") !== pin.id && !S.sheet) { ls.set("syslik.invSeen", pin.id); setTimeout(() => { if (!S.sheet) openSheet("dateInvited", {id:pin.id}); }, 500); }
     topHTML = topBar();
     html = ({home:homeView, park:parkView, travel:travelView, chat:chatView, memories:memoriesView, den:denView})[S.tab]();
@@ -3663,7 +3745,7 @@ function homeView(){
   const atHome = loc.place === "home";
   const samePlace = !!(oloc && oloc.place === loc.place);
   /* Na stejné obrazovce jen při stejné činnosti; výjimky: nákupy + sport (druhý břeh), divadlo (balet + divák) a dvě auta za sebou. */
-  const withPartner = samePlace && ((loc.act === "guitar" && oloc.act === "listen") || (loc.act === "listen" && oloc.act === "guitar") || loc.act === oloc.act || (loc.act === "shop" && !!SPORT[oloc.act]) || (oloc.act === "shop" && !!SPORT[loc.act]) || (loc.place === "theatre" && (loc.play || "") === (oloc.play || "")) || loc.place === "bjed" || (CAR_ACTS.has(loc.act) && CAR_ACTS.has(oloc.act)));
+  const withPartner = samePlace && ((loc.act === "guitar" && oloc.act === "listen") || (loc.act === "listen" && oloc.act === "guitar") || loc.act === oloc.act || (loc.act === "shop" && !!SPORT[oloc.act]) || (oloc.act === "shop" && !!SPORT[loc.act]) || (loc.place === "theatre" && (loc.play || "") === (oloc.play || "")) || loc.place === "bjed" || (loc.place === "benesov" && ["tecnam","tpax"].includes(loc.act) && ["tecnam","tpax"].includes(oloc.act)) || (CAR_ACTS.has(loc.act) && CAR_ACTS.has(oloc.act)));
   const vEv = !withPartner && o ? [...S.events].reverse().find(e => e.type === "visit" && e.author === other(S.slot)) : null;
   const visiting = !!(vEv && now() - vEv.at < 6 * 36e5 && atHome);
   const buddy = withPartner || visiting ? o : null;
@@ -3710,7 +3792,7 @@ function homeView(){
     ${S.home.bubble ? `<div class="bubble">${esc(S.home.bubble)}</div>` : S.guitarOn ? `<div class="bubble">${esc(guitarLine(withPartner && (loc.act === "listen" || oloc.act === "listen")))}</div>` : withPartner && CUDDLE_ACTS.has(loc.act) && CUDDLE_ACTS.has(oloc.act) ? `<div class="bubble">Syslííííímeee, Syslííííímeee! 🐿️💞</div>` : label ? `<div class="chip-float">${esc(label)}</div>` : ""}
     ${buddy ? `<div class="chip-float low">${esc(o.name)} ${far ? "je na druhém břehu 👋" : S.stageDancer ? "tančí na jevišti 🩰" : withPartner ? "je tu s tebou 💞" : "je tu na návštěvě 🏡"}</div>` : ""}
     ${goListen ? `<button class="chip-float low left" data-act="goListen">🎶 Jít poslouchat ${esc(o.name)}</button>` : ""}
-    ${loc.place !== "home" && loc.place !== "flight" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}${loc.place === "flight" ? `<button class="chip-float low left" data-act="flSpeed">⏩ Urychlit let</button>` : ""}
+    ${loc.place !== "home" && loc.place !== "flight" ? `<button class="chip-float low left" data-act="goHome">🏡 Domů</button>` : ""}${loc.place === "flight" ? `<button class="chip-float low left" data-act="flSpeed">⏩ Urychlit let</button>` : ""}${loc.place === "benesov" && loc.act === "tecnam" && o && o.gender === "female" && !(oloc && oloc.place === "benesov" && oloc.act === "tpax") ? `<button class="chip-float low left" style="bottom:46px" data-act="flyInvite">💞 Vzít ${esc(o.name)} prolétnout</button>` : ""}
     ${loc.place === "theatre" && p.gender === "male" && o ? `<button class="photo-btn flower-btn" data-act="theatreFlowers" aria-label="Přinést kytici">💐</button>` : ""}
     ${far ? `<div class="slot farbank" style="bottom:${farBottom(myAct, theirAct)}%" data-act="visitor" role="button" aria-label="Pozdravit">${syslikSVG(o.look, actPose(theirAct, false, 0), 92, {key:"far", wear:buddyWear, act:theirAct})}</div>` : ""}
     <div class="cast ${buddy && !far && !duo && loc.act !== "jetski" ? "together" : ""}" style="${castStyle(sceneAct)}">
@@ -4249,12 +4331,16 @@ function sheetHTML(s){
     case "wardrobe": return wardrobeSheet(s);
     case "todo": return todoSheet(s);
     case "atelier": return atelierSheet(s);
+    case "flyInvited": { const inv = S.events.find(e => e.id === s.id); if (!inv || !o) return head("Pozvánka");
+      return head("Pozvánka do Tecnamu 🛩️") + `<div class="scene" style="height:220px">${cockpitHTML()}<div class="cast">${syslikSVG(o.look, "study", 120, {key:"fi", wear:wearFor(o, "tecnam"), act:"tecnam"})}</div></div>
+        <p class="center" style="margin:0"><b>${esc(o.name)}</b> tě bere prolétnout nad Benešovem 🛩️<br><span class="muted small">Pilot má jen jednu podmínku: musíš slíbit, že se nebudeš bát.</span></p>
+        <button class="btn" data-act="flyYes" data-id="${esc(inv.id)}">Slibuju, nebudu se bát 💪</button><button class="btn ghost" data-act="flyNo" data-id="${esc(inv.id)}">Radši ne, bojím se 🙈</button>`; }
     case "flSpeed": { const l = locationOf(S.slot); if (l.place !== "flight") return head("Let ✈️");
       const left = Math.max(0, Math.round((l.arrive - now()) / 60000)), t = new Date(l.arrive).toLocaleTimeString("cs-CZ", {hour:"2-digit", minute:"2-digit"});
       return head("Urychlit let ⏩") + `<p class="center" style="margin:0">Přistání ${PLACES[l.dest].loc} v <b>${t}</b><br><span class="muted small">zbývá ${left >= 60 ? `${Math.floor(left / 60)} h ${left % 60} min` : `${left} min`}</span></p>
         <div class="stack" style="gap:8px">${[[15,"O 15 minut"],[30,"O 30 minut"],[60,"O hodinu"]].filter(([m]) => left > m).map(([m, n]) => `<button class="btn ghost" data-act="flSpeedGo" data-v="${m}">⏩ ${n}</button>`).join("")}
         <button class="btn" data-act="flSpeedGo" data-v="0">🛬 Přistát hned</button></div>`; }
-    case "flight": { const fromN = s.dest === "copenhagen" ? "Z Prahy do Kodaně" : "Z Kodaně do Prahy", mine = actsFor("flight", p.gender), cg = o && canGoTogether(locationOf(S.slot).place);
+    case "flight": { const fromN = CPH.has(s.dest) ? "Z Prahy do Kodaně" : "Z Kodaně do Prahy", mine = actsFor("flight", p.gender), cg = o && canGoTogether(locationOf(S.slot).place);
       return head("Let ✈️") + `<div class="scene" style="height:200px">${cabinHTML(s.act)}<div class="cast">${syslikSVG(p.look, actPose(s.act, false, 0), 110, {key:"fl", wear:wearFor(p, s.act), act:s.act})}</div></div>
         <p class="center" style="margin:0"><b>${fromN}</b> 🇨🇿 ⇄ 🇩🇰</p>
         <span class="label">V kolik přistaneš?</span><input type="time" id="fl-time" value="${esc(s.time || "")}" style="font-size:20px;font-weight:700;text-align:center">
@@ -4267,7 +4353,7 @@ function sheetHTML(s){
         <button class="btn" data-act="bedSave">Převléct 🛏️✨</button><button class="btn ghost" data-act="bedReset">Původní povlečení</button>`; }
     case "tie": { const o2 = partner(); const prevLook = o2 && o2.look && (o2.look.hair === "ponytail" || o2.look.hair === "bun") ? o2.look : {fur:"peach", belly:"blush", hair:"ponytail", hairc:"ginger"};
       return head("Vyrobit mašli 🎀") + `<div class="preview tailor-prev">${syslikSVG(prevLook, "happy", 160, {key:"tie", wear:[{id:"tp", type:"hairbow", color:s.color, color2:s.color2 || null, pattern:"none"}]})}</div>
-        <p class="small muted center" style="margin:0">Mašle do vlasů pro syslici. Sedí na culíku, drdůlku i na ofince.</p>
+        <p class="small muted center" style="margin:0">Mašle na ouško pro syslici 🎀</p>
         <span class="label">Barva mašle</span><div class="swatches">${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="tieColor" data-v="${c}" aria-pressed="${s.color === c}" aria-label="Barva"></button>`).join("")}</div>
         <span class="label">Uzlík uprostřed</span><div class="swatches"><button class="swatch auto" data-act="tieColor2" data-v="" aria-pressed="${!s.color2}" aria-label="Automaticky">A</button>${CLOTH_COLORS.map(c => `<button class="swatch" style="background:${c}" data-act="tieColor2" data-v="${c}" aria-pressed="${s.color2 === c}" aria-label="Barva uzlíku"></button>`).join("")}</div>
         <button class="btn" data-act="tieSend" ${o2 ? "" : "disabled"}>Darovat ${esc(o2 ? o2.name : "")} 🎁</button>`; }
@@ -4375,9 +4461,10 @@ function wardrobeSheet(s){
   const p = me(), items = wardrobe(), cat = s && OUTFIT_CATS[s.cat] ? s.cat : "", worn = cat ? outfitOf(p, cat) : wearingOf(p);
   const acts = cat ? [...new Set(Object.values(PLACES).flatMap(pl => Object.entries(pl.acts).filter(([k]) => ACT_CAT[k] === cat).map(([, a]) => a.n)))] : [];
   const chips = `<div class="chips" style="justify-content:center">${[["", "👕", "Běžně"]].concat(Object.entries(OUTFIT_CATS).map(([k, a]) => [k, a[0], a[1]])).map(([k, e, t]) => `<button class="chip" data-act="outfitCat" data-v="${k}" aria-pressed="${cat === k}">${e} ${t}${k && outfitOf(p, k).length ? " ✓" : ""}</button>`).join("")}</div>`;
-  const rails = Object.entries(SLOTS).filter(([slot]) => slot !== "hairtie" || p.gender === "female").map(([slot, title]) => {
+  const rails = Object.entries(SLOTS).filter(([slot]) => (slot !== "hairtie" && slot !== "ear") || p.gender === "female").map(([slot, title]) => {
     const list = items.filter(it => CLOTH[it.type].slot === slot);
-    if (slot === "hairtie" && !list.length) return `<div class="stack" style="gap:6px"><span class="label">${title}</span><p class="small muted" style="margin:0">Mašli do vlasů ti může vyrobit syslík 🎀</p></div>`;
+    if (slot === "hairtie" && !list.length) return "";
+    if (slot === "ear" && !list.length) return `<div class="stack" style="gap:6px"><span class="label">${title}</span><p class="small muted" style="margin:0">Mašli na ouško ti může vyrobit syslík 🎀</p></div>`;
     return `<div class="stack" style="gap:6px"><span class="label">${title}</span><div class="rail">
       ${list.map((it, i) => `<button class="cloth" data-act="wear" data-id="${esc(it.id)}" aria-pressed="${worn.some(w => w.id === it.id)}">
         ${clothSwatch(it, slot + i)}<small>${esc(it.name || CLOTH[it.type].name)}</small>
@@ -4816,13 +4903,18 @@ function handle(a, v, el){
     /* cestování */
     case "travelTo": { const fp = locationOf(S.slot).place;
       if (fp === "flight") { toast("Jsi v letadle ✈️ Počkej na přistání"); break; }
-      if (v === "flight") { openFlight(fp === "copenhagen" ? "home" : "copenhagen"); break; }
-      if ((v === "copenhagen") !== (fp === "copenhagen")) { openFlight(v === "copenhagen" ? "copenhagen" : "home"); break; }
+      if (v === "flight") { openFlight(CPH.has(fp) ? "home" : "copenhagen"); break; }
+      if (CPH.has(v) !== CPH.has(fp)) { openFlight(v); break; }
       openSheet("travel", {place:v}); break; }
     case "flAct": S.sheet.act = v; renderSheet(); break;
     case "mapReset": S.mapZ = {s:1, x:0, y:0}; render(); break;
     case "flBoard": boardFlight(el.dataset.t === "1"); break;
     case "flSpeed": { const l = locationOf(S.slot); if (l.place !== "flight") break; openSheet("flSpeed"); break; }
+    case "flyInvite": { const o = partner(); if (!o) break; send("flyInvite", {}); toast("Pozvánka do Tecnamu odletěla 💌"); burst("🛩️", "#home-scene"); break; }
+    case "flyYes": { const id = el.dataset.id, o = partner(); if (!o) break; send("flyAnswer", {id, yes:true});
+      send("travel", {place:"benesov", together:true, acts:{[S.slot]:"tpax", [other(S.slot)]:"tecnam"}}); closeSheet(); S.tab = "home"; window.scrollTo(0, 0);
+      toast("Nasedáš do Tecnamu 🛩️ Statečná syslice!"); render(); setTimeout(() => burst("💞", "#home-scene"), 300); break; }
+    case "flyNo": send("flyAnswer", {id:el.dataset.id, yes:false}); closeSheet(); toast("Nevadí, příště 🌷"); render(); break;
     case "flSpeedGo": { const l = locationOf(S.slot); if (l.place !== "flight") { closeSheet(); break; }
       const mins = +v, arrive = mins ? Math.max(now() + 5000, l.arrive - mins * 60000) : now() - 1000;
       send("flightSpeed", {id:l.flightId, arrive}); closeSheet();
@@ -4847,7 +4939,7 @@ function handle(a, v, el){
     case "openTie": openSheet("tie", {color:"#F48FA6"}); break;
     case "tieColor": S.sheet.color = v; renderSheet(); break;
     case "tieColor2": S.sheet.color2 = v || null; renderSheet(); break;
-    case "tieSend": { const item = {id:"c-" + uid(), type:"hairbow", color:S.sheet.color, color2:S.sheet.color2 || null, pattern:"none", name:"Mašle do vlasů"}; send("clothGift", {item}); closeSheet(); toast("Mašle je na cestě 🎀"); homePose("happy", 1500); break; }
+    case "tieSend": { const item = {id:"c-" + uid(), type:"hairbow", color:S.sheet.color, color2:S.sheet.color2 || null, pattern:"none", name:"Mašle na ouško"}; send("clothGift", {item}); closeSheet(); toast("Mašle je na cestě 🎀"); homePose("happy", 1500); break; }
     case "openBeads": openSheet("beads", {d:{beads:[], shape:"round"}}); break;
     case "mugSet": S.sheet.d[el.dataset.k] = v; renderSheet(); break;
     case "bqSet": S.sheet.d[el.dataset.k] = v; renderSheet(); break;
